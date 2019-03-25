@@ -1,0 +1,33 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Simple Chat App</title>
+    <script src="/script/socket.io.js"></script>
+    <script src="/script/main.js"></script>
+    <link rel="stylesheet" href="/css/main.css">
+</head>
+<body>
+    <div id="container">
+        <div id='content'>
+            <div id="messageContainer">
+                <h2>You Are <i><span id="userID"></span></i></h2>
+                <div id="messages">
+    
+                </div>
+            </div>
+            <div id="userContainer">
+                <h2>Connected Users</h2>
+                <div id="users">
+    
+                </div>
+            </div>
+        </div>
+        <form id="controls">
+            <input type="text" id="data" autocomplete="off" autofocus>
+            <button>Submit</button>
+        </form>
+    </div>
+</body>
+</html>
