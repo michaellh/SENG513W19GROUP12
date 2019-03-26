@@ -1,0 +1,17 @@
+{
+  "name": "seng513wgroup12",
+  "version": "1.0.0",
+  "description": "NetChatter web app",
+  "main": "index.js",
+  "dependencies": {
+    "express": "^4.16.4",
+    "express-mongo-db": "^2.0.4",
+    "socket.io": "^2.2.0",
+    "socketio": "^1.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/michaellh/SENG513W19GROUP12.git"
+  },
+  "homepage": "https://github.com/michaellh/SENG513W19GROUP12#readme"
+}

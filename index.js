@@ -1,7 +1,10 @@
+// Setup the Node.JS Express server
 const express = require('express');
 const app = express();
 const http = require('http').Server(app);
 const io = require('socket.io')(http);
+
+const mongoClient = require('mongodb').MongoClient;
 
 // Managing usernames
 let usedUsers = [];
@@ -22,6 +25,19 @@ app.use(express.static('public'));
 // If default page is requested, server index.html
 app.get('/', (req, res) => {
     res.sendFile(__dirname + '/index.html');
+});
+
+// Connect to mongoDB
+var mongoDBURL = "mongodb://localhost:27017/seng513";
+var db;
+
+// Initialize connection to mongoDB ONCE
+mongoClient.connect(mongoDBURL, function(err, database) {
+    if (err) throw err;
+
+    console.log("If seng513 already exists then we're connected to it otherwise it's created");
+    db = database;
+    app.emit('db ready');
 });
 
 // On Socket IO connection
@@ -66,6 +82,12 @@ io.on('connection', (socket) => {
     // Letting User know who they are
     socket.emit('status', `Welcome to the chat, you are ${styleName(user)}`);
 
+    // Example MongoDB call
+    // db.collection("users").find({first_name: "Michael"}).toArray(function(err, result) {
+    //     if(err) throw err;
+    //     console.log(result);
+    // });
+
     // Sending Messages
     socket.on('message', msg => {
         const message = {date : new Date(), ...msg};
@@ -106,6 +128,8 @@ io.on('connection', (socket) => {
     });
 });
 
-http.listen(3000, () => {
-    console.log('Listening on Port 3000');
+app.on('db ready', function() {
+    http.listen(3000, () => {
+        console.log('Listening on Port 3000');
+    });
 });
