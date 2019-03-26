@@ -1,4 +1,4 @@
-// Setup the Node.JS Express server
+// Setup the Node.JS Express server with Socket.io
 const express = require('express');
 const app = express();
 const http = require('http').Server(app);
@@ -137,7 +137,11 @@ io.on('connection', (socket) => {
 });
 
 app.on('db ready', function() {
-    http.listen(3000, () => {
-        console.log('Listening on Port 3000');
-    });
+    // Port # will be null/empty if run locally
+    let port = process.env.PORT;
+    if(port == null || port == "") {
+        port = 3000;
+    }
+    http.listen(port);
+    console.log('Listening on Port ' + port);
 });
