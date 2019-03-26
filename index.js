@@ -3,7 +3,6 @@ const express = require('express');
 const app = express();
 const http = require('http').Server(app);
 const io = require('socket.io')(http);
-
 const mongoClient = require('mongodb').MongoClient;
 
 // Managing usernames
@@ -27,16 +26,25 @@ app.get('/', (req, res) => {
     res.sendFile(__dirname + '/index.html');
 });
 
-// Connect to mongoDB
-var mongoDBURL = "mongodb://localhost:27017/seng513";
-var db;
+// Connect to the MongoDB Atlas database
+// var dbClient;
+// const uri = "mongodb+srv://Michael:Test@demo-84yw9.mongodb.net/test?retryWrites=true";
+// mongoClient.connect(uri, (err, client) => {
+//     if (err) throw err;
 
-// Initialize connection to mongoDB ONCE
-mongoClient.connect(mongoDBURL, function(err, database) {
+//     dbClient = client.db("SENG513");
+//     console.log("Connected to the database!");
+//     app.emit('db ready');
+// })
+
+// Connect to your local mongoDB
+var mongoDBURL = "mongodb://localhost:27017/seng513";
+var dbClient;
+mongoClient.connect(mongoDBURL, function(err, db) {
     if (err) throw err;
 
     console.log("If seng513 already exists then we're connected to it otherwise it's created");
-    db = database;
+    dbClient = db;
     app.emit('db ready');
 });
 
@@ -83,7 +91,7 @@ io.on('connection', (socket) => {
     socket.emit('status', `Welcome to the chat, you are ${styleName(user)}`);
 
     // Example MongoDB call
-    // db.collection("users").find({first_name: "Michael"}).toArray(function(err, result) {
+    // dbClient.collection("users").find({first_name: "Michael"}).toArray(function(err, result) {
     //     if(err) throw err;
     //     console.log(result);
     // });
