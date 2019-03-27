@@ -3,6 +3,8 @@ const express = require('express');
 const app = express();
 const http = require('http').Server(app);
 const io = require('socket.io')(http);
+
+const path = require('path');
 const mongoClient = require('mongodb').MongoClient;
 
 // Managing usernames
@@ -19,12 +21,13 @@ function styleName({username, color}){
 }
 
 // Serving Public Folder for Scripts
-app.use(express.static('public'));
+app.use(express.static('public/dist'));
+//app.use(express.static('public'));
 
 // If default page is requested, server index.html
-app.get('/', (req, res) => {
-    res.sendFile(__dirname + '/index.html');
-});
+// app.get('/', (req, res) => {
+//     res.sendFile('index.html', {root:path.join(__dirname, '/public')});
+// });
 
 // Connect to the MongoDB Atlas database
 var dbClient;
