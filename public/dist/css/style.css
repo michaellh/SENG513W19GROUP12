@@ -1,0 +1,97 @@
+/* Defaulting to 0 margin for custom setting below */
+* {
+    margin: 0;
+}
+
+/* Format text on top of each dialog*/
+h2{
+    color: white;
+    flex-grow: 1;
+}
+
+/* Main Container Housing the Elements */
+#container {
+    margin: 20px;
+    padding: 10px;
+    height: 90vh;
+    min-width: 300px;
+    flex-direction: column;
+    border: 2px solid black;
+    border-radius: 10px;
+    background-color: darkgray;
+}
+
+/* Style for the control elements */
+#controls {
+    margin: 0px 20px 10px 20px;
+    border: 2px solid black;
+    height: 5%;
+    display: flex;
+}
+#controls input {
+    background-color: lightcyan;
+    padding-left: 5px;
+    flex-grow: 8;
+}
+#controls button {
+    flex-grow: 2;
+}
+
+/* Container alignment for active users and messages */
+#content {
+    height: 90%;
+    display: flex;
+    padding: 10px;
+}
+
+/* Formating for the messages*/
+#messageContainer {
+    flex-grow: 8;
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    max-width: 75vw;
+}
+
+#messages {
+    height: 100%;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    border: 2px solid black;
+    border-radius: 20px;
+    padding: 10px;
+    background-color: lightcyan;
+}
+
+#messages p {
+    margin: 2px 0px;
+}
+
+/* Allow for messages to be bottom aligned */
+#messages p:first-child {
+    margin-top: auto;
+}
+
+/* Formating for active users column */
+#userContainer {
+    flex-grow: 2;
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    max-width: 19vw;
+}
+
+#users {
+    flex-grow: 99;
+    border: 2px solid black;
+    padding: 10px;
+    border-radius: 20px;
+    background-color: lightcyan;
+    overflow: auto;
+}
+
+#users p {
+    margin: 5px 0px;
+}
+/*# sourceMappingURL=style.css.map*/
