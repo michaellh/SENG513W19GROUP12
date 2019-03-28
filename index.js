@@ -24,8 +24,10 @@ function styleName({username, color}){
 app.use(express.static('public/dist'));
 //app.use(express.static('public'));
 
+console.log(__dirname);
+
 app.get("*", function (req, res) {
-    res.sendFile(__dirname + "/public/dist/index_bundle.js")
+    res.sendFile('index.html', {root:path.join(__dirname, '../public/dist')})
 })
 
 // Connect to the MongoDB Atlas database
