@@ -25,6 +25,10 @@ function styleName({username, color}){
 app.use('/dist', express.static(path.join(__dirname, 'public')));
 //app.use(express.static('public'));
 
+app.get('/*', function(req, res) {
+    res.sendFile('index.html', {root:path.join(__dirname, 'public/dist')});
+})
+
 // app.get("/", function (req, res) {
 //     console.log(__dirname);
 //     res.sendFile('index.html', {root:path.join(__dirname, 'public/dist')})
