@@ -24,6 +24,8 @@ function styleName({username, color}){
 app.use(express.static('public/dist'));
 //app.use(express.static('public'));
 
+app.use('*', (req, res) => res.sendFile(path.join(__dirname, 'public', 'dist', 'index.html')));
+
 // Connect to the MongoDB Atlas database
 var dbClient;
 const uri = "mongodb+srv://Michael:Test@demo-84yw9.mongodb.net/test?retryWrites=true";
