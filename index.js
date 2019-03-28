@@ -25,7 +25,8 @@ app.use(express.static('public/dist'));
 //app.use(express.static('public'));
 
 app.get('/', (req, res) => {
-    res.sendFile('public/dist/index.html');
+    //res.sendFile('public/dist/index.html');
+    res.sendFile('index.html', {root:path.join(__dirname, 'public/', 'dist/')});
     //res.status(200).send("Hi, It works!");
 });
 
