@@ -25,7 +25,7 @@ app.use(express.static('public/dist'));
 //app.use(express.static('public'));
 
 app.get("*", function (req, res) {
-    res.sendFile(__dirname + "/public/index.html")
+    res.sendFile(__dirname + "/public/dist/index.html")
 })
 
 // Connect to the MongoDB Atlas database
