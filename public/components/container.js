@@ -1,8 +1,9 @@
 import React, {Component} from 'react';
 import MessageContainer from '../components/message-container';
-import Messages from '../components/messages';
+import UserContainer from './user-container';
+import Controls from './controls';
 
-class Container extends Component {
+export default class Container extends Component {
     render() {
         return (
             <div>
@@ -10,15 +11,12 @@ class Container extends Component {
                     <div id='messageContainer'><MessageContainer />
                         <div id='messages'></div>
                     </div>
-                    <div id='userContainer'>
+                    <div id='userContainer'><UserContainer />
                         <div id='users'></div>
                     </div>
                 </div>
-                <div id='controls'>
-                </div>
+                <div><Controls /></div>
             </div>
         );
     }
 }
-
-export default Container;

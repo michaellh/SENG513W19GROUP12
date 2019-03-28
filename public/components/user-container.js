@@ -1,10 +1,10 @@
 import React, {Component} from 'react';
 
-export default class MessageContainer extends Component {
+export default class UserContainer extends Component {
     render() {
         return (
             <div>
-                <h2>You Are <i><span id="userID"></span></i></h2>
+                <h2>Connected Users</h2>
             </div>
         )
     }
