@@ -21,7 +21,7 @@ function styleName({username, color}){
 }
 
 // Serving Public Folder for Scripts
-app.use(express.static('public/dist'));
+app.use(express.static('public'));
 //app.use(express.static('public'));
 
 // app.get('/', (req, res) => {
