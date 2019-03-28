@@ -25,26 +25,26 @@ app.use(express.static('public/dist'));
 //app.use(express.static('public'));
 
 // Connect to the MongoDB Atlas database
-// var dbClient;
-// const uri = "mongodb+srv://Michael:Test@demo-84yw9.mongodb.net/test?retryWrites=true";
-// mongoClient.connect(uri, (err, client) => {
-//     if (err) throw err;
-
-//     dbClient = client.db("SENG513");
-//     console.log("Connected to the database!");
-//     app.emit('db ready');
-// })
-
-// Connect to your local mongoDB
-var mongoDBURL = "mongodb://localhost:27017/seng513";
 var dbClient;
-mongoClient.connect(mongoDBURL, function(err, db) {
+const uri = "mongodb+srv://Michael:Test@demo-84yw9.mongodb.net/test?retryWrites=true";
+mongoClient.connect(uri, (err, client) => {
     if (err) throw err;
 
-    console.log("If seng513 already exists then we're connected to it otherwise it's created");
-    dbClient = db;
+    dbClient = client.db("SENG513");
+    console.log("Connected to the database!");
     app.emit('db ready');
-});
+})
+
+// Connect to your local mongoDB
+// var mongoDBURL = "mongodb://localhost:27017/seng513";
+// var dbClient;
+// mongoClient.connect(mongoDBURL, function(err, db) {
+//     if (err) throw err;
+
+//     console.log("If seng513 already exists then we're connected to it otherwise it's created");
+//     dbClient = db;
+//     app.emit('db ready');
+// });
 
 // On Socket IO connection
 io.on('connection', (socket) => {
