@@ -21,18 +21,13 @@ function styleName({username, color}){
 }
 
 // Serving Public Folder for Scripts
-//app.use(express.static('public/dist'));
-app.use('/dist', express.static(path.join(__dirname, 'public')));
+app.use(express.static('public/dist'));
 //app.use(express.static('public'));
 
-app.get('/*', function(req, res) {
-    res.sendFile('index.html', {root:path.join(__dirname, 'public/dist')});
-})
-
-// app.get("/", function (req, res) {
-//     console.log(__dirname);
-//     res.sendFile('index.html', {root:path.join(__dirname, 'public/dist')})
-// })
+app.get('/', (req, res) => {
+    //res.sendFile(__dirname + '/index.html');
+    res.status(200).send("Hi, It works!");
+});
 
 // Connect to the MongoDB Atlas database
 var dbClient;
