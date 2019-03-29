@@ -1,21 +1,16 @@
 import React, {Component} from 'react';
-import MessageContainer from '../components/message-container';
-import UserContainer from './user-container';
-import Controls from './controls';
+import ChatArea from './chatArea';
+import SideArea from './SideArea';
+import Controls from './Controls';
 
 export default class Container extends Component {
     render() {
         return (
-            <div>
-                <div id='content'>
-                    <div id='messageContainer'><MessageContainer />
-                        <div id='messages'></div>
-                    </div>
-                    <div id='userContainer'><UserContainer />
-                        <div id='users'></div>
-                    </div>
+            <div className='container-fluid'>
+                <div className='row'>
+                    <SideArea className='col-3'/>
+                    <ChatArea className='col-9'/>
                 </div>
-                <div><Controls /></div>
             </div>
         );
     }
