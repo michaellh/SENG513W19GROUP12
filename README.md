@@ -1,5 +1,10 @@
 # Simple Chat App
 
+App Hosted at: 
+https://radiant-waters-80256.herokuapp.com/
+
+Master Branch set to auto-deploy.
+
 To Run locally:
 
 1. Clone Repo
