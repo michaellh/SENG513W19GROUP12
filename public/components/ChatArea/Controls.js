@@ -7,6 +7,10 @@ export default class Controls extends Component {
       this.state = {
          
       }
+      this.style = {
+        //   position: 'absolute',
+        //   bottom:'0',
+      }
 
       this.handleSubmit = this.handleSubmit.bind(this);
     }
@@ -20,7 +24,7 @@ export default class Controls extends Component {
     
     render() {
         return (
-            <div>
+            <div className={this.props.className} style={this.style}>
                 <form onSubmit={this.handleSubmit}>
                     <input type="text" />
                     <button>Submit</button>
