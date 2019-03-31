@@ -20,6 +20,12 @@ export default class SideArea extends Component {
         this.updateMode = this.updateMode.bind(this);
         this.filterResult = this.filterResult.bind(this);
         // console.log(this.props);
+
+        props.socket.on('startInfo', ({chats, friends}) => {
+            this.setState({chats});
+            this.setState({friends});
+            props.chooseChat(this.state.chats[0]);
+        });
     }
 
     updateMode(mode){
