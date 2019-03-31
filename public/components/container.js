@@ -16,7 +16,7 @@ export default class Container extends Component {
         // Debuging function
         this.socket.on('debug', message => console.log('DEBUG', message));
         this.socket.emit('debug', 'sendback("Hello")');
-        this.socket.emit('joinRoom', this.state.chatName);
+        // this.socket.emit('joinRoom', this.state.chatName);
     }
 
     chooseChat(name){
@@ -30,8 +30,8 @@ export default class Container extends Component {
         return (
             <div className='container-fluid'>
                 <div className='row'>
-                    <SideArea className='col-2' chooseChat={this.chooseChat} />
-                    <ChatArea className='col-10' chatName={this.state.chatName} socket={this.socket} user={this.props.user}/>
+                    <SideArea className='col-2' chooseChat={this.chooseChat} socket={this.socket} />
+                    <ChatArea className='col-10' chatName={this.state.chatName} socket={this.socket} user={this.props.user} />
                 </div>
             </div>
         );

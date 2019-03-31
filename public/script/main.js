@@ -8,6 +8,6 @@ import Container from '../components/Container';
 
 let name;
 while(!(name = prompt("Please enter your name")));
-document.cookie = `user='${name}'`;
+document.cookie = `user=${name}`;
 
 ReactDOM.render(<Container user={name} />, document.getElementById('container'));

@@ -21,6 +21,8 @@ export default class ChatArea extends Component {
 
         this.onMessage = this.onMessage.bind(this);
 
+        // props.socket.emit('reqHistory', props.chatName);
+
         props.socket.on('message', msg => {
             console.log(msg);
             this.setState({messages : [...this.state.messages, msg]});
@@ -33,6 +35,7 @@ export default class ChatArea extends Component {
     }
 
     componentWillReceiveProps(newProp){
+        console.log(newProp.chatName);
         this.setState({name:newProp.chatName});
         this.props.socket.emit('reqHistory', newProp.chatName);
     }

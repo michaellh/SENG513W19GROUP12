@@ -62,7 +62,20 @@ io.on('connect', socket => {
     const cookie = socket.client.request.headers.cookie;
     const userCookie =  cookie && cookie.split(';').find(cookie => cookie.includes('user='));
     const username = userCookie && userCookie.split('=')[1];
+    let inDB = true;
+    console.log(username);
     
+    dbClient.collection('users').findOne({name:username}, (err, res) => {
+        let user = res;
+        console.log(user);
+        if (user){
+            socket.emit('startInfo', {chats:user.chats, friends:user.friends});
+        }else{
+            inDB = false;
+            // Enroll new user
+            socket.emit('startInfo', {chats:['Chat1', 'Chat2'], friends: ['Friend1', 'Friend2', 'Friend3']});            
+        }
+    })
 
     sendback = (message) => {
         socket.emit('debug', message);
@@ -85,12 +98,25 @@ io.on('connect', socket => {
 
     socket.on('message', msg => {
         console.log(msg);
-        chat[msg.room].push(msg.msg);
-        io.to(msg.room).emit('message', msg.msg);
+        if(inDB) {
+            dbClient.collection('chats').update({name:msg.room}, {$push : {messages: msg.msg}});
+            io.to(msg.room).emit('message', msg.msg);
+        }else{
+            chat[msg.room].push(msg.msg);
+            io.to(msg.room).emit('message', msg.msg);
+        }
     });
 
     socket.on('reqHistory', room => {
-        socket.emit('loadHistory', chat[room]);
+        if(inDB){
+            dbClient.collection('chats').findOne({name:room}, (err, res) => {
+                console.log(res);
+                socket.emit('loadHistory', res.messages);
+            });
+        }else{
+            socket.emit('loadHistory', chat[room]);
+        }
+
     })
 });
 
