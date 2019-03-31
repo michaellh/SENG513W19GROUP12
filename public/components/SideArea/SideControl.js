@@ -21,7 +21,7 @@ export default function SideControl(props) {
                 <button className='btn btn-primary' onClick={friendMode} >Friends</button>
             </div>
             <div className='col'>
-                <button className='btn btn-secondary' onClick={chatMode} >Chats</button>
+                <button className='btn btn-secondary' onClick={chatMode} >Chats1</button>
             </div>
             <div className='col-12'>
                 <input type='text' className='form-control' onChange={handleSearch} />
