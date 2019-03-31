@@ -13,6 +13,7 @@ export default class Container extends Component {
         this.chooseChat = this.chooseChat.bind(this);
         
         this.socket = io("http://localhost:3000");
+        // this.socket = io();
         // Debuging function
         this.socket.on('debug', message => console.log('DEBUG', message));
         this.socket.emit('debug', 'sendback("Hello")');
