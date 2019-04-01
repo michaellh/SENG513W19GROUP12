@@ -2,17 +2,17 @@ import React, {Component} from 'react';
 
 export default class Controls extends Component {
     constructor(props) {
-      super(props)
-    
-      this.state = {
-         
-      }
-      this.style = {
-        //   position: 'absolute',
-        //   bottom:'0',
-      }
+        super(props)
+        
+        this.state = {
+            
+        }
+        this.style = {
+            //   position: 'absolute',
+            //   bottom:'0',
+        }
 
-      this.handleSubmit = this.handleSubmit.bind(this);
+        this.handleSubmit = this.handleSubmit.bind(this);
     }
 
     handleSubmit(e) {

@@ -8,8 +8,8 @@ export default class Container extends Component {
         super(props)
         
         this.state = {
-            chat : {id:'1',name:'chat1'},
-            modal: {title: 'Title', body: 'body', submit: null, fullCustom: false}   
+            chat : {id:'No Chat',name:'No Chat'},
+            modal: {title: 'Title', component: 'component', custom: false}   
         }
 
         this.chooseChat = this.chooseChat.bind(this);
@@ -30,8 +30,8 @@ export default class Container extends Component {
         console.log(chat);
     }
 
-    openModal(title, body, submit, fullCustom = false){
-        this.setState({modal: {title, body, submit, fullCustom}});
+    openModal(title, component, custom = false){
+        this.setState({modal: {title, component, custom}});
         $('#myModal').modal();
     }
     

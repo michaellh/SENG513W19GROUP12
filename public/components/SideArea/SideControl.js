@@ -1,4 +1,5 @@
 import React from 'react'
+import AddChat from '../Modal/AddChat';
 
 export default function SideControl(props) {
 
@@ -15,25 +16,34 @@ export default function SideControl(props) {
         props.filterResult(e.target.value);
     }
 
+    // Add Modal
     let handleAdd = () => {
-        
-        let handleSubmit = (target) => {
-            let name = target.querySelector('input').value;
-            props.socket.emit('createChat', name);
-        }
 
+        
+        // const body = (
+            // <div>
+            //     <div onClick={() => {single = !single; this.forceUpdate()}}>Toggle</div>
+            //     {
+            //         single ?
+            //         <div>
+            //             <h6>User Name</h6>
+            //             <input type='text' className='form-control' autoFocus={true}></input>
+            //         </div> 
+            //         :
+            //         <div>
+            //             <h6>Chat Name</h6>
+            //             <input type='text' className='form-control' autoFocus={true}></input>
+            //         </div>
+            //     }s
+            // </div>
+        // );
+        
         const title = 'Add Chat'
-        
-        const body = (
-            <div>
-                <h6>Chat Name</h6>
-                <input type='text' className='form-control' autoFocus={true}></input>
-            </div>
-        );
+        const body = <AddChat socket={props.socket}/>;
 
-        props.modal(title,body,handleSubmit);
+        props.modal(title,body);
     }
-
+    
     return (
         <div className='row'>
             <div className='col'>

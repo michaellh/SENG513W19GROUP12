@@ -64,17 +64,20 @@ io.on('connect', socket => {
     // Checking if user exist and assigning name
     const cookie = socket.client.request.headers.cookie;
     const userCookie =  cookie && cookie.split(';').find(cookie => cookie.includes('user='));
+    // username being used below as the username from the database
     const username = userCookie && userCookie.split('=')[1];
     let userID;
     let inDB = true;
     // console.log(username);
     
-    dbClient.collection('users').findOne({name:username}, (err, res) => {
-        let user = res;
+    dbClient.collection('users').findOneAndUpdate({name:username}, {$set:{socketID: socket.id}}, {returnOriginal: false}, (err, res) => {
+        let user = res.value;
+        console.log(res);
         // console.log(user);
         if (user){
             userID = user._id;
             console.log(userID);
+            // console.log(user.socketID, socket.id);
             socket.emit('startInfo', {chats:user.chats, friends:user.friends});
             // socket.emit('chatlist', user.chats);
             // socket.emit('friendlist', user.friends);
@@ -126,23 +129,100 @@ io.on('connect', socket => {
         }
     });
 
-    socket.on('createChat', name => {
+    socket.on('createGroupChat', name => {
         if(inDB){
+            let groupChatObj = {
+                name,
+                group: true,
+                messages:[],
+                members:[
+                    {id : userID, name: username}
+                ]
+            };
             // Adding to Chats Table
-            dbClient.collection('chats').insertOne({name, messages:[]}, (err,res) => {
-                const {_id:id, name} = res.ops[0];
+            dbClient.collection('chats').insertOne(groupChatObj, (err,res) => {
+                const {_id:id, name, group} = res.ops[0];
                 // Adding Chats name and ID to user table
-                dbClient.collection('users').findOneAndUpdate({_id:mID(userID)},{$push : {chats: {id,name}}}, {returnOriginal:false}, (err, res) => {
+                dbClient.collection('users').findOneAndUpdate({_id:mID(userID)},{$push : {chats: {id,name, group}}}, {returnOriginal:false}, (err, res) => {
                     // console.log(res, err);
                     let user = res.value;
                     sendback(user);
-                    
+                    // Updating user chatlist and friends.
                     socket.emit('startInfo', {chats:user.chats, friends:user.friends});
                 });
                 // dbClient.collection('users').findOne({_id:mID(userID)}, (err, res) => {
                 //     console.log(res, err);
                 // });
             });
+            
+        }
+    });
+
+    socket.on('createSingleChat', name => {
+        if(inDB){
+            // Find user in DB, res is null if not found
+            dbClient.collection('users').findOne({name}, (err, res) => {
+                if(res){
+                    // Found Users id, and name
+                    const {_id:clientID, name:clientName} = res;
+                    let chatObj = {
+                        name : 'OneOnOne',
+                        group : false,
+                        messages : [],
+                        members : [
+                            // Self
+                            {id : userID, name: username},
+                            // res user
+                            {id : clientID, name: clientName},
+                        ]
+                    };
+                    // Adding to chats table
+                    dbClient.collection('chats').insertOne(chatObj, (err,res) => {
+                        // Getting group condition, and id back from result
+                        const {_id:id, group} = res.ops[0];
+                        
+                        // Update Self Chat Table
+                        dbClient.collection('users').findOneAndUpdate({_id:mID(userID)},{$push : {chats: {id, name: clientName, group}}}, {returnOriginal:false}, (err, res) => {
+                            let user = res.value;
+                            sendback(['Self',user]);
+                            // Updating user chatlist and friends.
+                            socket.emit('startInfo', {chats:user.chats, friends:user.friends});
+                        });
+
+                         // Update Client Chat Table, id is clients, but name is self name
+                         dbClient.collection('users').findOneAndUpdate({_id:mID(clientID)},{$push : {chats: {id, name: username, group}}}, {returnOriginal:false}, (err, res) => {
+                            let user = res.value;
+                            sendback(['Client',user]);
+                            // Updating client's chatlist and friends.
+                            io.to(user.socketID).emit('startInfo', {chats:user.chats, friends:user.friends});
+                        });
+                    });
+                }else{
+                    // Cannot Find User
+                    console.log(`no user: ${name}`);
+                }
+            });
+
+            // const groupChatObj = {
+            //     name,
+            //     group: false,
+            //     messages:[],
+            //     members:[
+            //         {id : userID, name: username}
+            //     ]
+            // };
+            // // Adding to Chats Table
+            // dbClient.collection('chats').insertOne(groupChatObj, (err,res) => {
+            //     const {_id:id, name} = res.ops[0];
+            //     // Adding Chats name and ID to user table
+            //     dbClient.collection('users').findOneAndUpdate({_id:mID(userID)},{$push : {chats: {id,name}}}, {returnOriginal:false}, (err, res) => {
+            //         // console.log(res, err);
+            //         let user = res.value;
+            //         sendback(user);
+            //         // Updating user chatlist and friends.
+            //         socket.emit('startInfo', {chats:user.chats, friends:user.friends});
+            //     });
+            // });
             
         }
     });
