@@ -47,8 +47,8 @@ export default class SideArea extends Component {
 
     }
 
-    deleteChat(chatID){
-        this.props.socket.emit('deleteChat', chatID);
+    deleteChat(chat){
+        this.props.socket.emit('deleteChat', chat);
     }
 
     render() {

@@ -23,12 +23,12 @@ export default class ChatArea extends Component {
         // props.socket.emit('reqHistory', props.chat.name);
 
         props.socket.on('message', msg => {
-            console.log(msg);
+            // console.log(msg);
             this.setState({messages : [...this.state.messages, msg]});
         });
 
         props.socket.on('loadHistory', msg => {
-            console.log(msg);
+            // console.log(msg);
             this.setState({messages : msg});
         });        
     }

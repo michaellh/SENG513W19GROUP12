@@ -7,7 +7,7 @@ import Container from '../components/Container';
 // import '../css/main.css'
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-let name = 'lex';
+let name = 'userAlex';
 while(!(name = prompt("Please enter your name")));
 document.cookie = `user=${name}`;
 
