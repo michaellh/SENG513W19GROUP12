@@ -202,29 +202,32 @@ io.on('connect', socket => {
                     console.log(`no user: ${name}`);
                 }
             });
-
-            // const groupChatObj = {
-            //     name,
-            //     group: false,
-            //     messages:[],
-            //     members:[
-            //         {id : userID, name: username}
-            //     ]
-            // };
-            // // Adding to Chats Table
-            // dbClient.collection('chats').insertOne(groupChatObj, (err,res) => {
-            //     const {_id:id, name} = res.ops[0];
-            //     // Adding Chats name and ID to user table
-            //     dbClient.collection('users').findOneAndUpdate({_id:mID(userID)},{$push : {chats: {id,name}}}, {returnOriginal:false}, (err, res) => {
-            //         // console.log(res, err);
-            //         let user = res.value;
-            //         sendback(user);
-            //         // Updating user chatlist and friends.
-            //         socket.emit('startInfo', {chats:user.chats, friends:user.friends});
-            //     });
-            // });
-            
         }
+        else{
+            //Not in DB
+        }
+    });
+
+    socket.on('deleteChat', chatID => {
+        // Find the Chat and delete it
+        dbClient.collection('chats').findOneAndDelete({_id:mID(chatID)}, (err, res) => {
+            let deletedChat = res.value;
+            // deletedChat.value.members
+            sendback(['DeletedChat', deletedChat]);
+            // For each deleted member
+            deletedChat.members.forEach(({id, name}) => {
+                // Setting up query parameters
+                const query = {_id:mID(id)};
+                const update = {$pull:{chats:{id:deletedChat._id}}};
+                // Remove the chat from their list
+                dbClient.collection('users').findOneAndUpdate(query, update, {returnOriginal:false}, (err, res) => {
+                    const user = res.value;
+                    // Update their chatlist
+                    io.to(user.socketID).emit('startInfo', {chats:user.chats, friends:user.friends});
+                })
+            });
+            // console.log(deletedChat.members);
+        });
     });
 });
 

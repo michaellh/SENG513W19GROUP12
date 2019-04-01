@@ -19,6 +19,7 @@ export default class SideArea extends Component {
 
         this.updateMode = this.updateMode.bind(this);
         this.filterResult = this.filterResult.bind(this);
+        this.deleteChat = this.deleteChat.bind(this);
         // console.log(this.props);
 
         props.socket.on('startInfo', ({chats, friends}) => {
@@ -46,6 +47,10 @@ export default class SideArea extends Component {
 
     }
 
+    deleteChat(chatID){
+        this.props.socket.emit('deleteChat', chatID);
+    }
+
     render() {
         const style = {
             border: '2px solid black',
@@ -58,7 +63,7 @@ export default class SideArea extends Component {
                 <br />
                 {
                     this.state.mode == 'chats' ? 
-                    (<Chats chats={this.state.chats} chooseChat={this.props.chooseChat}/>) :
+                    (<Chats chats={this.state.chats} chooseChat={this.props.chooseChat} deleteChat={this.deleteChat}/>) :
                     (<Friends friends={this.state.friends} />)
                 }
             </div>
