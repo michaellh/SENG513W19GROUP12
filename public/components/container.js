@@ -37,8 +37,8 @@ export default class Container extends Component {
     
     render() {
         return (
-            <div className='container-fluid'>
-                <div className='row'>
+            <div className='container-fluid h-100'>
+                <div className='row h-100'>
                     <SideArea className='col-2' chooseChat={this.chooseChat} socket={this.socket} modal={this.openModal}/>
                     <ChatArea className='col-10' chat={this.state.chat} socket={this.socket} user={this.props.user} />
                     <Modal modal={this.state.modal}/>

@@ -1,6 +1,13 @@
 /* Defaulting to 0 margin for custom setting below */
 * {
-    margin: 0;
+    margin: 0px;
+    padding: 0px; 
+    outline: none;
+    border: 0px;
+}
+
+html, body {
+    height: 100%;
 }
 
 /* Format text on top of each dialog*/
@@ -11,9 +18,7 @@ h2{
 
 /* Main Container Housing the Elements */
 #container {
-    margin: 20px;
     padding: 10px;
-    height: 90vh;
     min-width: 300px;
     flex-direction: column;
     border: 2px solid black;
