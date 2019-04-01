@@ -24,7 +24,7 @@ export default class SideArea extends Component {
         props.socket.on('startInfo', ({chats, friends}) => {
             this.setState({chats});
             this.setState({friends});
-            props.chooseChat(this.state.chats[0]);
+            // props.chooseChat(this.state.chats[0]);
         });
     }
 
@@ -34,8 +34,8 @@ export default class SideArea extends Component {
     
     filterResult(term){
         let currentMode = this.state.mode;
-        let list = currentMode == 'chats' ? this.chats : this.friends;
-        let filteredResult = list.filter(d => d.includes(term));
+        let list = currentMode == 'chats' ? this.state.chats : this.state.friends;
+        let filteredResult = list.filter(d => d.name.includes(term));
         
         if(currentMode == 'chats'){
             this.setState({chats:filteredResult});
@@ -43,7 +43,7 @@ export default class SideArea extends Component {
         else{
             this.setState({friends:filteredResult});
         }
-        
+
     }
 
     render() {
@@ -54,7 +54,7 @@ export default class SideArea extends Component {
         return (
             <div className={this.props.className} style={style}>
                 <TopBar />
-                <SideControl updateMode={this.updateMode} filterResult={this.filterResult} />
+                <SideControl updateMode={this.updateMode} filterResult={this.filterResult} modal={this.props.modal} socket={this.props.socket} />
                 <br />
                 {
                     this.state.mode == 'chats' ? 

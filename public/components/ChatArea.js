@@ -2,7 +2,6 @@ import React, {Component} from 'react';
 import TopBar from './ChatArea/TopBar'
 import Messages from './ChatArea/Messages'
 import Controls from './ChatArea/Controls';
-import socket from '../script/main';
 
 
 export default class ChatArea extends Component {
@@ -10,7 +9,7 @@ export default class ChatArea extends Component {
         super(props)
 
         this.state = {
-            name: props.chatName,
+            chat: props.chat,
             messages:[]
         };
         
@@ -21,7 +20,7 @@ export default class ChatArea extends Component {
 
         this.onMessage = this.onMessage.bind(this);
 
-        // props.socket.emit('reqHistory', props.chatName);
+        // props.socket.emit('reqHistory', props.chat.name);
 
         props.socket.on('message', msg => {
             console.log(msg);
@@ -35,13 +34,15 @@ export default class ChatArea extends Component {
     }
 
     componentWillReceiveProps(newProp){
-        console.log(newProp.chatName);
-        this.setState({name:newProp.chatName});
-        this.props.socket.emit('reqHistory', newProp.chatName);
+        // console.log(newProp.chat);
+        if(this.state.chat.id != newProp.chat.id){
+            this.setState({chat:newProp.chat});
+            this.props.socket.emit('reqHistory', newProp.chat.id);
+        }
     }
 
     onMessage(message){
-        this.props.socket.emit('message', {room : this.props.chatName, msg : {user: this.props.user, message}});
+        this.props.socket.emit('message', {chat : this.props.chat, msg : {user: this.props.user, message}});
         // this.setState({messages : [...this.state.messages, message]});
     }
 
@@ -49,7 +50,7 @@ export default class ChatArea extends Component {
         return (
             <div className={this.props.className}>
                 <div className='row' style={this.style}>
-                    <TopBar className='col-12 align-self-start' name={this.state.name}/>
+                    <TopBar className='col-12 align-self-start' name={this.state.chat.name}/>
                     <Messages className='col-12 align-self-start' messages={this.state.messages} user={this.props.user} />
                     <Controls className='col-12 align-self-end' onMessage={this.onMessage} />
                 </div>

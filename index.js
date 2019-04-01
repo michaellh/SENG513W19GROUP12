@@ -6,6 +6,7 @@ const io = require('socket.io')(http);
 
 const path = require('path');
 const mongoClient = require('mongodb').MongoClient;
+const mObjectId = require('mongodb').ObjectId;
 
 // Managing usernames
 let usedUsers = [];
@@ -57,25 +58,32 @@ let chat = {};
 chat.Chat1 = [];
 chat.Chat2 = [];
 
+mID = id => new mObjectId(id);
+
 io.on('connect', socket => {
     // Checking if user exist and assigning name
     const cookie = socket.client.request.headers.cookie;
     const userCookie =  cookie && cookie.split(';').find(cookie => cookie.includes('user='));
     const username = userCookie && userCookie.split('=')[1];
+    let userID;
     let inDB = true;
-    console.log(username);
+    // console.log(username);
     
     dbClient.collection('users').findOne({name:username}, (err, res) => {
         let user = res;
-        console.log(user);
+        // console.log(user);
         if (user){
+            userID = user._id;
+            console.log(userID);
             socket.emit('startInfo', {chats:user.chats, friends:user.friends});
+            // socket.emit('chatlist', user.chats);
+            // socket.emit('friendlist', user.friends);
         }else{
             inDB = false;
             // Enroll new user
             socket.emit('startInfo', {chats:['Chat1', 'Chat2'], friends: ['Friend1', 'Friend2', 'Friend3']});            
         }
-    })
+    });
 
     sendback = (message) => {
         socket.emit('debug', message);
@@ -86,38 +94,58 @@ io.on('connect', socket => {
        eval(msg); 
     });
 
-    socket.on('joinRoom', room => {
-        console.log('Joined' + room);
-        socket.join(room);
+    socket.on('joinRoom', chat => {
+        console.log('Joined' + chat.name, chat.id);
+        socket.join(chat.id);
     });
 
-    socket.on('leaveRoom', room => {
-        console.log('Left' + room);
-        socket.leave(room);
+    socket.on('leaveRoom', chat => {
+        console.log('Left' + chat.name, chat.id);
+        socket.leave(chat.id);
     });
 
     socket.on('message', msg => {
-        console.log(msg);
+        // console.log(msg);
         if(inDB) {
-            dbClient.collection('chats').update({name:msg.room}, {$push : {messages: msg.msg}});
-            io.to(msg.room).emit('message', msg.msg);
+            dbClient.collection('chats').update({_id:mID(msg.chat.id)}, {$push : {messages: msg.msg}});
+            io.to(msg.chat.id).emit('message', msg.msg);
         }else{
-            chat[msg.room].push(msg.msg);
-            io.to(msg.room).emit('message', msg.msg);
+            chat[msg.chat.id].push(msg.msg);
+            io.to(msg.chat.id).emit('message', msg.msg);
         }
     });
 
-    socket.on('reqHistory', room => {
+    socket.on('reqHistory', id => {
         if(inDB){
-            dbClient.collection('chats').findOne({name:room}, (err, res) => {
-                console.log(res);
+            dbClient.collection('chats').findOne({_id:mID(id)}, (err, res) => {
+                // console.log(res);
                 socket.emit('loadHistory', res.messages);
             });
         }else{
-            socket.emit('loadHistory', chat[room]);
+            socket.emit('loadHistory', chat[id]);
         }
+    });
 
-    })
+    socket.on('createChat', name => {
+        if(inDB){
+            // Adding to Chats Table
+            dbClient.collection('chats').insertOne({name, messages:[]}, (err,res) => {
+                const {_id:id, name} = res.ops[0];
+                // Adding Chats name and ID to user table
+                dbClient.collection('users').findOneAndUpdate({_id:mID(userID)},{$push : {chats: {id,name}}}, {returnOriginal:false}, (err, res) => {
+                    // console.log(res, err);
+                    let user = res.value;
+                    sendback(user);
+                    
+                    socket.emit('startInfo', {chats:user.chats, friends:user.friends});
+                });
+                // dbClient.collection('users').findOne({_id:mID(userID)}, (err, res) => {
+                //     console.log(res, err);
+                // });
+            });
+            
+        }
+    });
 });
 
 

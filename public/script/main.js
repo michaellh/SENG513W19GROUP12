@@ -5,8 +5,9 @@ import Container from '../components/Container';
 // import './socket-calls.js'
 // import './socket.io.js'
 // import '../css/main.css'
+import 'bootstrap/dist/css/bootstrap.min.css';
 
-let name;
+let name = 'lex';
 while(!(name = prompt("Please enter your name")));
 document.cookie = `user=${name}`;
 
