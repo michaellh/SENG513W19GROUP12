@@ -20,7 +20,7 @@ export default class ChatArea extends Component {
 
         this.onMessage = this.onMessage.bind(this);
 
-        // props.socket.emit('reqHistory', props.chat.name);
+        this.props.socket.emit('reqHistory', this.props.chat.id);
 
         props.socket.on('message', msg => {
             // console.log(msg);
@@ -50,7 +50,7 @@ export default class ChatArea extends Component {
         return (
             <div className={this.props.className} id={this.props.id}>
                 <div className='row' style={this.style}>
-                    <TopBar className='col-12 align-self-start' name={this.state.chat.name} modal={this.props.modal}/>
+                    <TopBar className='col-12 align-self-start' chat={this.state.chat} socket={this.props.socket} modal={this.props.modal}/>
                     <Messages className='col-12 align-self-start' messages={this.state.messages} user={this.props.user} />
                     <Controls className='col-12 align-self-end' onMessage={this.onMessage} />
                 </div>

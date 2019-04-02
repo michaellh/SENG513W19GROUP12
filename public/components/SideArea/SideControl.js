@@ -18,25 +18,6 @@ export default function SideControl(props) {
 
     // Add Modal
     let handleAdd = () => {
-
-        
-        // const body = (
-            // <div>
-            //     <div onClick={() => {single = !single; this.forceUpdate()}}>Toggle</div>
-            //     {
-            //         single ?
-            //         <div>
-            //             <h6>User Name</h6>
-            //             <input type='text' className='form-control' autoFocus={true}></input>
-            //         </div> 
-            //         :
-            //         <div>
-            //             <h6>Chat Name</h6>
-            //             <input type='text' className='form-control' autoFocus={true}></input>
-            //         </div>
-            //     }s
-            // </div>
-        // );
         
         const title = 'Add Chat'
         const body = <AddChat socket={props.socket}/>;

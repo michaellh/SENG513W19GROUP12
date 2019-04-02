@@ -306,9 +306,32 @@ io.on('connect', socket => {
         });
     });
 
-    socket.on('leaveChat', ({chatID, userID}) => {
-        
-    });
+    // Leave Chat Function
+    function leaveChat(chatID,id){
+        dbClient.collection('chats').updateOne({_id:mID(chatID)},{$pull : {members: {id}}});
+        dbClient.collection('users').findOneAndUpdate({_id:mID(id)},{$pull : {chats: {id : mID(chatID)}}}, {returnOriginal:false}, (err, res) => {
+            // console.log('Removed from User', res.value.chats);
+            // let user = res.value;
+            io.to(user.socketID).emit('startInfo', {chats:user.chats, friends:user.friends});
+        });
+    }
+
+    socket.on('removeFromChat', ({chatID, id}) => leaveChat(chatID, id));
+
+    socket.on('leaveChat', chatID => leaveChat(chatID, userID)); 
+
+    // Get Chat Info
+    socket.on('reqChatInfo', chatID => {
+        dbClient.collection('chats').findOne({_id:mID(chatID)}, (err, res) => {
+            let chatInfo = res;
+            // Formating id for front end
+            chatInfo.id = chatInfo._id;
+            // Removing extra unecessary stuff;
+            delete chatInfo._id;
+            delete chatInfo.messages;
+            socket.emit('chatInfo', chatInfo);
+        });
+    })
 
 });
 
