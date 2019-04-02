@@ -5,9 +5,10 @@ import Container from '../components/Container';
 // import './socket-calls.js'
 // import './socket.io.js'
 // import '../css/main.css'
+import 'bootstrap/dist/css/bootstrap.min.css';
 
-let name;
+let name = 'userAlex';
 while(!(name = prompt("Please enter your name")));
 document.cookie = `user=${name}`;
 
-ReactDOM.render(<Container user={name} />, document.getElementById('container'));
+ReactDOM.render(<Container />, document.getElementById('container'));
