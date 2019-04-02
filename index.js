@@ -152,6 +152,7 @@ io.on('connect', socket => {
             // Adding to Chats Table
             dbClient.collection('chats').insertOne(groupChatObj, (err,res) => {
                 const {_id:id, name, group} = res.ops[0];
+                sendback(['chatID',id]);
                 // Adding Chats name and ID to user table
                 dbClient.collection('users').findOneAndUpdate({_id:mID(userID)},{$push : {chats: {id,name, group}}}, {returnOriginal:false}, (err, res) => {
                     // console.log(res, err);
@@ -265,12 +266,50 @@ io.on('connect', socket => {
         }
     });
 
-    // Add to chat
+    // Add User to Chat
     socket.on('addToChat', ({chatID, name}) => {
         dbClient.collection('users').findOne({name}, function(err, res){
-            sendback([res,err]);
+            // User Exist
+            if(res){
+                sendback([res,err]);
+                const {_id:id, socketID, name} = res;
+                // Update Chat member with new user
+                dbClient.collection('chats').findOneAndUpdate({_id:mID(chatID)},{$push : {members: {id, name, role:'member'}}}, {returnOriginal:false}, (err, res) => {
+                    let chat = res.value;
+                    // Check chat exist, and is group chat
+                    if(chat && chat.group){
+                        // console.log(chat);
+                        // sendback(chat);
+
+                        // Update user's chatlist with new chat, Could be moved out to to improve performance
+                        // Setting up query parameters
+                        const query = {_id:mID(id)};
+                        const update = {$push:{chats:{id:chat._id, name: chat.name, group: chat.group}}};
+                        // Add new chat to user Chatlist
+                        dbClient.collection('users').findOneAndUpdate(query, update, {returnOriginal:false}, (err, res) => {
+                            const user = res.value;
+                            // Update their chatlist
+                            io.to(user.socketID).emit('startInfo', {chats:user.chats, friends:user.friends});
+                        })
+
+                    }
+                    // chat does not exist
+                    else{
+                        console.log('chat not found')
+                    }
+                });
+            }
+            // user not found
+            else{
+                console.log('no user');
+            } 
         });
     });
+
+    socket.on('leaveChat', ({chatID, userID}) => {
+        
+    });
+
 });
 
 
