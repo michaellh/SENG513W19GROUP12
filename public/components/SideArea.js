@@ -63,8 +63,8 @@ export default class SideArea extends Component {
             height: '100%'
         }
         return (
-            <div className={this.props.className} style={style}>
-                <TopBar />
+            <div className={this.props.className} id={this.props.id} style={style}>
+                <TopBar modal={this.props.modal}/>
                 <SideControl updateMode={this.updateMode} filterResult={this.filterResult} modal={this.props.modal} socket={this.props.socket} />
                 <br />
                 {

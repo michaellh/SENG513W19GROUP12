@@ -48,9 +48,9 @@ export default class ChatArea extends Component {
 
     render() {
         return (
-            <div className={this.props.className}>
+            <div className={this.props.className} id={this.props.id}>
                 <div className='row' style={this.style}>
-                    <TopBar className='col-12 align-self-start' name={this.state.chat.name}/>
+                    <TopBar className='col-12 align-self-start' name={this.state.chat.name} modal={this.props.modal}/>
                     <Messages className='col-12 align-self-start' messages={this.state.messages} user={this.props.user} />
                     <Controls className='col-12 align-self-end' onMessage={this.onMessage} />
                 </div>

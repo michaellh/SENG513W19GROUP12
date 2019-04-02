@@ -39,12 +39,12 @@ export default class Container extends Component {
         return (
             <div className='container-fluid h-100'>
                 <div className='row h-100'>
-                    <SideArea className='col-2' chooseChat={this.chooseChat} socket={this.socket} modal={this.openModal}/>
+                    <SideArea className='col-2' id='side-area' chooseChat={this.chooseChat} socket={this.socket} modal={this.openModal}/>
                     {
                         this.state.chat ? 
-                        <ChatArea className='col-10' chat={this.state.chat} socket={this.socket} user={this.props.user} />
+                        <ChatArea className='col-10' id='chat-area' chat={this.state.chat} socket={this.socket} user={this.props.user} modal={this.openModal}/>
                         :
-                        <h1>No Chat</h1>
+                        <h1 className='col-10 text-center align-self-center'>You have no chats...</h1>
                     }
                     <Modal modal={this.state.modal}/>
                 </div>
