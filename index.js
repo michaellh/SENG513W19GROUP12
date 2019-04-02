@@ -86,7 +86,7 @@ io.on('connect', socket => {
             // socket.emit('chatlist', user.chats);
             // socket.emit('friendlist', user.friends);
         }else{
-            inDB = false;
+            // inDB = false;
             // Enroll new user
             const userObject = {
                 name: username,
