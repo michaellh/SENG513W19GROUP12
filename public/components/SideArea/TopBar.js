@@ -4,12 +4,12 @@ import Settings from '../Modal/Settings';
 export default function TopBar(props) {
 
     let handleSettings = () => {
-        const title = 'Settings'
+        const title = <span><i className='fas fa-cog'></i>  Settings</span>
         const body = <Settings socket={props.socket}/>;
 
         props.modal(title,body);
     }
-    
+
   return (
     <div className='row top-bar'>
         <div className='col-3'>
