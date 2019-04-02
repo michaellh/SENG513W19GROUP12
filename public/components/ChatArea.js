@@ -24,12 +24,14 @@ export default class ChatArea extends Component {
 
         props.socket.on('message', msg => {
             // console.log(msg);
+            msg.date = new Date(msg.date);
             this.setState({messages : [...this.state.messages, msg]});
         });
 
-        props.socket.on('loadHistory', msg => {
+        props.socket.on('loadHistory', messages => {
             // console.log(msg);
-            this.setState({messages : msg});
+            messages.forEach(d => d.date = new Date(d.date));
+            this.setState({messages});
         });        
     }
 
@@ -42,7 +44,8 @@ export default class ChatArea extends Component {
     }
 
     onMessage(message){
-        this.props.socket.emit('message', {chat : this.props.chat, msg : {user: this.props.user, message}});
+        const {id:userID, name:userName} =this.props.user;
+        this.props.socket.emit('message', {chat : this.props.chat, msg : {userID, userName, message}});
         // this.setState({messages : [...this.state.messages, message]});
     }
 

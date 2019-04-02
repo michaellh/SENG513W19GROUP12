@@ -60,6 +60,9 @@ chat.Chat2 = [];
 
 mID = id => new mObjectId(id);
 
+// Object Mutable so do not need to return;
+frontEndID = obj => {obj.id = obj._id; delete obj._id};
+
 io.on('connect', socket => {
     // Checking if user exist and assigning name
     const cookie = socket.client.request.headers.cookie;
@@ -77,8 +80,9 @@ io.on('connect', socket => {
         if (user){
             userID = user._id;
             console.log(userID);
+            frontEndID(user);
             // console.log(user.socketID, socket.id);
-            socket.emit('startInfo', {chats:user.chats, friends:user.friends});
+            socket.emit('userInfo', user);
             // socket.emit('chatlist', user.chats);
             // socket.emit('friendlist', user.friends);
         }else{
@@ -91,10 +95,12 @@ io.on('connect', socket => {
                 friends: [],
             }
             dbClient.collection('users').insertOne(userObject, (err, res) => {
-                userID = res.insertedId;
-                socket.emit('startInfo', {chats:[], friends:[]});
+                let user = res.ops[0];
+                userID = user._id;
+                frontEndID(user);
+                socket.emit('userInfo', user);
             });
-            // socket.emit('startInfo', {chats:['Chat1', 'Chat2'], friends: ['Friend1', 'Friend2', 'Friend3']});            
+            // socket.emit('chatlist', {chats:['Chat1', 'Chat2'], friends: ['Friend1', 'Friend2', 'Friend3']});            
         }
     });
 
@@ -117,11 +123,24 @@ io.on('connect', socket => {
         socket.leave(chat.id);
     });
 
+    // Get Chat Info
+    socket.on('reqChatInfo', chatID => {
+        dbClient.collection('chats').findOne({_id:mID(chatID)}, (err, res) => {
+            let chatInfo = res;
+            // Formating id for front end
+            frontEndID(chatInfo);
+            // Removing extra unecessary stuff;
+            delete chatInfo.messages;
+            socket.emit('chatInfo', chatInfo);
+        });
+    })
+
     socket.on('message', msg => {
         // console.log(msg);
         if(inDB) {
-            dbClient.collection('chats').update({_id:mID(msg.chat.id)}, {$push : {messages: msg.msg}});
-            io.to(msg.chat.id).emit('message', msg.msg);
+            let message = {date: new Date(), ...msg.msg};
+            dbClient.collection('chats').update({_id:mID(msg.chat.id)}, {$push : {messages: message}});
+            io.to(msg.chat.id).emit('message', message);
         }else{
             chat[msg.chat.id].push(msg.msg);
             io.to(msg.chat.id).emit('message', msg.msg);
@@ -159,7 +178,7 @@ io.on('connect', socket => {
                     let user = res.value;
                     sendback(user);
                     // Updating user chatlist and friends.
-                    socket.emit('startInfo', {chats:user.chats, friends:user.friends});
+                    socket.emit('chatlist', user.chats);
                 });
                 // dbClient.collection('users').findOne({_id:mID(userID)}, (err, res) => {
                 //     console.log(res, err);
@@ -198,7 +217,7 @@ io.on('connect', socket => {
                             let user = res.value;
                             sendback(['Self',user]);
                             // Updating user chatlist and friends.
-                            socket.emit('startInfo', {chats:user.chats, friends:user.friends});
+                            socket.emit('chatlist', user.chats);
                         });
 
                          // Update Client Chat Table, id is clients, but name is self name
@@ -206,7 +225,7 @@ io.on('connect', socket => {
                             let user = res.value;
                             sendback(['Client',user]);
                             // Updating client's chatlist and friends.
-                            io.to(user.socketID).emit('startInfo', {chats:user.chats, friends:user.friends});
+                            io.to(user.socketID).emit('chatlist', user.chats);
                         });
                     });
                 }else{
@@ -236,7 +255,7 @@ io.on('connect', socket => {
                 dbClient.collection('users').findOneAndUpdate(query, update, {returnOriginal:false}, (err, res) => {
                     const user = res.value;
                     // Update their chatlist
-                    io.to(user.socketID).emit('startInfo', {chats:user.chats, friends:user.friends});
+                    io.to(user.socketID).emit('chatlist', user.chats);
                 })
             });
             // console.log(deletedChat.members);
@@ -289,7 +308,7 @@ io.on('connect', socket => {
                         dbClient.collection('users').findOneAndUpdate(query, update, {returnOriginal:false}, (err, res) => {
                             const user = res.value;
                             // Update their chatlist
-                            io.to(user.socketID).emit('startInfo', {chats:user.chats, friends:user.friends});
+                            io.to(user.socketID).emit('chatlist', user.chats);
                         })
 
                     }
@@ -312,26 +331,13 @@ io.on('connect', socket => {
         dbClient.collection('users').findOneAndUpdate({_id:mID(id)},{$pull : {chats: {id : mID(chatID)}}}, {returnOriginal:false}, (err, res) => {
             // console.log('Removed from User', res.value.chats);
             // let user = res.value;
-            io.to(user.socketID).emit('startInfo', {chats:user.chats, friends:user.friends});
+            io.to(user.socketID).emit('chatlist', user.chats);
         });
     }
 
     socket.on('removeFromChat', ({chatID, id}) => leaveChat(chatID, id));
 
     socket.on('leaveChat', chatID => leaveChat(chatID, userID)); 
-
-    // Get Chat Info
-    socket.on('reqChatInfo', chatID => {
-        dbClient.collection('chats').findOne({_id:mID(chatID)}, (err, res) => {
-            let chatInfo = res;
-            // Formating id for front end
-            chatInfo.id = chatInfo._id;
-            // Removing extra unecessary stuff;
-            delete chatInfo._id;
-            delete chatInfo.messages;
-            socket.emit('chatInfo', chatInfo);
-        });
-    })
 
 });
 

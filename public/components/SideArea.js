@@ -23,15 +23,28 @@ export default class SideArea extends Component {
         this.deleteChat = this.deleteChat.bind(this);
         // console.log(this.props);
 
-        props.socket.on('startInfo', ({chats, friends}) => {
+        props.socket.on('chatlist', chats => {
             this.chats = chats;
-            this.friends = friends;
             this.setState({chats});
-            this.setState({friends});
             // apply back filter
             this.filterResult(this.state.searchTerm);
             // props.chooseChat(this.state.chats[0]);
         });
+
+
+        props.socket.on('friendlist', friends => {
+            this.friends = friends;
+            this.setState({friends});
+            // apply back filter
+            this.filterResult(this.state.searchTerm);
+        });
+    }
+
+    componentWillReceiveProps(newProp){
+        const {chats, friends} = newProp.user;
+        this.chats = chats;
+        this.friends = friends;
+        this.setState({chats, friends});
     }
 
     updateMode(mode){
