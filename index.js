@@ -168,6 +168,7 @@ io.on('connect', socket => {
         }
     });
 
+    // Create Single Chat
     socket.on('createSingleChat', name => {
         if(inDB){
             // Find user in DB, res is null if not found
@@ -218,30 +219,57 @@ io.on('connect', socket => {
         }
     });
 
+    // Defining function outside as being used more than once
+    function deleteChat(chatID){
+        // Find the Single Chat and delete it
+        dbClient.collection('chats').findOneAndDelete({_id:mID(chatID)}, (err, res) => {
+            let deletedChat = res.value;
+            // deletedChat.value.members
+            sendback(['DeletedChat', deletedChat]);
+            // For each deleted member
+            deletedChat.members.forEach(({id, name}) => {
+                // Setting up query parameters
+                const query = {_id:mID(id)};
+                const update = {$pull:{chats:{id:deletedChat._id}}};
+                // Remove the chat from their list
+                dbClient.collection('users').findOneAndUpdate(query, update, {returnOriginal:false}, (err, res) => {
+                    const user = res.value;
+                    // Update their chatlist
+                    io.to(user.socketID).emit('startInfo', {chats:user.chats, friends:user.friends});
+                })
+            });
+            // console.log(deletedChat.members);
+        });
+    }
+
     socket.on('deleteChat', chat => {
         if(chat.group){
             console.log('Group Chat Delete attempted');
-        }else{
-            // Find the Single Chat and delete it
-            dbClient.collection('chats').findOneAndDelete({_id:mID(chat.id)}, (err, res) => {
-                let deletedChat = res.value;
-                // deletedChat.value.members
-                sendback(['DeletedChat', deletedChat]);
-                // For each deleted member
-                deletedChat.members.forEach(({id, name}) => {
-                    // Setting up query parameters
-                    const query = {_id:mID(id)};
-                    const update = {$pull:{chats:{id:deletedChat._id}}};
-                    // Remove the chat from their list
-                    dbClient.collection('users').findOneAndUpdate(query, update, {returnOriginal:false}, (err, res) => {
-                        const user = res.value;
-                        // Update their chatlist
-                        io.to(user.socketID).emit('startInfo', {chats:user.chats, friends:user.friends});
-                    })
-                });
-                // console.log(deletedChat.members);
+            dbClient.collection('chats').findOne({_id:mID(chat.id)}, (err, res) => {
+                let currentChat = res;
+                // console.log(currentChat);
+                // sendback(currentChat.members);
+                // Typecasting to string to compare and find
+                const {name, role} = currentChat.members.find(({id}) => `${id}` == `${userID}`);
+                
+                if(role == 'admin'){
+                    deleteChat(currentChat._id);
+                }else{
+                    // Not admin, leave chat?
+                    console.log('notAdmin');
+                }
             });
+        }else{
+            // Single chat delete
+            deleteChat(chat.id);
         }
+    });
+
+    // Add to chat
+    socket.on('addToChat', ({chatID, name}) => {
+        dbClient.collection('users').findOne({name}, function(err, res){
+            sendback([res,err]);
+        });
     });
 });
 

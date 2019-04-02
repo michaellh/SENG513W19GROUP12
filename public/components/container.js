@@ -8,7 +8,7 @@ export default class Container extends Component {
         super(props)
         
         this.state = {
-            chat : {id:'No Chat',name:'No Chat'},
+            chat : null,
             modal: {title: 'Title', component: 'component', custom: false}   
         }
 
@@ -24,7 +24,7 @@ export default class Container extends Component {
     }
 
     chooseChat(chat){
-        this.socket.emit('leaveRoom', this.state.chat);
+        this.state.chat && this.socket.emit('leaveRoom', this.state.chat);
         this.setState({chat: chat});
         this.socket.emit('joinRoom', chat);
         console.log(chat);
@@ -40,7 +40,12 @@ export default class Container extends Component {
             <div className='container-fluid h-100'>
                 <div className='row h-100'>
                     <SideArea className='col-2' chooseChat={this.chooseChat} socket={this.socket} modal={this.openModal}/>
-                    <ChatArea className='col-10' chat={this.state.chat} socket={this.socket} user={this.props.user} />
+                    {
+                        this.state.chat ? 
+                        <ChatArea className='col-10' chat={this.state.chat} socket={this.socket} user={this.props.user} />
+                        :
+                        <h1>No Chat</h1>
+                    }
                     <Modal modal={this.state.modal}/>
                 </div>
             </div>

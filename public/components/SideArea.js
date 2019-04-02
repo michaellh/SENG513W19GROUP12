@@ -8,13 +8,14 @@ export default class SideArea extends Component {
     constructor(props) {
         super(props)
         
-        this.chats = ['Chat1', 'Chat2'];
-        this.friends = ['Friend1', 'Friend2', 'Friend3'];
+        this.chats = [];
+        this.friends = [];
 
         this.state = {
             mode : 'chats',
             chats: this.chats,
             friends: this.friends,
+            searchTerm: '',
         }
 
         this.updateMode = this.updateMode.bind(this);
@@ -23,8 +24,12 @@ export default class SideArea extends Component {
         // console.log(this.props);
 
         props.socket.on('startInfo', ({chats, friends}) => {
+            this.chats = chats;
+            this.friends = friends;
             this.setState({chats});
             this.setState({friends});
+            // apply back filter
+            this.filterResult(this.state.searchTerm);
             // props.chooseChat(this.state.chats[0]);
         });
     }
@@ -34,8 +39,9 @@ export default class SideArea extends Component {
     }
     
     filterResult(term){
+        this.setState({searchTerm:term});
         let currentMode = this.state.mode;
-        let list = currentMode == 'chats' ? this.state.chats : this.state.friends;
+        let list = currentMode == 'chats' ? this.chats : this.friends;
         let filteredResult = list.filter(d => d.name.includes(term));
         
         if(currentMode == 'chats'){
