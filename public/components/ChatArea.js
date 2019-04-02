@@ -15,7 +15,6 @@ export default class ChatArea extends Component {
         
         this.style = {
             height: '100%',
-            border: '2px solid black'
         };
 
         this.onMessage = this.onMessage.bind(this);
@@ -51,7 +50,7 @@ export default class ChatArea extends Component {
             <div className={this.props.className} id={this.props.id}>
                 <div className='row' style={this.style}>
                     <TopBar className='col-12 align-self-start' chat={this.state.chat} socket={this.props.socket} modal={this.props.modal}/>
-                    <Messages className='col-12 align-self-start' messages={this.state.messages} user={this.props.user} />
+                    <Messages className='col-12 align-self-start' messages={this.state.messages} user={this.props.user} id='messages'/>
                     <Controls className='col-12 align-self-end' onMessage={this.onMessage} />
                 </div>
             </div>

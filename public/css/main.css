@@ -10,10 +10,31 @@ html, body {
     height: 100%;
 }
 
+#container {
+
+}
+
 .top-bar {
     margin: 10px 0px 10px 0px;
 }
 
-#side-area button{
+#side-area {
+    border: solid black 1px;
 }
 
+#chat-area {
+    border: solid black 1px;
+    padding-bottom: 10px;
+}
+
+#messages {
+    overflow: auto; 
+    position: fixed; 
+    bottom: 75px; 
+    width: 83%;
+    max-height: 85%;
+}
+
+#messages div{
+    margin: 8px 0px 8px 0px; 
+}
