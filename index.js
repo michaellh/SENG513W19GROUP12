@@ -3,10 +3,9 @@ const express = require('express');
 const app = express();
 const http = require('http').Server(app);
 const io = require('socket.io')(http);
-
 const path = require('path');
-const mongoClient = require('mongodb').MongoClient;
 const mObjectId = require('mongodb').ObjectId;
+const passport = require('passport');
 
 // Managing usernames
 let usedUsers = [];
@@ -23,26 +22,15 @@ function styleName({username, color}){
 
 // Serving Public Folder for Scripts
 // app.use(express.static('public/dist'));
+require('./config/authentication').initPassport();
 app.use(express.static('public/dist'));
+app.use(passport.initialize());
 
 // Connect to the MongoDB Atlas database
-let dbClient;
-const uri = "mongodb+srv://Michael:Test@demo-84yw9.mongodb.net/test?retryWrites=true";
-mongoClient.connect(uri, (err, client) => {
-    if (err) throw err;
-
-    dbClient = client.db("SENG513");
-    console.log("Connected to the database!");
-    app.emit('db ready');
-
-    // dbClient.collection('users').find({name:'user'}, (err, res) => {
-    //     res.forEach(d => {
-    //         console.log(d);
-    //     });
-    // });
-});
-
-
+var models = require('./models');
+var controllers = require('./controllers');
+controllers.createRoutes(app);
+controllers.startListening(http);
 // Connect to your local mongoDB
 // var mongoDBURL = "mongodb://localhost:27017/seng513";
 // var dbClient;
@@ -69,7 +57,7 @@ io.on('connect', socket => {
     let userID;
     let inDB = true;
     // console.log(username);
-    
+
     dbClient.collection('users').findOneAndUpdate({name:username}, {$set:{socketID: socket.id}}, {returnOriginal: false}, (err, res) => {
         let user = res.value;
         // console.log(res);
@@ -94,7 +82,7 @@ io.on('connect', socket => {
                 userID = res.insertedId;
                 socket.emit('startInfo', {chats:[], friends:[]});
             });
-            // socket.emit('startInfo', {chats:['Chat1', 'Chat2'], friends: ['Friend1', 'Friend2', 'Friend3']});            
+            // socket.emit('startInfo', {chats:['Chat1', 'Chat2'], friends: ['Friend1', 'Friend2', 'Friend3']});
         }
     });
 
@@ -104,7 +92,7 @@ io.on('connect', socket => {
     // console.log('Connected');
     // To send message back and forth
     socket.on('debug', msg => {
-       eval(msg); 
+       eval(msg);
     });
 
     socket.on('joinRoom', chat => {
@@ -164,7 +152,7 @@ io.on('connect', socket => {
                 //     console.log(res, err);
                 // });
             });
-            
+
         }
     });
 
@@ -190,7 +178,7 @@ io.on('connect', socket => {
                     dbClient.collection('chats').insertOne(chatObj, (err,res) => {
                         // Getting group condition, and id back from result
                         const {_id:id, group} = res.ops[0];
-                        
+
                         // Update Self Chat Table
                         dbClient.collection('users').findOneAndUpdate({_id:mID(userID)},{$push : {chats: {id, name: clientName, group}}}, {returnOriginal:false}, (err, res) => {
                             let user = res.value;
@@ -247,7 +235,7 @@ io.on('connect', socket => {
 
 
 // Object.keys(io.sockets.sockets).forEach(d => {
-    
+
 // });
 // // On Socket IO connection
 // io.on('connection', (socket) => {
@@ -256,13 +244,13 @@ io.on('connect', socket => {
 //     const userCookie =  cookie && cookie.split(';').find(cookie => cookie.includes('user='));
 //     const username = userCookie && userCookie.split('=')[1];
 //     let user = {username, color : '#000000'};
-    
+
 //     // If there are users, Add it to the list
 //     if (username){
 //         // user = usedUsers.find(entry => entry.username == username);
 //         const oldUser = usedUsers.find(entry => entry.username == username);
 //         user = oldUser ? oldUser : user;
-        
+
 //         // Only add to active user if he is not there
 //         if (!activeUsers.includes(user)){
 //             activeUsers.push(user);
@@ -317,18 +305,18 @@ io.on('connect', socket => {
 //             user.username = name;
 //             socket.emit('setUser', user);
 //             io.emit('userList', activeUsers);
-//         }        
+//         }
 //     });
 
 //     // Changing Color
 //     socket.on('color', color => {
-//         socket.emit('status', `Your username color has been changed: 
+//         socket.emit('status', `Your username color has been changed:
 //                                 <span style='color:${user.color}'>${user.color}</span> -> <span style='color:#${color}'>#${color}</span>`);
 //         user.color = `#${color}`;
 //         socket.emit('setUser', user);
 //         io.emit('userList', activeUsers);
 //     });
-    
+
 //     // On Disconnect
 //     socket.on('disconnect', () => {
 //         socket.broadcast.emit('status', `${styleName(user)} has left the chat`)
@@ -336,13 +324,3 @@ io.on('connect', socket => {
 //         io.emit('userList', activeUsers);
 //     });
 // });
-
-app.on('db ready', function() {
-    // Port # will be null/empty if run locally
-    let port = process.env.PORT;
-    if(port == null || port == "") {
-        port = 3000;
-    }
-    http.listen(port);
-    console.log('Listening on Port ' + port);
-});
