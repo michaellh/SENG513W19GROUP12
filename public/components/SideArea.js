@@ -73,11 +73,11 @@ export default class SideArea extends Component {
         return (
             <div className={this.props.className} id={this.props.id}>
                 <TopBar modal={this.props.modal}/>
-                <SideControl updateMode={this.updateMode} filterResult={this.filterResult} modal={this.props.modal} socket={this.props.socket} />
+                <SideControl updateMode={this.updateMode} filterResult={this.filterResult} modal={this.props.modal} socket={this.props.socket} mode={this.state.mode}/>
                 <br />
                 {
                     this.state.mode == 'chats' ? 
-                    (<Chats chats={this.state.chats} chooseChat={this.props.chooseChat} deleteChat={this.deleteChat}/>) :
+                    (<Chats chats={this.state.chats} chooseChat={this.props.chooseChat} chosenChat={this.props.chosenChat} deleteChat={this.deleteChat}/>) :
                     (<Friends friends={this.state.friends} />)
                 }
             </div>

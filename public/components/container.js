@@ -30,7 +30,7 @@ export default class Container extends Component {
 
         this.socket.on('chatInfo', chat => {
             this.setState({chat});
-            console.log(chat);
+            //console.log(chat);
         });
 
         this.socket.on('resetChat', chatID => {
@@ -54,6 +54,7 @@ export default class Container extends Component {
         this.state.chat && this.socket.emit('leaveRoom', this.state.chat);
         this.socket.emit('reqChatInfo', chat.id);
         this.socket.emit('joinRoom', chat);
+        console.log(this.state.chat);
         // this.setState({chat: chat});
         // console.log(chat);
     }
@@ -67,7 +68,7 @@ export default class Container extends Component {
         return (
             <div className='container-fluid h-100'>
                 <div className='row h-100'>
-                    <SideArea className='col-2' id='side-area' updateUser={this.updateUser} user={this.state.user} chooseChat={this.chooseChat} socket={this.socket} modal={this.openModal}/>
+                    <SideArea className='col-2' id='side-area' updateUser={this.updateUser} user={this.state.user} chooseChat={this.chooseChat} socket={this.socket} modal={this.openModal} chosenChat={this.state.chat}/>
                     {
                         this.state.chat ? 
                         <ChatArea className='col-10' id='chat-area' chat={this.state.chat} socket={this.socket} user={this.state.user} modal={this.openModal}/>
