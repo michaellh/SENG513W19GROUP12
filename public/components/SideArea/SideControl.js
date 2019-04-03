@@ -3,13 +3,14 @@ import AddChat from '../Modal/AddChat';
 
 export default function SideControl(props) {
 
-
     let friendMode = () => {
         props.updateMode('friends');
+        console.log(props.mode);
     }
 
     let chatMode = () => {
         props.updateMode('chats')
+        console.log(props.mode);
     }
 
     let handleSearch = (e) => {
@@ -27,10 +28,19 @@ export default function SideControl(props) {
     
     return (
         <div className='row'>
-            <div className='col-12 btn-group'>
-                <button className='btn btn-primary' onClick={friendMode} ><i className='fas fa-user-friends'></i>  Friends</button>
-                <button className='btn btn-secondary' onClick={chatMode} >Chats  <i className='fas fa-comments'></i></button>
-            </div>
+            {
+                props.mode=="friends"?
+
+                <div className='col-12 btn-group'>
+                    <button className='btn btn-primary' onClick={friendMode} ><i className='fas fa-user-friends'></i>  Friends</button>
+                    <button className='btn btn-outline-primary' onClick={chatMode} >Chats  <i className='fas fa-comments'></i></button>
+                </div>
+                :
+                <div className='col-12 btn-group'>
+                    <button className='btn btn-outline-primary' onClick={friendMode} ><i className='fas fa-user-friends'></i>  Friends</button>
+                    <button className='btn btn-primary' onClick={chatMode} >Chats  <i className='fas fa-comments'></i></button>
+                </div>
+            }
             <div className='col-12'>
                 <div className='input-group'>
                     <div className='input-group-prepend'>
@@ -40,7 +50,7 @@ export default function SideControl(props) {
                 </div>
             </div>
             <div className='col-12'>
-                <button className='btn btn-danger btn-block' onClick={handleAdd} ><i className='fas fa-plus-circle'></i>  Add</button>
+                <button className='btn btn-outline-primary btn-block' onClick={handleAdd} ><i className='fas fa-plus-circle'></i>  Add</button>
             </div>
         </div>
     )

@@ -76,7 +76,7 @@ export default class AddChat extends Component {
                         }
                     </div>
                     <div className="modal-footer">
-                        <button type="submit" className="btn btn-secondary" data-dismiss="modal" onClick={this.handleSubmit}>Okay</button>
+                        <button type="submit" className="btn btn-primary" data-dismiss="modal" onClick={this.handleSubmit}>Okay</button>
                     </div>
                 </form>
         )
