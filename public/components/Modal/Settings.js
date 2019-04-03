@@ -14,7 +14,7 @@ export default class Settings extends Component {
         this.handleSubmit = this.handleSubmit.bind(this);
 
         // When animation finished, and modal closed, reset state
-        $('#myModal').on('hidden.bs.modal', (e) => {
+        $('#myModal').on('show.bs.modal', (e) => {
             this.setState({
                 mode : false,
                 text:'',

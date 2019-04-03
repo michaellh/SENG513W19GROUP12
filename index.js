@@ -4,25 +4,10 @@ const app = express();
 const http = require('http').Server(app);
 const io = require('socket.io')(http);
 
-const path = require('path');
 const mongoClient = require('mongodb').MongoClient;
 const mObjectId = require('mongodb').ObjectId;
 
-// Managing usernames
-let usedUsers = [];
-let availUsers = ["Danyell","Marjory","Nereida","Madie","Shavonda","Lucrecia","Dina","Jarvis","Paris","Euna","Michaela","Stefanie","Herminia","Arla","Rolland","Preston","Johnsie","Sunday","Alisia","Allyn"]
-
-// Connected Users
-let activeUsers = [];
-
-let messageLog = [];
-
-function styleName({username, color}){
-    return `<span style='color:${color}'>${username}</span>`;
-}
-
 // Serving Public Folder for Scripts
-// app.use(express.static('public/dist'));
 app.use(express.static('public/dist'));
 
 // Connect to the MongoDB Atlas database
@@ -58,28 +43,28 @@ let chat = {};
 chat.Chat1 = [];
 chat.Chat2 = [];
 
-mID = id => new mObjectId(id);
+let mID = id => new mObjectId(id);
 
 // Object Mutable so do not need to return;
-frontEndID = obj => {obj.id = obj._id; delete obj._id};
+let frontEndID = obj => {obj.id = obj._id; delete obj._id};
 
 io.on('connect', socket => {
     // Checking if user exist and assigning name
     const cookie = socket.client.request.headers.cookie;
     const userCookie =  cookie && cookie.split(';').find(cookie => cookie.includes('user='));
     // username being used below as the username from the database
-    const username = userCookie && userCookie.split('=')[1];
-    let userID;
+    const socket_username = userCookie && userCookie.split('=')[1];
+    let socket_userID;
     let inDB = true;
-    // console.log(username);
+    // console.log(socket_username);
     
-    dbClient.collection('users').findOneAndUpdate({name:username}, {$set:{socketID: socket.id}}, {returnOriginal: false}, (err, res) => {
+    dbClient.collection('users').findOneAndUpdate({name:socket_username}, {$set:{socketID: socket.id}}, {returnOriginal: false}, (err, res) => {
         let user = res.value;
         // console.log(res);
         // console.log(user);
         if (user){
-            userID = user._id;
-            console.log(userID);
+            socket_userID = user._id;
+            console.log(socket_userID);
             frontEndID(user);
             // console.log(user.socketID, socket.id);
             socket.emit('userInfo', user);
@@ -89,14 +74,14 @@ io.on('connect', socket => {
             // inDB = false;
             // Enroll new user
             const userObject = {
-                name: username,
+                name: socket_username,
                 socketID: socket.id,
                 chats: [],
                 friends: [],
             }
             dbClient.collection('users').insertOne(userObject, (err, res) => {
                 let user = res.ops[0];
-                userID = user._id;
+                socket_userID = user._id;
                 frontEndID(user);
                 socket.emit('userInfo', user);
             });
@@ -104,7 +89,7 @@ io.on('connect', socket => {
         }
     });
 
-    sendback = (message) => {
+    let sendback = (message) => {
         socket.emit('debug', message);
     }
     // console.log('Connected');
@@ -147,6 +132,42 @@ io.on('connect', socket => {
         }
     });
 
+    // Handle Message Reacts
+    socket.on('messageReact', ({chatID, userID, date, reactions, incReaction}) => {
+        // Checking Reactions
+        reactions = reactions ? reactions : {like:0, dislike:0};
+        // Incrementing that reaction
+        reactions[incReaction]++;
+
+        // Updating messages that match the date, userid of the chat
+        const query = {_id:mID(chatID), messages: {$elemMatch:{date: new Date(date),userID}}};
+        const update = {$set:{'messages.$.reactions':reactions}};
+        dbClient.collection('chats').findOneAndUpdate(query, update, {returnOriginal:false}, (err, res) => {
+            // If success, emit history of chat again so the message on client updates
+            res.value && io.to(chatID).emit('loadHistory', res.value.messages);
+        });
+    });
+
+    // Handle Message Deletes
+    socket.on('messageDelete', ({chatID, userID, date}) => {
+        // Checking whether deleting own message
+        if (userID == socket_userID){    
+            // Updating messages that match the date, userid of the chat
+            const query = {_id:mID(chatID)};
+            // const update = {$pull: {messages: {$elemMatch:{date: new Date(date),userID}}}};
+            const update = {$pull: {messages: {userID ,date: new Date(date)}}};
+            dbClient.collection('chats').findOneAndUpdate(query, update, {returnOriginal:false}, (err, res) => {
+                // If success, emit history of chat again so the message on client updates
+                res.value && io.to(chatID).emit('loadHistory', res.value.messages);
+            });
+        }   
+        else{
+            // Cannot delete other messages
+            // Should not be able to anyway, Delete should only show for own messages
+            console.log('tried deleteing other message');
+        }
+    });
+
     socket.on('reqHistory', id => {
         if(inDB){
             dbClient.collection('chats').findOne({_id:mID(id)}, (err, res) => {
@@ -165,7 +186,7 @@ io.on('connect', socket => {
                 group: true,
                 messages:[],
                 members:[
-                    {id : userID, name: username, role:'admin'}
+                    {id : socket_userID, name: socket_username, role:'admin'}
                 ]
             };
             // Adding to Chats Table
@@ -173,14 +194,14 @@ io.on('connect', socket => {
                 const {_id:id, name, group} = res.ops[0];
                 sendback(['chatID',id]);
                 // Adding Chats name and ID to user table
-                dbClient.collection('users').findOneAndUpdate({_id:mID(userID)},{$push : {chats: {id,name, group}}}, {returnOriginal:false}, (err, res) => {
+                dbClient.collection('users').findOneAndUpdate({_id:mID(socket_userID)},{$push : {chats: {id,name, group}}}, {returnOriginal:false}, (err, res) => {
                     // console.log(res, err);
                     let user = res.value;
                     sendback(user);
                     // Updating user chatlist and friends.
                     socket.emit('chatlist', user.chats);
                 });
-                // dbClient.collection('users').findOne({_id:mID(userID)}, (err, res) => {
+                // dbClient.collection('users').findOne({_id:mID(socket_userID)}, (err, res) => {
                 //     console.log(res, err);
                 // });
             });
@@ -202,7 +223,7 @@ io.on('connect', socket => {
                         messages : [],
                         members : [
                             // Self
-                            {id : userID, name: username},
+                            {id : socket_userID, name: socket_username},
                             // res user
                             {id : clientID, name: clientName},
                         ]
@@ -213,7 +234,7 @@ io.on('connect', socket => {
                         const {_id:id, group} = res.ops[0];
                         
                         // Update Self Chat Table
-                        dbClient.collection('users').findOneAndUpdate({_id:mID(userID)},{$push : {chats: {id, name: clientName, group}}}, {returnOriginal:false}, (err, res) => {
+                        dbClient.collection('users').findOneAndUpdate({_id:mID(socket_userID)},{$push : {chats: {id, name: clientName, group}}}, {returnOriginal:false}, (err, res) => {
                             let user = res.value;
                             sendback(['Self',user]);
                             // Updating user chatlist and friends.
@@ -221,7 +242,7 @@ io.on('connect', socket => {
                         });
 
                          // Update Client Chat Table, id is clients, but name is self name
-                         dbClient.collection('users').findOneAndUpdate({_id:mID(clientID)},{$push : {chats: {id, name: username, group}}}, {returnOriginal:false}, (err, res) => {
+                         dbClient.collection('users').findOneAndUpdate({_id:mID(clientID)},{$push : {chats: {id, name: socket_username, group}}}, {returnOriginal:false}, (err, res) => {
                             let user = res.value;
                             sendback(['Client',user]);
                             // Updating client's chatlist and friends.
@@ -270,7 +291,7 @@ io.on('connect', socket => {
                 // console.log(currentChat);
                 // sendback(currentChat.members);
                 // Typecasting to string to compare and find
-                const {name, role} = currentChat.members.find(({id}) => `${id}` == `${userID}`);
+                const {name, role} = currentChat.members.find(({id}) => `${id}` == `${socket_userID}`);
                 
                 if(role == 'admin'){
                     deleteChat(currentChat._id);
@@ -337,100 +358,13 @@ io.on('connect', socket => {
 
     socket.on('removeFromChat', ({chatID, id}) => leaveChat(chatID, id));
 
-    socket.on('leaveChat', chatID => leaveChat(chatID, userID)); 
+    socket.on('leaveChat', chatID => leaveChat(chatID, socket_userID)); 
 
 });
 
 
 // Object.keys(io.sockets.sockets).forEach(d => {
     
-// });
-// // On Socket IO connection
-// io.on('connection', (socket) => {
-//     // Checking if user exist and assigning name
-//     const cookie = socket.client.request.headers.cookie;
-//     const userCookie =  cookie && cookie.split(';').find(cookie => cookie.includes('user='));
-//     const username = userCookie && userCookie.split('=')[1];
-//     let user = {username, color : '#000000'};
-    
-//     // If there are users, Add it to the list
-//     if (username){
-//         // user = usedUsers.find(entry => entry.username == username);
-//         const oldUser = usedUsers.find(entry => entry.username == username);
-//         user = oldUser ? oldUser : user;
-        
-//         // Only add to active user if he is not there
-//         if (!activeUsers.includes(user)){
-//             activeUsers.push(user);
-//         }
-//         socket.emit('setUser', user);
-//     }
-//     else{
-//         // Generating new name for the user
-//         user.username = availUsers[Math.floor(Math.random()*availUsers.length)];
-//         usedUsers.push(user);
-//         // Removing it from list of possible users
-//         availUsers.splice(availUsers.indexOf(user.username),1);
-//         activeUsers.push(user);
-//         socket.emit('setUser',user);
-//     }
-
-//     // Letting people know who connected
-//     socket.broadcast.emit('status', `${styleName(user)} has joined the chat`);
-
-//     // Updating userlist
-//     io.emit('userList', activeUsers);
-
-//     // Sending the Chat History
-//     socket.emit('history', messageLog);
-
-//     // Letting User know who they are
-//     socket.emit('status', `Welcome to the chat, you are ${styleName(user)}`);
-
-//     // Example MongoDB call
-//     // dbClient.collection("users").find({first_name: "Michael"}).toArray(function(err, result) {
-//     //     if(err) throw err;
-//     //     console.log(result);
-//     // });
-
-//     // Sending Messages
-//     socket.on('message', msg => {
-//         const message = {date : new Date(), ...msg};
-//         messageLog.push(message);
-//         io.emit('message', message);
-//     });
-
-//     // Changing Nickname
-//     socket.on('nickname', name => {
-//         if(activeUsers.find( user => user.username === name)){
-//             socket.emit('status', 'Name in use. Your name was not changed.')
-//         }else if(name === ''){
-//             socket.emit('status', 'Name cannot be empty. Your name was not changed.')
-//         }else{
-//             const updatedUser = {username: name, color: user.color};
-//             socket.emit('status', `Your name has been changed to ${styleName(updatedUser)}`);
-//             socket.broadcast.emit('status', `${styleName(user)} has changed their name to ${styleName(updatedUser)}`);
-//             user.username = name;
-//             socket.emit('setUser', user);
-//             io.emit('userList', activeUsers);
-//         }        
-//     });
-
-//     // Changing Color
-//     socket.on('color', color => {
-//         socket.emit('status', `Your username color has been changed: 
-//                                 <span style='color:${user.color}'>${user.color}</span> -> <span style='color:#${color}'>#${color}</span>`);
-//         user.color = `#${color}`;
-//         socket.emit('setUser', user);
-//         io.emit('userList', activeUsers);
-//     });
-    
-//     // On Disconnect
-//     socket.on('disconnect', () => {
-//         socket.broadcast.emit('status', `${styleName(user)} has left the chat`)
-//         activeUsers.splice(activeUsers.indexOf(user),1);
-//         io.emit('userList', activeUsers);
-//     });
 // });
 
 app.on('db ready', function() {
