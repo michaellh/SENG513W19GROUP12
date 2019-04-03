@@ -17,6 +17,7 @@ export default class LeaveChat extends Component {
 
     handleSubmit(e) {
         //props.socket.emit('leaveChat', props.chat.id);
+        props.socket.emit('leaveChat', props.chat);
     }
     
     render() {
