@@ -11,8 +11,8 @@ export default function TopBar(props) {
   	}
   
   	let handleLeaveChat = () => {
-		// console.log(props.chat.id);
-		props.socket.emit('leaveChat', props.chat.id);
+		// console.log(props.chat);
+		props.socket.emit('leaveChat', props.chat);
   	}
 	
 	// Using group chatname from chat if groupchat. Else use the name from the user's table

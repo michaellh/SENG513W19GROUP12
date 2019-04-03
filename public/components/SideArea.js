@@ -20,23 +20,23 @@ export default class SideArea extends Component {
 
         this.updateMode = this.updateMode.bind(this);
         this.filterResult = this.filterResult.bind(this);
-        this.deleteChat = this.deleteChat.bind(this);
         // console.log(this.props);
 
         props.socket.on('chatlist', chats => {
-            this.chats = chats;
-            this.setState({chats});
-            // apply back filter
-            this.filterResult(this.state.searchTerm);
-            // props.chooseChat(this.state.chats[0]);
+            // Updating the user object
+            let user = {...this.props.user};
+            user.chats = chats;
+            this.props.updateUser(user);
+            // ComponentWillReceiveProps will update everything
         });
 
 
         props.socket.on('friendlist', friends => {
-            this.friends = friends;
-            this.setState({friends});
-            // apply back filter
-            this.filterResult(this.state.searchTerm);
+            // Updating the user object
+            let user = {...this.props.user};
+            user.friends = friends;
+            this.props.updateUser(user);
+            // ComponentWillReceiveProps will update everything
         });
     }
 
@@ -45,6 +45,9 @@ export default class SideArea extends Component {
         this.chats = chats;
         this.friends = friends;
         this.setState({chats, friends});
+
+        // apply back filter
+        this.filterResult(this.state.searchTerm);
     }
 
     updateMode(mode){
@@ -64,10 +67,6 @@ export default class SideArea extends Component {
             this.setState({friends:filteredResult});
         }
 
-    }
-
-    deleteChat(chat){
-        this.props.socket.emit('deleteChat', chat);
     }
 
     render() {
