@@ -50,12 +50,7 @@ export default class ChatArea extends Component {
                 <div className='row h-100'>
                     <TopBar className='col-12 align-self-start' chat={this.state.chat} user={this.props.user} socket={this.props.socket} modal={this.props.modal}/>
                     <Messages className='col-12 align-self-start' messages={this.state.messages} chat={this.state.chat} user={this.props.user} socket={this.props.socket} id='messages'/>
-                    {
-                        this.state.chat.group || this.state.chat.members.length > 1 ? 
-                        <Controls className='col-12 align-self-end' onMessage={this.onMessage} />
-                        :
-                        <div className='alert alert-danger'>Other User Has Left</div>
-                    }
+                    <Controls className='col-12 align-self-end' onMessage={this.onMessage} chat={this.state.chat} />
                 </div>
             </div>
         )

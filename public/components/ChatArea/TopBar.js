@@ -7,11 +7,12 @@ import ManageUsers from '../Modal/ManageUsers'
 export default function TopBar(props) {
 
 	// Using group chatname from chat if groupchat. Else use the name from the user's table
-	let chatName = props.chat.group ? props.chat.name : props.user.chats.find(({id}) => id == props.chat.id).name
+	let chatName = props.chat.group ? props.chat.name : props.user.chats.find(({id}) => id == props.chat.id).name;
+	let role = props.chat.members.find(({id}) => id == props.user.id).role;
 
 	let handleAddUser = () => {
 	    const title = <span><i className='fas fa-user-plus'></i>  Add User</span>
-	    const body = <LeaveChat socket={props.socket} chat={props.chat}/>;
+	    const body = <AddUser socket={props.socket} chat={props.chat}/>;
 
 	    props.modal(title,body);
   	}
@@ -19,7 +20,8 @@ export default function TopBar(props) {
   	let handleLeaveChat = () => {
 		// console.log(props.chat.id);
 		
-		const title = <span><i className='fas fa-trash-alt'></i>  Leave {chatName}?</span>
+		
+		const title = <span><i className='fas fa-trash-alt'></i>  {role == 'member' ? 'Leave' : 'Delete'} {chatName}?</span>
 		const body = <LeaveChat socket={props.socket} chat={props.chat}/>;
 
 		props.modal(title,body);

@@ -23,11 +23,12 @@ export default class Controls extends Component {
     }
     
     render() {
+        const deadChat = !this.props.chat.group && this.props.chat.members.length <= 1;
         return (
             <div className={this.props.className} style={this.style}>
                 <form onSubmit={this.handleSubmit}>
                     <div className='input-group input-group-lg'>
-                        <input type="text" className='form-control' placeholder="Type a message..."/>
+                        <input type="text" className='form-control' placeholder={deadChat ? "Other user has left" : "Type a message..."} disabled={deadChat}/>
                         <div className='input-group-append'>
                             <button className='btn btn-primary btn-lg'><i className='fas fa-paper-plane'></i></button>
                             <button className='btn btn-outline-primary'><i className='fas fa-smile'></i></button>
