@@ -168,6 +168,25 @@ io.on('connect', socket => {
         }
     });
 
+    // Handle Message Edit
+    socket.on('messageEdit', ({chatID, userID, date, message}) => {
+        // Checking whether editing own message
+        if (userID == socket_userID){    
+            // Updating messages that match the date, userid of the chat
+            const query = {_id:mID(chatID), messages: {$elemMatch:{date: new Date(date),userID}}};
+            const update = {$set:{'messages.$.message':message}};
+            dbClient.collection('chats').findOneAndUpdate(query, update, {returnOriginal:false}, (err, res) => {
+                // If success, emit history of chat again so the message on client updates
+                res.value && io.to(chatID).emit('loadHistory', res.value.messages);
+            });
+        }   
+        else{
+            // Cannot Edit other messages
+            // Should not be able to anyway, Edit should only show for own messages
+            console.log('tried Editing other message');
+        }
+    });
+
     socket.on('reqHistory', id => {
         if(inDB){
             dbClient.collection('chats').findOne({_id:mID(id)}, (err, res) => {

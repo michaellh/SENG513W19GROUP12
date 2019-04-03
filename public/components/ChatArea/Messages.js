@@ -10,7 +10,12 @@ export default function Messages(props) {
 
     let handleDelete = (date, userID) => {
         props.socket.emit('messageDelete', {chatID : props.chat.id, userID, date})
+    }
 
+    let handleEdit = (date, userID) => {
+        // Message to be edited to
+        let message = 'boo';
+        props.socket.emit('messageEdit', {chatID : props.chat.id, userID, date, message})
     }
 
     const messages = props.messages.map((d,i) => {
@@ -30,6 +35,7 @@ export default function Messages(props) {
                     <button onClick={() => handleReact(d.date, d.userID, d.reactions,'like')}>Like</button>
                     <button onClick={() => handleReact(d.date, d.userID, d.reactions,'dislike')}>Dislike</button>
                     <button onClick={() => handleDelete(d.date, d.userID)}>delete</button>
+                    <button onClick={() => handleEdit(d.date, d.userID, d.message)}>Edit</button>
                 </div>
                  
             </div>
