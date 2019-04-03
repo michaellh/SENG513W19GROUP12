@@ -2,12 +2,12 @@ import React from 'react'
 
 export default function Chats(props) {
 
-    let chosen = props.chosenChat==null?"TestChat":props.chosenChat.name;
+    let chosen = props.chosenChat && props.chosenChat.id;
     // console.log(props);
     const chats = props.chats.map((d,i) => {
         return (
             //${d.group ? 'alert-info' : 'alert-secondary' }
-            <li key={i} className={`list-group-item ${chosen==d.name ? 'list-group-item-action active' : 'list-group-item-action' } `} 
+            <li key={i} className={`list-group-item ${chosen == d.id ? 'list-group-item-action active' : 'list-group-item-action' } `} 
                 onClick={() => {props.chooseChat(d)}}
                 >
                 {d.name}
