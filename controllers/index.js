@@ -1,9 +1,9 @@
-var accounts = require('./accounts')
+var users = require('./users')
 var server = require('./server')
 var socketPaths = require('./socketPaths')
 
 module.exports = {
-    createRoutes: accounts.createRoutes,
+    createRoutes: users.createRoutes,
     startListening: server.startListening,
     initialize: socketPaths.initialize
 }
