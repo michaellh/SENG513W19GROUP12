@@ -1,7 +1,7 @@
 import ReactDOM from 'react-dom';
 
 export default function createPopover(id, component, options) {
-    console.log('Hello');
+    // console.log('Hello');
     $(`#${id}`).popover({
         content: ' ',
         ...options
