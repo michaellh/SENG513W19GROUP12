@@ -10,7 +10,7 @@ export default function Friends(props) {
     return (
         <div className='row'>
             <div className='col-12'>
-                <ul className='list-group text-center'>
+                <ul className='list-group-flush text-center'>
                     {friends}
                 </ul>
             </div>

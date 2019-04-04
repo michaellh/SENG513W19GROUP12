@@ -8,7 +8,7 @@ export default function Chats(props) {
         return (
             //${d.group ? 'alert-info' : 'alert-secondary' }
             <li key={i} className={`list-group-item ${chosen == d.id ? 'list-group-item-action active' : 'list-group-item-action' } `} 
-                onClick={() => {props.chooseChat(d)}}
+                onClick={() => {console.log(d.group);props.chooseChat(d)}}
                 >
                 {d.name}
             </li>
@@ -18,7 +18,7 @@ export default function Chats(props) {
     return (
         <div className='row'>
             <div className='col-12'>
-                <ul className='list-group text-center'>
+                <ul className='list-group-flush text-center'>
                     {chats}
                 </ul>
             </div>

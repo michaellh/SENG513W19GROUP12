@@ -50,17 +50,30 @@ export default function TopBar(props) {
 	createPopover('chatAreaSearch', <SearchBar id='chatAreaSearch' filterMessages={props.filterMessages}/>, {placement:'bottom'});
 
 	return (
-		<div className='col-12 top-bar'>
-			<div className='row'>
-				<h4 className='col-10 text-center'>{chatName}</h4>
-				<div className='col-2 btn-group input-group-lg'>
-					<button className='btn btn-outline-primary' id='chatAreaSearch'><i className='fas fa-search'></i></button>
-					<button className='btn btn-outline-primary' onClick={handleManageUsers}><i className='fas fa-user-cog'></i></button>
-					<button className='btn btn-outline-primary' onClick={handleAddUser}><i className='fas fa-user-plus'></i></button>
-					<button className='btn btn-outline-primary' onClick={handleCustomize}><i className='fas fa-tools'></i></button>
-					<button className='btn btn-outline-primary' onClick={handleLeaveChat}><i className='fas fa-sign-out-alt'></i></button>
+		<div className='col-12 mb-2 mt-2'>
+			{
+				props.chat.group?
+				<div className='row'>
+					<h4 className='col-10 text-center'>{chatName}</h4>
+					<div className='col-2 btn-group input-group-lg'>
+						<button className='btn btn-outline-primary' id='chatAreaSearch'><i className='fas fa-search'></i></button>
+						<button className='btn btn-outline-primary' onClick={handleManageUsers}><i className='fas fa-user-cog'></i></button>
+						<button className='btn btn-outline-primary' onClick={handleAddUser}><i className='fas fa-user-plus'></i></button>
+						<button className='btn btn-outline-primary' onClick={handleCustomize}><i className='fas fa-tools'></i></button>
+						<button className='btn btn-outline-primary' onClick={handleLeaveChat}><i className='fas fa-sign-out-alt'></i></button>
+					</div>
 				</div>
-			</div>
+				:
+				<div className='row'>
+					<h4 className='col-10 text-center'>{chatName}</h4>
+					<div className='col-1'></div>
+					<div className='col-1 btn-group input-group-lg'>
+						<button className='btn btn-outline-primary' id='chatAreaSearch'><i className='fas fa-search'></i></button>
+						<button className='btn btn-outline-primary' onClick={handleCustomize}><i className='fas fa-tools'></i></button>
+						<button className='btn btn-outline-primary' onClick={handleLeaveChat}><i className='fas fa-sign-out-alt'></i></button>
+					</div>
+				</div>
+			}
 		</div>
 	)
 }
