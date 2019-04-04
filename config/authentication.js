@@ -8,15 +8,15 @@ module.exports.initPassport = function(dbClient) {
       usernameField: 'email'
     },
     function(email, password, done) {
-        dbClient.findOne({ email: email }, function(err, user) {
+        dbClient.collection('users').findOne({ email: email }, function(err, user) {
             if (err) { return done(err); }
             if (!user)
             {
-                return done(null, false, { message: 'Incorrect email.' });
+                return done(null, false, { message: 'The specified account does not exist.' });
             }
             validatePassword(password, user.password, function(err, res) {
                 if (!res){
-                return done(null, false, { message: 'Password is wrong'});
+                return done(null, false, { message: 'Incorrect password'});
                 }
                 // If credentials are correct, return the user object
                 return done(null, user);

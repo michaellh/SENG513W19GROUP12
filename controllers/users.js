@@ -18,7 +18,6 @@ module.exports = {
                     res.json("Error: Please choose a different email address.");
                     return;
                 }
-                console.log("hello");
                 if (!user) //Ensure user does not already exist
                 {
                     let saltRounds = constants.BCRYPT_SALT_ROUNDS; //CPU intensity varies greatly based on this value
