@@ -1,44 +1,64 @@
 var jwtExpress = require ('express-jwt');
 var passport = require ('passport');
 var constants = require('./constants');
+var jwt = require('jsonwebtoken');
 
 var bcrypt = require('bcrypt');
 
 module.exports = {
-    createRoutes: function (app) {
+    initRoutes: function (app, dbClient) {
         app.post('/createUser', function (req, res) {
-            accounts.getUserByEmail (req.body.email, function(err, user) {
+            dbClient.collection('users').findOne({ email: req.body.email }, function(err, user) {
                 if (err) {
                     res.status(404).json(err);
                     return;
                 }
-                if (user.rowLength == 1){
+                if (user)
+                {
                     res.json("Error: Please choose a different email address.");
                     return;
                 }
-                var saltRounds = 9; //CPU intensity varies greatly based on this value
-                bcrypt.hash(req.body.password, saltRounds, function(err, hash) {
-                    accounts.createUser(req.body.email, req.body.fname, req.body.lname, hash, req.body.birthday, constants.ADMIN_USER_TYPE, function(err) {
-                        if (err) {
-                            console.log(err);
-                            res.json(err);
-                        } else {
-                            var token = jwt.sign({
-                                                    email: req.body.email,
-                                                    fname: req.body.fname,
-                                                    lname: req.body.lname },
-                                                   constants.JSON_KEY,
-                                                    {
-                                                        expiresIn: constants.USER_TIMEOUT
-                                                    }
-                                                ); //expire in 30 mins
-                            res.status(200).json({
-                                                    auth_token: token,
-                                                    timeout: constants.USER_TIMEOUT
-                                                });
+                console.log("hello");
+                if (!user) //Ensure user does not already exist
+                {
+                    let saltRounds = constants.BCRYPT_SALT_ROUNDS; //CPU intensity varies greatly based on this value
+                    bcrypt.hash(req.body.password, saltRounds, function(err, hash) {
+                        // Enroll new user
+                        const userObject = {
+                            name: req.body.socket_username,
+                            socketID: req.body.socket_id,
+                            email: req.body.email,
+                            password: hash,
+                            fname: req.body.fname,
+                            lname: req.body.lname,
+                            chats: [],
+                            friends: [],
                         }
+                        dbClient.collection('users').insertOne(userObject, (err, result) => {
+                            // let user = res.ops[0];
+                            // socket_userID = user._id;
+                            // frontEndID(user);
+                            // socket.emit('userInfo', user);
+                            if (err) {
+                                console.log(err);
+                                res.json(err);
+                            } else {
+                                let token = jwt.sign({
+                                                        email: req.body.email,
+                                                        name: req.body.socket_username },
+                                                       constants.JSON_KEY,
+                                                        {
+                                                            expiresIn: constants.USER_TIMEOUT
+                                                        }
+                                                    ); //expire in 30 mins
+                                res.status(200).json({
+                                                        auth_token: token,
+                                                        timeout: constants.USER_TIMEOUT
+                                                    });
+                            }
+                        });
                     });
-                });
+                }
             });
         });
 
@@ -51,10 +71,10 @@ module.exports = {
                 // If a user is found
                 if(user){
                     res.status(200);
-                    var token = jwt.sign({
+                    let token = jwt.sign({
                                             email: user.email,
-                                            fname: user.fname,
-                                            lname: user.lname },
+                                            name: user.socket_username
+                                         },
                                            constants.JSON_KEY,
                                             {
                                                 expiresIn: constants.USER_TIMEOUT
@@ -78,9 +98,9 @@ module.exports = {
         });
 
         app.use(function (err, req, res, next) {
-        if (err.name === 'UnauthorizedError') {
-            res.status(401).send('Invalid Token Sent');
-        }
+            if (err.name === 'UnauthorizedError') {
+                res.status(401).send('Invalid Token Sent');
+            }
         });
     }
 }

@@ -1,1 +1,5 @@
-exports.authentication = require('./authentication');
+var auth = require('./authentication');
+
+module.exports = {
+    initPassport: auth.initPassport
+}

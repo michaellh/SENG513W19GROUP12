@@ -3,7 +3,7 @@ var server = require('./server')
 var socketPaths = require('./socketPaths')
 
 module.exports = {
-    createRoutes: users.createRoutes,
+    initRoutes: users.initRoutes,
     startListening: server.startListening,
     initialize: socketPaths.initialize
 }
