@@ -8,12 +8,16 @@ export default class ChatArea extends Component {
     constructor(props) {
         super(props)
 
+        this.messages = [];
+        
         this.state = {
             chat: props.chat,
-            messages:[]
+            messages:[],
+            searchTerm:'',
         };
 
         this.onMessage = this.onMessage.bind(this);
+        this.filterMessages = this.filterMessages.bind(this);
 
         this.props.socket.emit('reqHistory', this.props.chat.id);
 
@@ -26,7 +30,9 @@ export default class ChatArea extends Component {
         props.socket.on('loadHistory', messages => {
             // console.log(msg);
             messages.forEach(d => d.date = new Date(d.date));
+            this.messages = messages;
             this.setState({messages});
+            this.filterMessages(this.state.searchTerm);
         });        
     }
 
@@ -42,6 +48,12 @@ export default class ChatArea extends Component {
         const {id:userID, name:userName} =this.props.user;
         this.props.socket.emit('message', {chat : this.props.chat, msg : {userID, userName, message}});
         // this.setState({messages : [...this.state.messages, message]});
+    }
+
+    filterMessages(searchTerm){
+        this.setState({searchTerm});
+        let messages = this.messages.filter(d => d.message.includes(searchTerm));
+        this.setState({messages});
     }
 
     render() {
