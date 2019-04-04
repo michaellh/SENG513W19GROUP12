@@ -1,4 +1,3 @@
-var accounts = require('../models/accounts');
 var jwtExpress = require ('express-jwt');
 var passport = require ('passport');
 var constants = require('./constants');
