@@ -38,5 +38,4 @@ mongoClient.connect(uri, (err, client) => {
 //     app.emit('db ready');
 // });
 
-
 // Object.keys(io.sockets.sockets).forEach(d => {

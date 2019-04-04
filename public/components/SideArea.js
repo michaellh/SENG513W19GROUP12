@@ -8,35 +8,57 @@ export default class SideArea extends Component {
     constructor(props) {
         super(props)
         
-        this.chats = ['Chat1', 'Chat2'];
-        this.friends = ['Friend1', 'Friend2', 'Friend3'];
+        this.chats = [];
+        this.friends = [];
 
         this.state = {
             mode : 'chats',
             chats: this.chats,
             friends: this.friends,
+            searchTerm: '',
         }
 
         this.updateMode = this.updateMode.bind(this);
         this.filterResult = this.filterResult.bind(this);
-        this.deleteChat = this.deleteChat.bind(this);
         // console.log(this.props);
 
-        props.socket.on('startInfo', ({chats, friends}) => {
-            this.setState({chats});
-            this.setState({friends});
-            // props.chooseChat(this.state.chats[0]);
+        props.socket.on('chatlist', chats => {
+            // Updating the user object
+            let user = {...this.props.user};
+            user.chats = chats;
+            this.props.updateUser(user);
+            // ComponentWillReceiveProps will update everything
         });
+
+
+        props.socket.on('friendlist', friends => {
+            // Updating the user object
+            let user = {...this.props.user};
+            user.friends = friends;
+            this.props.updateUser(user);
+            // ComponentWillReceiveProps will update everything
+        });
+    }
+
+    componentWillReceiveProps(newProp){
+        const {chats, friends} = newProp.user;
+        this.chats = chats;
+        this.friends = friends;
+        this.setState({chats, friends});
+
+        // apply back filter
+        this.filterResult(this.state.searchTerm);
     }
 
     updateMode(mode){
         this.setState({mode:mode});
     }
     
-    filterResult(term){
+    filterResult(searchTerm){
+        this.setState({searchTerm});
         let currentMode = this.state.mode;
-        let list = currentMode == 'chats' ? this.state.chats : this.state.friends;
-        let filteredResult = list.filter(d => d.name.includes(term));
+        let list = currentMode == 'chats' ? this.chats : this.friends;
+        let filteredResult = list.filter(d => d.name.includes(searchTerm));
         
         if(currentMode == 'chats'){
             this.setState({chats:filteredResult});
@@ -47,23 +69,15 @@ export default class SideArea extends Component {
 
     }
 
-    deleteChat(chat){
-        this.props.socket.emit('deleteChat', chat);
-    }
-
     render() {
-        const style = {
-            border: '2px solid black',
-            height: '100%'
-        }
         return (
-            <div className={this.props.className} style={style}>
-                <TopBar />
-                <SideControl updateMode={this.updateMode} filterResult={this.filterResult} modal={this.props.modal} socket={this.props.socket} />
+            <div className={this.props.className} id={this.props.id}>
+                <TopBar modal={this.props.modal}/>
+                <SideControl updateMode={this.updateMode} filterResult={this.filterResult} modal={this.props.modal} socket={this.props.socket} mode={this.state.mode}/>
                 <br />
                 {
                     this.state.mode == 'chats' ? 
-                    (<Chats chats={this.state.chats} chooseChat={this.props.chooseChat} deleteChat={this.deleteChat}/>) :
+                    (<Chats chats={this.state.chats} chooseChat={this.props.chooseChat} chosenChat={this.props.chosenChat} deleteChat={this.deleteChat}/>) :
                     (<Friends friends={this.state.friends} />)
                 }
             </div>

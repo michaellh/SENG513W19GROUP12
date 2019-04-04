@@ -3,13 +3,14 @@ import AddChat from '../Modal/AddChat';
 
 export default function SideControl(props) {
 
-
     let friendMode = () => {
         props.updateMode('friends');
+        console.log(props.mode);
     }
 
     let chatMode = () => {
         props.updateMode('chats')
+        console.log(props.mode);
     }
 
     let handleSearch = (e) => {
@@ -18,27 +19,8 @@ export default function SideControl(props) {
 
     // Add Modal
     let handleAdd = () => {
-
         
-        // const body = (
-            // <div>
-            //     <div onClick={() => {single = !single; this.forceUpdate()}}>Toggle</div>
-            //     {
-            //         single ?
-            //         <div>
-            //             <h6>User Name</h6>
-            //             <input type='text' className='form-control' autoFocus={true}></input>
-            //         </div> 
-            //         :
-            //         <div>
-            //             <h6>Chat Name</h6>
-            //             <input type='text' className='form-control' autoFocus={true}></input>
-            //         </div>
-            //     }s
-            // </div>
-        // );
-        
-        const title = 'Add Chat'
+        const title = <span><i className='fas fa-plus-circle'></i>  Add Chat</span>
         const body = <AddChat socket={props.socket}/>;
 
         props.modal(title,body);
@@ -46,17 +28,29 @@ export default function SideControl(props) {
     
     return (
         <div className='row'>
-            <div className='col'>
-                <button className='btn btn-primary' onClick={friendMode} >Friends</button>
-            </div>
-            <div className='col'>
-                <button className='btn btn-secondary' onClick={chatMode} >Chats</button>
+            {
+                props.mode=="friends"?
+
+                <div className='col-12 btn-group'>
+                    <button className='btn btn-primary' onClick={friendMode} ><i className='fas fa-user-friends'></i>  Friends</button>
+                    <button className='btn btn-outline-primary' onClick={chatMode} >Chats  <i className='fas fa-comments'></i></button>
+                </div>
+                :
+                <div className='col-12 btn-group'>
+                    <button className='btn btn-outline-primary' onClick={friendMode} ><i className='fas fa-user-friends'></i>  Friends</button>
+                    <button className='btn btn-primary' onClick={chatMode} >Chats  <i className='fas fa-comments'></i></button>
+                </div>
+            }
+            <div className='col-12'>
+                <div className='input-group'>
+                    <input type='text' className='form-control' placeholder="Search..." onChange={handleSearch} />
+                    <div className='input-group-append'>
+                        <span className="input-group-text"><i className='fas fa-search'></i></span>
+                    </div>
+                </div>
             </div>
             <div className='col-12'>
-                <input type='text' className='form-control' onChange={handleSearch} />
-            </div>
-            <div className='col-12'>
-                <button className='btn btn-danger btn-block' onClick={handleAdd} >Add</button>
+                <button className='btn btn-outline-primary btn-block' onClick={handleAdd} ><i className='fas fa-plus-circle'></i>  Add</button>
             </div>
         </div>
     )

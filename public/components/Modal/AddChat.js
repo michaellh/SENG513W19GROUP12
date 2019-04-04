@@ -15,17 +15,14 @@ export default class AddChat extends Component {
 
         // When animation finished, and modal closed, reset state
         $('#myModal').on('hidden.bs.modal', (e) => {
-            this.setState({
-                mode : false,
-                text:'',
-            })
+            this.setState({mode : false});
         });
     }
 
     handleClick(e) {
         e.preventDefault();
         console.log(e.target.value);
-        this.setState({mode: e.target.value});
+        this.setState({mode: e.target.value, text:''});
     }
 
     handleText(e) {
@@ -68,18 +65,18 @@ export default class AddChat extends Component {
                             // Adding User
                             <div>
                                 <h6>User Name</h6>
-                                <input type='text' className='form-control' autoFocus={true} onChange={this.handleText}></input>
+                                <input type='text' className='form-control' autoFocus={true} onChange={this.handleText} value={this.state.text}></input>
                             </div> 
                             :
                             // Adding Group
                             <div>
                                 <h6>Chat Name</h6>
-                                <input type='text' className='form-control' autoFocus={true} onChange={this.handleText}></input>
+                                <input type='text' className='form-control' autoFocus={true} onChange={this.handleText} value={this.state.text}></input>
                             </div>
                         }
                     </div>
                     <div className="modal-footer">
-                        <button type="submit" className="btn btn-secondary" data-dismiss="modal" onClick={this.handleSubmit}>Okay</button>
+                        <button type="submit" className="btn btn-primary" data-dismiss="modal" onClick={this.handleSubmit}>Okay</button>
                     </div>
                 </form>
         )

@@ -153,6 +153,37 @@ module.exports = {
             //
             // chat renames
             //
+            // Function to rename chat table of user
+            function renameUserChatTable(chatID, userID, chatName){
+                // Updating User Own Chat table
+                const query = {_id:mID(userID), 'chats.id': mID(chatID)};
+                const update = {$set:{'chats.$.name':chatName}};
+                dbClient.collection('users').findOneAndUpdate(query, update, {returnOriginal:false}, (err, res) => {
+                    // console.log(res.value);
+                    user = res.value;
+                    // If success, emit chatlist to user.
+                    io.to(user.socketID).emit('chatlist', user.chats);
+                });
+            }
+            // Rename chat
+            socket.on('renameChat', ({chat,name}) => {
+                console.log(chat, name);
+                if (chat.group){
+                    // Updating Chats table name
+                    const query = {_id:mID(chat.id)};
+                    const update = {$set:{name}};
+                    dbClient.collection('chats').findOneAndUpdate(query, update, {returnOriginal:false}, (err, res) => {
+                        // For each member of the group, also update their individual chat tables
+                        res.value.members.forEach(member => {
+                            // console.log(member);
+                            renameUserChatTable(chat.id, member.id, name);
+                        });
+                    });
+                }
+                else{
+                    renameUserChatTable(chat.id, socket_userID, name);
+                }
+            })
 
             socket.on('reqHistory', id => {
                 if(inDB){
@@ -382,5 +413,6 @@ module.exports = {
             });
 
         });
+
     }
 }

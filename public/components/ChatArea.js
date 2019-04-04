@@ -8,28 +8,31 @@ export default class ChatArea extends Component {
     constructor(props) {
         super(props)
 
+        this.messages = [];
+        
         this.state = {
             chat: props.chat,
-            messages:[]
-        };
-        
-        this.style = {
-            height: '100%',
-            border: '2px solid black'
+            messages:[],
+            searchTerm:'',
         };
 
         this.onMessage = this.onMessage.bind(this);
+        this.filterMessages = this.filterMessages.bind(this);
 
-        // props.socket.emit('reqHistory', props.chat.name);
+        this.props.socket.emit('reqHistory', this.props.chat.id);
 
         props.socket.on('message', msg => {
             // console.log(msg);
+            msg.date = new Date(msg.date);
             this.setState({messages : [...this.state.messages, msg]});
         });
 
-        props.socket.on('loadHistory', msg => {
+        props.socket.on('loadHistory', messages => {
             // console.log(msg);
-            this.setState({messages : msg});
+            messages.forEach(d => d.date = new Date(d.date));
+            this.messages = messages;
+            this.setState({messages});
+            this.filterMessages(this.state.searchTerm);
         });        
     }
 
@@ -42,18 +45,23 @@ export default class ChatArea extends Component {
     }
 
     onMessage(message){
-        this.props.socket.emit('message', {chat : this.props.chat, msg : {user: this.props.user, message}});
+        const {id:userID, name:userName} =this.props.user;
+        this.props.socket.emit('message', {chat : this.props.chat, msg : {userID, userName, message}});
         // this.setState({messages : [...this.state.messages, message]});
+    }
+
+    filterMessages(searchTerm){
+        this.setState({searchTerm});
+        let messages = this.messages.filter(d => d.message.includes(searchTerm));
+        this.setState({messages});
     }
 
     render() {
         return (
-            <div className={this.props.className}>
-                <div className='row' style={this.style}>
-                    <TopBar className='col-12 align-self-start' name={this.state.chat.name}/>
-                    <Messages className='col-12 align-self-start' messages={this.state.messages} user={this.props.user} />
-                    <Controls className='col-12 align-self-end' onMessage={this.onMessage} />
-                </div>
+            <div className={this.props.className} id={this.props.id}>
+                    <TopBar className='row' chat={this.state.chat} user={this.props.user} socket={this.props.socket} modal={this.props.modal} filterMessages={this.filterMessages}/>
+                    <Messages className='row' messages={this.state.messages} chat={this.state.chat} user={this.props.user} socket={this.props.socket} id='messages'/>
+                    <Controls className='row' onMessage={this.onMessage} chat={this.state.chat} />
             </div>
         )
     }

@@ -1,33 +1,14 @@
 import React, { Component } from 'react'
 
-export default class ManageUsers extends Component {
-    constructor(props) {
-        super(props)
+export default function ManageUser(props) {
 
-        this.handleSubmit = this.handleSubmit.bind(this);
-
-        // When animation finished, and modal closed, reset state
-        $('#myModal').on('show.bs.modal', (e) => {
-            this.setState({
-                text:'',
-            })
-        });
-    }
-
-
-    handleSubmit(e) {
-        //props.socket.emit('leaveChat', props.chat.id);
+    let handleClick = (e) => {
     }
     
-    render() {
-        return (
-                // Add User Mode
-                <form style={{margin:0,padding:0}}>
-                    <div className="modal-footer">
-                        <button type="submit" className="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                        <button type="submit" className="btn btn-danger" data-dismiss="modal" onClick={this.handleSubmit}>Okay</button>
-                    </div>
-                </form>
-        )
-    }
+    return (
+        <div className="modal-footer">
+            <button className="btn btn-secondary" data-dismiss="modal">Cancel</button>
+            <button className="btn btn-danger" data-dismiss="modal" onClick={handleClick}>Okay</button>
+        </div>
+    )
 }
