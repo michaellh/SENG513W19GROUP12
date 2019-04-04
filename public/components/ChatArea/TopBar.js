@@ -3,6 +3,8 @@ import AddUser from '../Modal/AddUser';
 import LeaveChat from '../Modal/LeaveChat'
 import Customize from '../Modal/Customize'
 import ManageUsers from '../Modal/ManageUsers'
+import SearchBar from '../Popover/SearchBar';
+import createPopover from '../Popover';
 
 export default function TopBar(props) {
 
@@ -45,6 +47,7 @@ export default function TopBar(props) {
 		props.modal(title,body);
   	}
 
+	createPopover('chatAreaSearch', <SearchBar id='chatAreaSearch' filterMessages={props.filterMessages}/>, {placement:'bottom'});
 
 	return (
 		<div className='col-12 top-bar'>
@@ -52,7 +55,7 @@ export default function TopBar(props) {
 				<h4 className='col-10 text-center'>{chatName}</h4>
 				<div className='col-2 btn-group input-group-lg'>
 					<button className='btn btn-outline-primary' onClick={handleLeaveChat}><i className='fas fa-trash-alt'></i></button>
-					<button className='btn btn-outline-primary'><i className='fas fa-search'></i></button>
+					<button className='btn btn-outline-primary' id='chatAreaSearch'><i className='fas fa-search'></i></button>
 					<button className='btn btn-outline-primary' onClick={handleManageUsers}><i className='fas fa-user-cog'></i></button>
 					<button className='btn btn-outline-primary' onClick={handleAddUser}><i className='fas fa-user-plus'></i></button>
 					<button className='btn btn-outline-primary' onClick={handleCustomize}><i className='fas fa-tools'></i></button>
