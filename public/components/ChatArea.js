@@ -59,7 +59,7 @@ export default class ChatArea extends Component {
     render() {
         return (
             <div className={this.props.className} id={this.props.id}>
-                    <TopBar className='row' chat={this.state.chat} user={this.props.user} socket={this.props.socket} modal={this.props.modal}/>
+                    <TopBar className='row' chat={this.state.chat} user={this.props.user} socket={this.props.socket} modal={this.props.modal} filterMessages={this.filterMessages}/>
                     <Messages className='row' messages={this.state.messages} chat={this.state.chat} user={this.props.user} socket={this.props.socket} id='messages'/>
                     <Controls className='row' onMessage={this.onMessage} chat={this.state.chat} />
             </div>
