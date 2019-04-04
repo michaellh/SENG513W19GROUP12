@@ -21,7 +21,7 @@ export default function Messages(props) {
     const messages = props.messages.map((d,i) => {
         return (
             <div key={i} style={{textAlign: d.userID == props.user.id  ? 'right':'left'}}>
-                <div className='alert alert-primary'>
+                <div className='alert alert-primary m-2'>
                     [{fmtDate(d.date)}] {d.userName}: {d.message}
                     {
                         // SHow reaction div if there is a reaction
@@ -36,14 +36,15 @@ export default function Messages(props) {
                     <button onClick={() => handleReact(d.date, d.userID, d.reactions,'dislike')}>Dislike</button>
                     <button onClick={() => handleDelete(d.date, d.userID)}>delete</button>
                     <button onClick={() => handleEdit(d.date, d.userID, d.message)}>Edit</button>
-                </div>
-                 
+                </div>                
             </div>
         )
     })
     return (
         <div className={props.className} id={props.id}>
-            {messages}
+            <div className='col-12'>
+                {messages}
+            </div>
         </div>
     )
 }

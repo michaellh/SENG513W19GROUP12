@@ -43,10 +43,10 @@ export default function SideControl(props) {
             }
             <div className='col-12'>
                 <div className='input-group'>
-                    <div className='input-group-prepend'>
+                    <input type='text' className='form-control' placeholder="Search..." onChange={handleSearch} />
+                    <div className='input-group-append'>
                         <span className="input-group-text"><i className='fas fa-search'></i></span>
                     </div>
-                    <input type='text' className='form-control' placeholder="Search..." onChange={handleSearch} />
                 </div>
             </div>
             <div className='col-12'>

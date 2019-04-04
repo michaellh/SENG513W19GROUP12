@@ -45,18 +45,25 @@ export default function TopBar(props) {
 		props.modal(title,body);
   	}
 
+  	let handleSearch = (e) => {
+        //props.filterResult(e.target.value);
+    }
+
 
 	return (
-		<div className='col-12 top-bar'>
-			<div className='row'>
-				<h4 className='col-10 text-center'>{chatName}</h4>
-				<div className='col-2 btn-group input-group-lg'>
-					<button className='btn btn-outline-primary' onClick={handleLeaveChat}><i className='fas fa-trash-alt'></i></button>
-					<button className='btn btn-outline-primary'><i className='fas fa-search'></i></button>
-					<button className='btn btn-outline-primary' onClick={handleManageUsers}><i className='fas fa-user-cog'></i></button>
-					<button className='btn btn-outline-primary' onClick={handleAddUser}><i className='fas fa-user-plus'></i></button>
-					<button className='btn btn-outline-primary' onClick={handleCustomize}><i className='fas fa-tools'></i></button>
-				</div>
+		<div className='row mb-2 mt-2'>
+			<div className='col-9'>
+				<h4 className='text-center'>{chatName}</h4>
+			</div>
+			<div className='col-3 btn-group'>
+	            <input type='text' className='form-control' placeholder="Search chat history..." onChange={handleSearch}/>
+				<div className='input-group-append'>
+	                <span className="input-group-text"><i className='fas fa-search'></i></span>
+	            </div>
+				<button className='btn btn-outline-primary' onClick={handleManageUsers}><i className='fas fa-user-cog'></i></button>
+				<button className='btn btn-outline-primary' onClick={handleAddUser}><i className='fas fa-user-plus'></i></button>
+				<button className='btn btn-outline-primary' onClick={handleCustomize}><i className='fas fa-tools'></i></button>
+				<button className='btn btn-outline-primary' onClick={handleLeaveChat}><i className='fas fa-sign-out-alt'></i></button>
 			</div>
 		</div>
 	)

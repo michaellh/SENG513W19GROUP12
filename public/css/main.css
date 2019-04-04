@@ -24,14 +24,6 @@ html, body {
 }
 
 #messages {
-    overflow: auto; 
-    position: fixed; 
-    bottom: 75px; 
-    width: 83%;
-    max-height: 85%;
     border: solid #d9d9d9 0.5px;
 }
 
-#messages div{
-    margin: 8px 0px 8px 0px; 
-}
