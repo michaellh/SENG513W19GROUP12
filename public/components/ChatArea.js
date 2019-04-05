@@ -52,7 +52,7 @@ export default class ChatArea extends Component {
 
     filterMessages(searchTerm){
         this.setState({searchTerm});
-        let messages = this.messages.filter(d => d.message.includes(searchTerm));
+        let messages = this.messages.filter(d => d.message.includes(searchTerm))
         this.setState({messages});
     }
 
@@ -60,7 +60,7 @@ export default class ChatArea extends Component {
         return (
             <div className={this.props.className} id={this.props.id}>
                     <TopBar className='row' chat={this.state.chat} user={this.props.user} socket={this.props.socket} modal={this.props.modal} filterMessages={this.filterMessages}/>
-                    <Messages className='row' messages={this.state.messages} chat={this.state.chat} user={this.props.user} socket={this.props.socket} id='messages'/>
+                    <Messages className='row' messages={this.state.messages} chat={this.state.chat} user={this.props.user} socket={this.props.socket} searchTerm={this.state.searchTerm} id='messages'/>
                     <Controls className='row' onMessage={this.onMessage} chat={this.state.chat} />
             </div>
         )

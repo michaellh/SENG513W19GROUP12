@@ -4,7 +4,7 @@ import LeaveChat from '../Modal/LeaveChat'
 import Customize from '../Modal/Customize'
 import ManageUsers from '../Modal/ManageUsers'
 import SearchBar from '../Popover/SearchBar';
-import createPopover from '../Popover';
+import { UncontrolledPopover } from 'reactstrap';
 
 export default function TopBar(props) {
 
@@ -47,8 +47,6 @@ export default function TopBar(props) {
 		props.modal(title,body);
   	}
 
-	createPopover('chatAreaSearch', <SearchBar id='chatAreaSearch' filterMessages={props.filterMessages}/>, {placement:'bottom'});
-
 	return (
 		<div className='col-12 mb-2 mt-2'>
 			{
@@ -62,6 +60,9 @@ export default function TopBar(props) {
 						<button className='btn btn-outline-primary' onClick={handleCustomize}><i className='fas fa-tools'></i></button>
 						<button className='btn btn-outline-primary' onClick={handleLeaveChat}><i className='fas fa-sign-out-alt'></i></button>
 					</div>
+					<UncontrolledPopover placement="left" target="chatAreaSearch">
+						<SearchBar id='chatAreaSearch' filterMessages={props.filterMessages}/>
+					</UncontrolledPopover>
 				</div>
 				:
 				<div className='row'>
@@ -72,6 +73,9 @@ export default function TopBar(props) {
 						<button className='btn btn-outline-primary' onClick={handleCustomize}><i className='fas fa-tools'></i></button>
 						<button className='btn btn-outline-primary' onClick={handleLeaveChat}><i className='fas fa-sign-out-alt'></i></button>
 					</div>
+					<UncontrolledPopover placement="left" target="chatAreaSearch">
+						<SearchBar id='chatAreaSearch' filterMessages={props.filterMessages}/>
+					</UncontrolledPopover>
 				</div>
 			}
 		</div>
