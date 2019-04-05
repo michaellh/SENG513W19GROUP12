@@ -144,15 +144,24 @@ module.exports = {
             // chat renames
             //
             // Function to rename chat table of user
-            function renameUserChatTable(chatID, userID, chatName){
+            function renameUserChatTable(chatID, userID, chatName, chat){
                 // Updating User Own Chat table
                 const query = {_id:mID(userID), 'chats.id': mID(chatID)};
                 const update = {$set:{'chats.$.name':chatName}};
                 dbClient.collection('users').findOneAndUpdate(query, update, {returnOriginal:false}, (err, res) => {
                     // console.log(res.value);
-                    user = res.value;
+                    let user = res.value;
                     // If success, emit chatlist to user.
                     io.to(user.socketID).emit('chatlist', user.chats);
+                    // Tell them to update chat Info
+                    dbClient.collection('chats').findOne({_id:mID(chatID)}, (err, res) => {
+                        // console.log(res);
+                        let chatInfo = res;
+                        frontEndID(chatInfo);
+                        // Removing extra unecessary stuff;
+                        delete chatInfo.messages;
+                        io.to(user.socketID).emit('chatInfoUpdate',chatInfo);
+                    });
                 });
             }
             // Rename chat
@@ -166,7 +175,7 @@ module.exports = {
                         // For each member of the group, also update their individual chat tables
                         res.value.members.forEach(member => {
                             // console.log(member);
-                            renameUserChatTable(chat.id, member.id, name);
+                            renameUserChatTable(chat.id, member.id, name, res.value);
                         });
                     });
                 }
@@ -345,23 +354,33 @@ module.exports = {
 
             // Leave Chat Function
             function leaveChat(chatID,id){
-
-                dbClient.collection('chats').updateOne({_id:mID(chatID)},{$pull : {members: {id}}});
+                // Updating the user Chat Table
                 dbClient.collection('users').findOneAndUpdate({_id:mID(id)},{$pull : {chats: {id : mID(chatID)}}}, {returnOriginal:false}, (err, res) => {
                     // console.log('Removed from User', res.value.chats);
                     let user = res.value;
                     // Let the chat know that this user has left
-                    const message = {
-                        date: new Date(),
-                        userID: 1, //Just arbirary assignment of userID 1 for server
-                        userName: 'Server',
-                        message: `${user.name} has left the chat`,
-                    }
-                    io.to(chatID).emit('message', message);
+                    // Optional Server Left Message
+                    // const message = {
+                    //     date: new Date(),
+                    //     userID: 1, //Just arbirary assignment of userID 1 for server
+                    //     userName: 'Server',
+                    //     message: `${user.name} has left the chat`,
+                    // }
+                    // io.to(chatID).emit('message', message);
                     // Tell user to reset chat
                     io.to(user.socketID).emit('resetChat', chatID);
                     // Sending message only to that person that was removed
                     io.to(user.socketID).emit('chatlist', user.chats);
+                });
+                // Updating the chat table member list
+                dbClient.collection('chats').findOneAndUpdate({_id:mID(chatID)},{$pull : {members: {id}}}, {returnOriginal:false}, (err, res) => {
+                    // console.log(res);
+                    let chatInfo = res.value;
+                    frontEndID(chatInfo);
+                    // Removing extra unecessary stuff;
+                    delete chatInfo.messages;
+                    // Telling everyone in chatroom new chat info
+                    io.to(chatID).emit('chatInfoUpdate',chatInfo);
                 });
             }
 

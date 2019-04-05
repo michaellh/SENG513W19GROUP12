@@ -18,8 +18,8 @@ export default class Container extends Component {
         this.updateUser = this.updateUser.bind(this);
         
         // 
-        // this.socket = io("http://localhost:3000");
-        this.socket = io();
+        this.socket = io("http://localhost:3000");
+        // this.socket = io();
         // Debuging function
         this.socket.on('debug', message => console.log('DEBUG', message));
         this.socket.emit('debug', 'sendback("Hello")');
@@ -32,6 +32,13 @@ export default class Container extends Component {
         this.socket.on('chatInfo', chat => {
             this.setState({chat});
             //console.log(chat);
+        });
+
+        this.socket.on('chatInfoUpdate', chat => {
+            // Updating chat Info for delete chat, and chat renames
+            if (this.state.chat && this.state.chat.id == chat.id){
+                this.setState({chat});
+            }
         });
 
         this.socket.on('resetChat', chatID => {
@@ -51,11 +58,11 @@ export default class Container extends Component {
     }
 
     chooseChat(chat){
-        console.log(chat);
+        // console.log(chat);
         this.state.chat && this.socket.emit('leaveRoom', this.state.chat);
         this.socket.emit('reqChatInfo', chat.id);
         this.socket.emit('joinRoom', chat);
-        console.log(this.state.chat);
+        // console.log(this.state.chat);
         // this.setState({chat: chat});
         // console.log(chat);
     }
