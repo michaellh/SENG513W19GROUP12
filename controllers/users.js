@@ -2,8 +2,9 @@ var jwtExpress = require ('express-jwt');
 var passport = require ('passport');
 var constants = require('./constants');
 var jwt = require('jsonwebtoken');
-
+var crypto = require('crypto');
 var bcrypt = require('bcrypt');
+var nodemailer = require('nodemailer');
 
 module.exports = {
     initRoutes: function (app, dbClient) {
@@ -23,7 +24,7 @@ module.exports = {
                     let saltRounds = constants.BCRYPT_SALT_ROUNDS; //CPU intensity varies greatly based on this value
                     bcrypt.hash(req.body.password, saltRounds, function(err, hash) {
                         // Enroll new user
-                        const userObject = {
+                        let userObject = {
                             name: req.body.socket_username,
                             socketID: req.body.socket_id,
                             email: req.body.email,
@@ -91,6 +92,59 @@ module.exports = {
             })(req,res);
         });
 
+        app.post('/forgot', function(req, res, next) {
+            dbClient.collection('users').findOne({ email: req.body.email }, function(err, user) {
+                if (err) {
+                    res.status(404).json(err);
+                    return;
+                }
+                if (!user) //Ensure user does not already exist
+                {
+                    res.json("Error: No account with that e-mail exists!");
+                    return;
+                }
+                else
+                {
+                    crypto.randomBytes(20, function(err, buf) {
+                        if (err) {
+                            res.status(404).json(err);
+                            return;
+                        }
+                        else {
+                            var token = buf.toString('hex');
+                            user.resetPasswordToken = token;
+                            user.resetPasswordExpires = Date.now() + 3600000;
+                            dbClient.collection('users').replaceOne({ email: user.email }, user, sendPasswordReset(req, res, user));
+                        }
+                    });
+                }
+            });
+        });
+
+        app.post('/reset/:token', function(req, res) {
+            dbClient.collection('users').findOne({ email: req.body.email, resetPasswordToken: req.params.token }, function(err, user) {
+                if (err) {
+                    res.status(404).json(err);
+                    return;
+                }
+                if (!user) //Ensure user does not already exist
+                {
+                    res.json("Error: Incorrect email and reset token combination!");
+                    return;
+                }
+                else
+                {
+                    let saltRounds = constants.BCRYPT_SALT_ROUNDS; //CPU intensity varies greatly based on this value
+                    bcrypt.hash(req.body.password, saltRounds, function(err, hash) {
+                        user.password = hash;
+                        user.resetPasswordToken = undefined;
+                        user.resetPasswordExpires = undefined;
+                        dbClient.collection('users').replaceOne({ email: user.email }, user, notifyPasswordChange(req, res, user));
+                    });
+                }
+            });
+        });
+
         app.get('/protected', jwtExpress({secret: constants.JSON_KEY}), function(req, res){
                 if (!req.user.admin) return res.sendStatus(401);
                 res.sendStatus(200);
@@ -102,4 +156,58 @@ module.exports = {
             }
         });
     }
+}
+
+function sendPasswordReset(req, res, user) {
+        let smtpTransport = nodemailer.createTransport({
+          service: 'SendGrid',
+          auth: {
+            api_key: constants.SEND_GRID_API_KEY
+          }
+        });
+        let mailOptions = {
+          to: user.email,
+          from: 'passwordreset@NetChatter.com',
+          subject: 'Net Chatter Password Reset',
+          text: 'You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\n' +
+            'Please click on the following link, or paste this into your browser to complete the process:\n\n' +
+            'http://' + req.headers.host + '/reset/' + user.resetPasswordToken + '\n\n' +
+            'If you did not request this, please ignore this email and your password will remain unchanged.\n'
+        };
+        smtpTransport.sendMail(mailOptions, function(err) {
+            if (err) {
+                console.log("Error! Unable to send out reset email: " + err)
+            }
+            else {
+                res.sendStatus(200).json({
+                    email: user.email
+                });
+            }
+        });
+}
+
+function notifyPasswordChange(req, res, user) {
+        let smtpTransport = nodemailer.createTransport('SMTP', {
+          service: 'SendGrid',
+          auth: {
+              api_key: constants.SEND_GRID_API_KEY
+          }
+        });
+        let mailOptions = {
+          to: user.email,
+          from: 'passwordreset@NetChatter.com',
+          subject: 'Your password has been changed',
+          text: 'Hello,\n\n' +
+            'This is a confirmation that the password for your account ' + user.email + ' has just been changed.\n'
+        };
+        smtpTransport.sendMail(mailOptions, function(err) {
+            if (err) {
+                console.log("Error! Unable to send out password change email: " + err)
+            }
+            else {
+                res.sendStatus(200).json({
+                    email: user.email
+                });
+            }
+        });
 }
