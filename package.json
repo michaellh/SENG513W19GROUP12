@@ -10,6 +10,7 @@
     "express-mongo-db": "^2.0.4",
     "jsonwebtoken": "^8.5.1",
     "nodemailer": "^6.0.0",
+    "nodemailer-sendgrid-transport": "^0.2.0",
     "npm-reinstall": "^2.0.0",
     "passport": "^0.4.0",
     "passport-local": "^1.0.0",
