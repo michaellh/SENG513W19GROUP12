@@ -25,7 +25,7 @@ export default class Controls extends Component {
     render() {
         const deadChat = !this.props.chat.group && this.props.chat.members.length <= 1;
         return (
-            <div className='{this.props.className} mt-2' style={this.style}>
+            <div className='{this.props.className} mt-2' id={this.props.id} style={this.style}>
                 <div className='col-12'>
                 <form onSubmit={this.handleSubmit}>
                     <div className='input-group'>

@@ -14,10 +14,12 @@ export default class ChatArea extends Component {
             chat: props.chat,
             messages:[],
             searchTerm:'',
+            chatHeight: 0,
         };
 
         this.onMessage = this.onMessage.bind(this);
         this.filterMessages = this.filterMessages.bind(this);
+        this.updateChatHeight = this.updateChatHeight.bind(this);
 
         this.props.socket.emit('reqHistory', this.props.chat.id);
 
@@ -45,6 +47,20 @@ export default class ChatArea extends Component {
         this.setState({chat:newProp.chat});
     }
 
+    componentDidMount(){
+        this.updateChatHeight();
+        window.addEventListener('resize', this.updateChatHeight);
+    }
+
+    updateChatHeight(){
+        const windowHeight = parseInt(window.innerHeight);     
+        const topBarHeight = $('#chat-topBar').outerHeight(true);
+        const controlsHeight = $('#chat-controls').outerHeight(true);;
+
+        const chatHeight = windowHeight - topBarHeight - controlsHeight + 'px';
+        this.setState({chatHeight})
+    }
+
     onMessage(message){
         const {id:userID, name:userName} =this.props.user;
         this.props.socket.emit('message', {chat : this.props.chat, msg : {userID, userName, message}});
@@ -60,9 +76,9 @@ export default class ChatArea extends Component {
     render() {
         return (
             <div className={this.props.className} id={this.props.id}>
-                    <TopBar className='row' chat={this.state.chat} user={this.props.user} socket={this.props.socket} modal={this.props.modal} filterMessages={this.filterMessages}/>
-                    <Messages className='row' messages={this.state.messages} chat={this.state.chat} user={this.props.user} socket={this.props.socket} searchTerm={this.state.searchTerm} id='messages'/>
-                    <Controls className='row' onMessage={this.onMessage} chat={this.state.chat} />
+                <TopBar  id='chat-topBar' className='row' chat={this.state.chat} user={this.props.user} socket={this.props.socket} modal={this.props.modal} filterMessages={this.filterMessages}/>
+                <Messages className='row' id='chat-messages' messages={this.state.messages} chat={this.state.chat} user={this.props.user} socket={this.props.socket} searchTerm={this.state.searchTerm} height={this.state.chatHeight}/>
+                <Controls  id='chat-controls' className='row' onMessage={this.onMessage} chat={this.state.chat} />
             </div>
         )
     }

@@ -51,7 +51,7 @@ export default function Messages(props) {
         )
     })
     return (
-        <div className={props.className} id={props.id}>
+        <div className={props.className} id={props.id} style={{height:props.height}}>
             <div className='col-12'>
                 {messages}
             </div>
