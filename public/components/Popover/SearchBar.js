@@ -9,11 +9,16 @@ export default class SearchBar extends Component {
             text : ''
         }
         
+        this.textInput = React.createRef();
         this.handleOnChange = this.handleOnChange.bind(this);
     }
 
     componentWillUnmount() {
         this.props.filterMessages('');
+    }
+    
+    componentDidMount(){
+        this.textInput.current.focus();
     }
     
     handleOnChange(e) {
@@ -23,7 +28,7 @@ export default class SearchBar extends Component {
     render() {
         return (
         <div>
-            <input className='form-control' onChange={this.handleOnChange}></input>
+            <input ref={this.textInput} className='form-control' onChange={this.handleOnChange}></input>
         </div>
         )
     }

@@ -1,6 +1,4 @@
 import React from 'react'
-import createPopover from '../Popover';
-import Reactions from '../Popover/Reactions';
 
 export default function Messages(props) {
     let fmtDate = (date) => `${date.getHours() < 10 ? '0'+date.getHours() : date.getHours()}:${date.getMinutes() < 10 ? '0'+date.getMinutes() : date.getMinutes()}`;
@@ -19,16 +17,17 @@ export default function Messages(props) {
         let message = 'boo';
         props.socket.emit('messageEdit', {chatID : props.chat.id, userID, date, message})
     }
-    
-    // createPopover('MessageTestArea', <Reactions id='MessageTestArea'/>, {placement:'bottom'});
-    createPopover('messageTestArea', <Reactions id='messageTestArea' />, {placement:'bottom'});
+
+    let filterMessage = (searchTerm, message) => {
+       return searchTerm ? message.split(searchTerm).join(`<span style='background-color:yellow'>${searchTerm}</span>`) : message
+    };
 
     const messages = props.messages.map((d,i) => {
-        let id = i;
         return (
             <div key={i} style={{textAlign: d.userID == props.user.id  ? 'right':'left'}}>
                 <div className='alert alert-primary m-2'>
-                    [{fmtDate(d.date)}] {d.userName}: {d.message}
+                    [{fmtDate(d.date)}] {d.userName}: <span dangerouslySetInnerHTML={{__html:filterMessage(props.searchTerm, d.message)}}></span>
+                    {/* {d.message} */}
                     {
                         // SHow reaction div if there is a reaction
                         d.reactions ? 
@@ -53,7 +52,6 @@ export default function Messages(props) {
         <div className={props.className} id={props.id}>
             <div className='col-12'>
                 {messages}
-                <button className='btn btn-outline-primary' id='messageTestArea'><i className='fas fa-search'></i></button>
             </div>
         </div>
     )

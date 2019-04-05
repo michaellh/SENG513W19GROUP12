@@ -20,7 +20,7 @@ export default function SideControl(props) {
     // Add Modal
     let handleAdd = () => {
         
-        const title = <span><i className='fas fa-plus-circle'></i>  Add Chat</span>
+        const title = 'Add Chat'
         const body = <AddChat socket={props.socket}/>;
 
         props.modal(title,body);
