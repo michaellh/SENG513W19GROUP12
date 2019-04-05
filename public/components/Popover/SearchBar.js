@@ -33,16 +33,3 @@ export default class SearchBar extends Component {
         )
     }
 }
-
-// import React from 'react'
-
-// export default function SearchBar(props) {
-//     let handleOnChange = (e) => {
-//        props.filterMessages(e.target.value);
-//     }
-//     return (
-//         <div>
-//             <input className='form-control' onChange={handleOnChange}></input>
-//         </div>
-//     )
-// }
