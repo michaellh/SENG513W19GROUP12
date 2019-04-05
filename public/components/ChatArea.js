@@ -8,17 +8,16 @@ export default class ChatArea extends Component {
     constructor(props) {
         super(props)
 
+        this.messages = [];
+        
         this.state = {
             chat: props.chat,
-            messages:[]
-        };
-        
-        this.style = {
-            height: '100%',
-            border: '2px solid black'
+            messages:[],
+            searchTerm:'',
         };
 
         this.onMessage = this.onMessage.bind(this);
+        this.filterMessages = this.filterMessages.bind(this);
 
         this.props.socket.emit('reqHistory', this.props.chat.id);
 
@@ -31,7 +30,9 @@ export default class ChatArea extends Component {
         props.socket.on('loadHistory', messages => {
             // console.log(msg);
             messages.forEach(d => d.date = new Date(d.date));
+            this.messages = messages;
             this.setState({messages});
+            this.filterMessages(this.state.searchTerm);
         });        
     }
 
@@ -49,14 +50,18 @@ export default class ChatArea extends Component {
         // this.setState({messages : [...this.state.messages, message]});
     }
 
+    filterMessages(searchTerm){
+        this.setState({searchTerm});
+        let messages = this.messages.filter(d => d.message.includes(searchTerm))
+        this.setState({messages});
+    }
+
     render() {
         return (
             <div className={this.props.className} id={this.props.id}>
-                <div className='row' style={this.style}>
-                    <TopBar className='col-12 align-self-start' chat={this.state.chat} socket={this.props.socket} modal={this.props.modal}/>
-                    <Messages className='col-12 align-self-start' messages={this.state.messages} user={this.props.user} />
-                    <Controls className='col-12 align-self-end' onMessage={this.onMessage} />
-                </div>
+                    <TopBar className='row' chat={this.state.chat} user={this.props.user} socket={this.props.socket} modal={this.props.modal} filterMessages={this.filterMessages}/>
+                    <Messages className='row' messages={this.state.messages} chat={this.state.chat} user={this.props.user} socket={this.props.socket} searchTerm={this.state.searchTerm} id='messages'/>
+                    <Controls className='row' onMessage={this.onMessage} chat={this.state.chat} />
             </div>
         )
     }

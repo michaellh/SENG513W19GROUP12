@@ -11,7 +11,7 @@ export default function TopBar(props) {
     }
     
   return (
-    <div className='row top-bar'>
+    <div className='row mb-2 mt-2'>
         <div className='col-3'>
             <h2>LOGO</h2>
         </div>

@@ -7,13 +7,23 @@
 }
 
 html, body {
-    height: 100%;
+
 }
 
-.top-bar {
-    margin: 10px 0px 10px 0px;
+#container {
+
 }
 
-#side-area button{
+#side-area {
+    border: solid #d9d9d9 0.5px;
+}
+
+#chat-area {
+    border: #d9d9d9 0.5px;
+    padding-bottom: 10px;
+}
+
+#messages {
+    border: solid #d9d9d9 0.5px;
 }
 

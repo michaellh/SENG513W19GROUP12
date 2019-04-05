@@ -12,7 +12,7 @@ export default class AddUser extends Component {
         this.handleSubmit = this.handleSubmit.bind(this);
 
         // When animation finished, and modal closed, reset state
-        $('#myModal').on('hidden.bs.modal', (e) => {
+        $('#myModal').on('show.bs.modal', (e) => {
             this.setState({
                 text:'',
             })
@@ -42,7 +42,7 @@ export default class AddUser extends Component {
                         <input type='text' className='form-control' autoFocus={true} onChange={this.handleText} value={this.state.text}></input>
                     </div>
                     <div className="modal-footer">
-                        <button type="submit" className="btn btn-secondary" data-dismiss="modal" onClick={this.handleSubmit}>Okay</button>
+                        <button type="submit" className="btn btn-primary" data-dismiss="modal" onClick={this.handleSubmit}>Okay</button>
                     </div>
                 </form>
         )
