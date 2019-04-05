@@ -2,10 +2,8 @@ const mObjectId = require('mongodb').ObjectId;
 
 module.exports = {
     initialize: function (io, dbClient) {
-        let chat = {};
-        chat.Chat1 = [];
-        chat.Chat2 = [];
 
+        // get ID to Mongo format
         let mID = id => new mObjectId(id);
 
         // Object Mutable so do not need to return;
@@ -18,7 +16,6 @@ module.exports = {
             // username being used below as the username from the database
             const socket_username = userCookie && userCookie.split('=')[1];
             let socket_userID;
-            let inDB = true;
             // console.log(socket_username);
 
             dbClient.collection('users').findOneAndUpdate({name:socket_username}, {$set:{socketID: socket.id}}, {returnOriginal: false}, (err, res) => {
@@ -34,7 +31,6 @@ module.exports = {
                     // socket.emit('chatlist', user.chats);
                     // socket.emit('friendlist', user.friends);
                 }else{
-                    // inDB = false;
                     // Enroll new user
                     const userObject = {
                         name: socket_username,
@@ -84,15 +80,9 @@ module.exports = {
             })
 
             socket.on('message', msg => {
-                // console.log(msg);
-                if(inDB) {
-                    let message = {date: new Date(), ...msg.msg};
-                    dbClient.collection('chats').update({_id:mID(msg.chat.id)}, {$push : {messages: message}});
-                    io.to(msg.chat.id).emit('message', message);
-                }else{
-                    chat[msg.chat.id].push(msg.msg);
-                    io.to(msg.chat.id).emit('message', msg.msg);
-                }
+                let message = {date: new Date(), ...msg.msg};
+                dbClient.collection('chats').update({_id:mID(msg.chat.id)}, {$push : {messages: message}});
+                io.to(msg.chat.id).emit('message', message);
             });
 
             // Handle Message Reacts
@@ -186,95 +176,83 @@ module.exports = {
             })
 
             socket.on('reqHistory', id => {
-                if(inDB){
-                    dbClient.collection('chats').findOne({_id:mID(id)}, (err, res) => {
-                        // console.log(res);
-                        socket.emit('loadHistory', res.messages);
-                    });
-                }else{
-                    socket.emit('loadHistory', chat[id]);
-                }
+                dbClient.collection('chats').findOne({_id:mID(id)}, (err, res) => {
+                    // console.log(res);
+                    socket.emit('loadHistory', res.messages);
+                });
             });
 
             socket.on('createGroupChat', name => {
-                if(inDB){
-                    let groupChatObj = {
-                        name,
-                        group: true,
-                        messages:[],
-                        members:[
-                            {id : socket_userID, name: socket_username, role:'admin'}
-                        ]
-                    };
-                    // Adding to Chats Table
-                    dbClient.collection('chats').insertOne(groupChatObj, (err,res) => {
-                        const {_id:id, name, group} = res.ops[0];
-                        sendback(['chatID',id]);
-                        // Adding Chats name and ID to user table
-                        dbClient.collection('users').findOneAndUpdate({_id:mID(socket_userID)},{$push : {chats: {id,name, group}}}, {returnOriginal:false}, (err, res) => {
-                            // console.log(res, err);
-                            let user = res.value;
-                            sendback(user);
-                            // Updating user chatlist and friends.
-                            socket.emit('chatlist', user.chats);
-                        });
-                        // dbClient.collection('users').findOne({_id:mID(socket_userID)}, (err, res) => {
-                        //     console.log(res, err);
-                        // });
+                let groupChatObj = {
+                    name,
+                    group: true,
+                    messages:[],
+                    members:[
+                        {id : socket_userID, name: socket_username, role:'admin'}
+                    ]
+                };
+                // Adding to Chats Table
+                dbClient.collection('chats').insertOne(groupChatObj, (err,res) => {
+                    const {_id:id, name, group} = res.ops[0];
+                    sendback(['chatID',id]);
+                    // Adding Chats name and ID to user table
+                    dbClient.collection('users').findOneAndUpdate({_id:mID(socket_userID)},{$push : {chats: {id,name, group}}}, {returnOriginal:false}, (err, res) => {
+                        // console.log(res, err);
+                        let user = res.value;
+                        sendback(user);
+                        // Updating user chatlist and friends.
+                        socket.emit('chatlist', user.chats);
                     });
-
-                }
+                    // dbClient.collection('users').findOne({_id:mID(socket_userID)}, (err, res) => {
+                    //     console.log(res, err);
+                    // });
+                });
             });
 
             // Create Single Chat
             socket.on('createSingleChat', name => {
-                if(inDB){
-                    // Find user in DB, res is null if not found
-                    dbClient.collection('users').findOne({name}, (err, res) => {
-                        if(res){
-                            // Found Users id, and name
-                            const {_id:clientID, name:clientName} = res;
-                            let chatObj = {
-                                name : 'OneOnOne',
-                                group : false,
-                                messages : [],
-                                members : [
-                                    // Self
-                                    {id : socket_userID, name: socket_username},
-                                    // res user
-                                    {id : clientID, name: clientName},
-                                ]
-                            };
-                            // Adding to chats table
-                            dbClient.collection('chats').insertOne(chatObj, (err,res) => {
-                                // Getting group condition, and id back from result
-                                const {_id:id, group} = res.ops[0];
+                // Find user in DB, res is null if not found
+                dbClient.collection('users').findOne({name}, (err, res) => {
+                    if(res){
+                        // Found Users id, and name
+                        const {_id:clientID, name:clientName} = res;
+                        let chatObj = {
+                            name : 'OneOnOne',
+                            group : false,
+                            messages : [],
+                            members : [
+                                // Self
+                                {id : socket_userID, name: socket_username},
+                                // res user
+                                {id : clientID, name: clientName},
+                            ]
+                        };
+                        // Adding to chats table
+                        dbClient.collection('chats').insertOne(chatObj, (err,res) => {
+                            // Getting group condition, and id back from result
+                            const {_id:id, group} = res.ops[0];
 
-                                // Update Self Chat Table
-                                dbClient.collection('users').findOneAndUpdate({_id:mID(socket_userID)},{$push : {chats: {id, name: clientName, group}}}, {returnOriginal:false}, (err, res) => {
-                                    let user = res.value;
-                                    sendback(['Self',user]);
-                                    // Updating user chatlist and friends.
-                                    socket.emit('chatlist', user.chats);
-                                });
-
-                                 // Update Client Chat Table, id is clients, but name is self name
-                                 dbClient.collection('users').findOneAndUpdate({_id:mID(clientID)},{$push : {chats: {id, name: socket_username, group}}}, {returnOriginal:false}, (err, res) => {
-                                    let user = res.value;
-                                    sendback(['Client',user]);
-                                    // Updating client's chatlist and friends.
-                                    io.to(user.socketID).emit('chatlist', user.chats);
-                                });
+                            // Update Self Chat Table
+                            dbClient.collection('users').findOneAndUpdate({_id:mID(socket_userID)},{$push : {chats: {id, name: clientName, group}}}, {returnOriginal:false}, (err, res) => {
+                                let user = res.value;
+                                sendback(['Self',user]);
+                                // Updating user chatlist and friends.
+                                socket.emit('chatlist', user.chats);
                             });
-                        }else{
-                            // Cannot Find User
-                            console.log(`no user: ${name}`);
-                        }
-                    });
-                }
-                else{
-                    //Not in DB
-                }
+
+                                // Update Client Chat Table, id is clients, but name is self name
+                                dbClient.collection('users').findOneAndUpdate({_id:mID(clientID)},{$push : {chats: {id, name: socket_username, group}}}, {returnOriginal:false}, (err, res) => {
+                                let user = res.value;
+                                sendback(['Client',user]);
+                                // Updating client's chatlist and friends.
+                                io.to(user.socketID).emit('chatlist', user.chats);
+                            });
+                        });
+                    }else{
+                        // Cannot Find User
+                        console.log(`no user: ${name}`);
+                    }
+                });
             });
 
             // Add User to Chat
