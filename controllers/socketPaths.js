@@ -115,7 +115,7 @@ module.exports = {
                 reactions = reactions ? reactions : {like:0, dislike:0};
                 // Incrementing that reaction
                 reactions[incReaction]++;
-
+                console.log('messageReacted');
                 // Updating messages that match the date, userid of the chat
                 const query = {_id:mID(chatID), messages: {$elemMatch:{date: new Date(date),userID}}};
                 const update = {$set:{'messages.$.reactions':reactions}};
@@ -331,6 +331,15 @@ module.exports = {
                     }
                     // user not found
                     else{
+                        // Cannot Find User
+                        const notification = {
+                            title: 'Cannot Add User',
+                            message: `No User: ${name}`,
+                            color: 'lightpink',
+                            // delay: 5000,
+                            // autohide: true,
+                        }
+                        notifyUser(socket_userID, notification);
                         console.log('no user');
                     }
                 });

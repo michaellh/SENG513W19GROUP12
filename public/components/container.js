@@ -18,6 +18,7 @@ export default class Container extends Component {
         this.openModal = this.openModal.bind(this);
         this.updateUser = this.updateUser.bind(this);
         
+        this.chatAreaRef = React.createRef();
         // 
         this.socket = io("http://localhost:3000");
         // this.socket = io();
@@ -70,6 +71,9 @@ export default class Container extends Component {
         this.state.chat && this.socket.emit('leaveRoom', this.state.chat);
         this.socket.emit('reqChatInfo', chat.id);
         this.socket.emit('joinRoom', chat);
+        setTimeout(() => {
+            this.chatAreaRef.current.scrollToBottom();
+        },500);
         // console.log(this.state.chat);
         // this.setState({chat: chat});
         // console.log(chat);
@@ -87,7 +91,7 @@ export default class Container extends Component {
                     <SideArea className='col-2' id='side-area' updateUser={this.updateUser} user={this.state.user} chooseChat={this.chooseChat} socket={this.socket} modal={this.openModal} chosenChat={this.state.chat}/>
                     {
                         this.state.chat ? 
-                        <ChatArea className='col-10' id='chat-area' chat={this.state.chat} socket={this.socket} user={this.state.user} modal={this.openModal}/>
+                        <ChatArea ref={this.chatAreaRef} className='col-10' id='chat-area' chat={this.state.chat} socket={this.socket} user={this.state.user} modal={this.openModal}/>
                         :
                         <h1 className='col-10 text-center align-self-center'>You have no chats...</h1>
                     }

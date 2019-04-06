@@ -15,10 +15,11 @@ export default class Messages extends Component {
         this.handleDelete = this.handleDelete.bind(this);
         this.handleEdit = this.handleEdit.bind(this);
         this.filterMessage = this.filterMessage.bind(this);
+        this.scrollToBottom = this.scrollToBottom.bind(this);
 
     }
 
-    componentDidUpdate(){
+    scrollToBottom(){
         this.endMessageRef.current.scrollIntoView({ behavior: 'smooth' });
     }
     
