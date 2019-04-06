@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import FormEditor from './Forms/FormEditor';
+import { Link } from 'react-router-dom'
 
 class Login extends Component {
   constructor(props) {
@@ -20,6 +21,23 @@ class Login extends Component {
   handleSubmit(event) {
       this.setState({ Username: { value : this.state.Username.value, hasError: !this.state.Username.hasError}});
       event.preventDefault()
+
+      const userInfo = {
+        email: this.state.Username.value,
+        password: this.state.Password.value
+      }
+
+      fetch("http://localhost:3000/sign-in", {
+                method: "POST",
+                mode: 'no-cors',
+                headers: new Headers({
+                  'Content-Type': 'application/json',
+                }),
+                body: userInfo
+            })
+            .catch((error) => {
+                console.error(error);
+            });
   }
 
   render() {
@@ -37,7 +55,7 @@ class Login extends Component {
                 <button className="btn btn-primary btn-lg" style={{"width" : "100%"}} type="submit">Login</button>
               </div>
               <div className="col-md-6">
-                <button className="btn btn-primary btn-lg" style={{"width" : "100%"}} type="button">Sign Up</button>
+                <Link to="/signup"><button className="btn btn-primary btn-lg" style={{"width" : "100%"}} type="button">Sign Up</button></Link>
               </div>
             </div>
           </div>
