@@ -1,9 +1,11 @@
 # Simple Chat App
 
-App Hosted at: 
+App Hosted at:
 https://radiant-waters-80256.herokuapp.com/
 
 Master Branch set to auto-deploy.
+
+Application has been tested in Edge, Chrome, and Firefox
 
 To Run locally:
 
@@ -20,8 +22,6 @@ To Build App:
 1. Run "npm build" in public folder
 
 2. Run "node index.js" in root folder
-Application has been tested in Edge, Chrome, and Firefox
-
 
 # Project Structure
 
