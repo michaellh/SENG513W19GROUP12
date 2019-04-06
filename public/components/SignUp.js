@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import FormEditor from './Forms/FormEditor';
+import { Link } from 'react-router-dom'
 
 class SignUp extends Component {
   constructor(props) {
@@ -38,6 +39,9 @@ class SignUp extends Component {
           <div className="row" style={{flex:1}}>
             <div className="col-md-6">
               <button className="btn btn-primary btn-lg" style={{"width" : "100%"}} type="submit">Sign Up</button>
+            </div>
+            <div className="col-md-6">
+              <Link to="/login"><button className="btn btn-outline-primary btn-lg" style={{"width" : "100%"}} type="button">Back to Login</button></Link>
             </div>
           </div>
         </form>

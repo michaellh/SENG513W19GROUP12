@@ -55,12 +55,12 @@ class Login extends Component {
                 <button className="btn btn-primary btn-lg" style={{"width" : "100%"}} type="submit">Login</button>
               </div>
               <div className="col-md-6">
-                <Link to="/signup"><button className="btn btn-primary btn-lg" style={{"width" : "100%"}} type="button">Sign Up</button></Link>
+                <Link to="/signup"><button className="btn btn-outline-primary btn-lg" style={{"width" : "100%"}} type="button">Sign Up</button></Link>
               </div>
             </div>
           </div>
         </form>
-        <div>{JSON.stringify(this.state)}</div>
+        <Link to="/reset-password"><button className="btn btn-link" style={{paddingLeft:0}}>Forgot Password?</button></Link>
       </div>
     )
   }

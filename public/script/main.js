@@ -13,6 +13,7 @@ const routing = (
     <div>
       <Route exact path="/" component={Navigation} />
       <Route path="/login" component={Login} />
+      <Route path="/reset-password" component={SignUp} />
       <Route path="/signup" component={SignUp} />
     </div>
   </Router>
