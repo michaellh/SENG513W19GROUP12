@@ -37,6 +37,7 @@ module.exports = {
                         socketID: socket.id,
                         chats: [],
                         friends: [],
+                        notifications: [],
                     }
                     dbClient.collection('users').insertOne(userObject, (err, res) => {
                         let user = res.ops[0];
@@ -46,6 +47,29 @@ module.exports = {
                     });
                     // socket.emit('chatlist', {chats:['Chat1', 'Chat2'], friends: ['Friend1', 'Friend2', 'Friend3']});
                 }
+            });
+
+            function notifyUser(userID, notification){
+                notification = {time: new Date(), ...notification};
+                // dbClient.collection('users').findOneAndUpdate({_id:mID(userID)}, (err, res) => {
+                //     const user = res;
+                //     io.to(user.socketID).emit('notification', notification);
+                // });
+                dbClient.collection('users').findOneAndUpdate({_id:mID(userID)},{$push : {notifications: notification}}, {returnOriginal:false}, (err, res) => {
+                    const user = res.value;
+                    // console.log('Send Message to ', res);
+                    // console.log(socket.id);
+                    io.to(user.socketID).emit('notification', user.notifications);
+                });
+            }
+
+            socket.on('removeNotification', time => {
+                dbClient.collection('users').findOneAndUpdate({_id:mID(socket_userID)},{$pull : {notifications: {time : new Date(time)}}}, {returnOriginal:false}, (err, res) => {
+                    const user = res.value;
+                    // console.log('Send Message to ', res);
+                    // console.log(socket.id);
+                    io.to(user.socketID).emit('notification', user.notifications);
+                });
             });
 
             let sendback = (message) => {
@@ -259,6 +283,14 @@ module.exports = {
                         });
                     }else{
                         // Cannot Find User
+                        const notification = {
+                            title: 'Create Chat Failed',
+                            message: `No User: ${name}`,
+                            color: 'lightpink',
+                            // delay: 5000,
+                            // autohide: true,
+                        }
+                        notifyUser(socket_userID, notification);
                         console.log(`no user: ${name}`);
                     }
                 });

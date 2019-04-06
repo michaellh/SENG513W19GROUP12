@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import ChatArea from './chatArea';
 import SideArea from './SideArea';
 import Modal from './Modal';
+import Toast from './Toast';
 
 export default class Container extends Component {
     constructor(props) {
@@ -39,6 +40,13 @@ export default class Container extends Component {
             if (this.state.chat && this.state.chat.id == chat.id){
                 this.setState({chat});
             }
+        });
+
+        this.socket.on('notification', notifications => {
+            // console.log('gotNotification');
+            let user = {...this.state.user};
+            user.notifications = notifications;
+            this.setState({user});
         });
 
         this.socket.on('resetChat', chatID => {
@@ -83,7 +91,8 @@ export default class Container extends Component {
                         :
                         <h1 className='col-10 text-center align-self-center'>You have no chats...</h1>
                     }
-                    <Modal modal={this.state.modal}/>
+                    <Modal modal={this.state.modal} />
+                    <Toast user={this.state.user} socket={this.socket} />
                 </div>
             </div>
         );
