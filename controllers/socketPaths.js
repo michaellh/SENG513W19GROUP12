@@ -101,11 +101,13 @@ module.exports = {
                 // Updating chatroom info
                 dbClient.collection('chats').findOneAndUpdate({_id:mID(chatID)},{$pull : {activeMembers: socket_userID}}, {returnOriginal:false}, (err, res) => {
                     const chatInfo = res.value;
-                    frontEndID(chatInfo);
-                    // Removing extra unecessary stuff;
-                    delete chatInfo.messages;
-                    io.to(chatID).emit('chatInfoUpdate',chatInfo);
-                    // console.log(chatInfo);
+                    // Only proccess if we do have chatInfo. Will ahve none if we try to leave deleted room
+                    if(chatInfo){
+                        frontEndID(chatInfo);
+                        // Removing extra unecessary stuff;
+                        delete chatInfo.messages;
+                        io.to(chatID).emit('chatInfoUpdate',chatInfo);
+                    }
                 });
             }
 
@@ -384,6 +386,15 @@ module.exports = {
                                     const user = res.value;
                                     // Update their chatlist
                                     io.to(user.socketID).emit('chatlist', user.chats);
+                                    // Send them a notification
+                                    const notification = {
+                                        title: `${chat.name}: Welcome`,
+                                        message: `You have been added to chat ${chat.name}`,
+                                        color: 'lightgreen',
+                                        // delay: 5000,
+                                        // autohide: true,
+                                    }
+                                    notifyUser(user._id, notification);
                                 });
 
                                 // Telling Everyone else to update chat Info
@@ -521,6 +532,7 @@ module.exports = {
                 }
             });
 
+            // Leaving all rooms and from active user list of those rooms
             socket.on('disconnect', () => {
                 dbClient.collection('users').findOne({_id:mID(socket_userID)}, (err, res) => {
                     let user = res;
