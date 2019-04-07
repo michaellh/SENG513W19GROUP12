@@ -99,7 +99,7 @@ class SignUp extends Component {
               }).then(data => {
                 if (data === "Error: Please choose a different email address.") {
                   this.setState({
-                    Username: { value: this.state.Username.value, hasError: true, errorMessage: "Please choose a different email address"}
+                    Email: { value: this.state.Email.value, hasError: true, errorMessage: "Please choose a different email address"}
                   })
                 }
                 else {
