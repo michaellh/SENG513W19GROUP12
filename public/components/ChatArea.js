@@ -30,6 +30,7 @@ export default class ChatArea extends Component {
             // console.log(msg);
             msg.date = new Date(msg.date);
             this.setState({messages : [...this.state.messages, msg]});
+            this.scrollToBottom();
         });
 
         props.socket.on('loadHistory', messages => {
@@ -38,6 +39,10 @@ export default class ChatArea extends Component {
             this.messages = messages;
             this.setState({messages});
             this.filterMessages(this.state.searchTerm);
+            if (this.props.switchRoom){
+                this.scrollToBottom();
+                this.props.updateSwitchRoom(false);
+            }
         });        
     }
 
@@ -67,7 +72,6 @@ export default class ChatArea extends Component {
     onMessage(message){
         const {id:userID, name:userName} =this.props.user;
         this.props.socket.emit('message', {chat : this.props.chat, msg : {userID, userName, message}});
-        this.scrollToBottom();
         // this.setState({messages : [...this.state.messages, message]});
     }
 

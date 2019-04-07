@@ -24,7 +24,9 @@ export default class Messages extends Component {
     }
     
     fmtDate(date){
-        return `${date.getHours() < 10 ? '0'+date.getHours() : date.getHours()}:${date.getMinutes() < 10 ? '0'+date.getMinutes() : date.getMinutes()}`;
+
+        const time = `${date.getHours() < 10 ? '0'+date.getHours() : date.getHours()}:${date.getMinutes() < 10 ? '0'+date.getMinutes() : date.getMinutes()}`;
+        return `${date.toLocaleDateString()} ${time}`;
     }    
     // console.log(props);
 
@@ -48,11 +50,16 @@ export default class Messages extends Component {
 
     render() {
         const messages = this.props.messages.map((d,i) => {
+            const isSelf = d.userID == this.props.user.id;
             return (
-                <div key={i} style={{textAlign: d.userID == this.props.user.id  ? 'right':'left'}}>
-                    <div className='alert alert-primary m-2'>
-                        [{this.fmtDate(d.date)}] {d.userName}: 
-                        {this.props.searchTerm ? <span dangerouslySetInnerHTML={{__html:this.filterMessage(this.props.searchTerm, d.message)}}></span> : d.message}
+                <div key={i} className={`row ${isSelf ? 'justify-content-end' : 'justify-content-start'}`} style={{textAlign: isSelf ? 'right':'left'}}>
+                    <div className={`alert alert-primary m-2 ${isSelf ? 'alert-primary' : 'alert-info'}`}>
+                        <div className='text-secondary'>
+                            <small>{this.fmtDate(d.date)} | {d.userName}</small>
+                        </div>
+                        <div>
+                            {this.props.searchTerm ? <span dangerouslySetInnerHTML={{__html:this.filterMessage(this.props.searchTerm, d.message)}}></span> : d.message}
+                        </div>
                         
                         {/* {d.message} */}
                         {
