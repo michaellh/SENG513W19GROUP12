@@ -5,15 +5,14 @@ export default class Customize extends Component{
         super(props)
 
         this.state = {
-            font: 'Arial',
-            fontSize: 16,
-            fontColour: 'Black',
+
         }
 
         this.setFontSize = this.setFontSize.bind(this);
         this.setFontColour = this.setFontColour.bind(this);
         this.setFont = this.setFont.bind(this);
-        this.handleClick = this.handleClick.bind(this);
+        this.handleSave = this.handleSave.bind(this);
+        this.handleSaveGroupName = this.handleSaveGroupName.bind(this);
 
         $('#myModal').on('show.bs.modal', (e) => {
             this.setState({
@@ -24,19 +23,23 @@ export default class Customize extends Component{
     }
 
     setFontSize(e){
-        this.setState({fontSize: e.target.value});
+        //console.log(e.target.value);
     }
 
     setFontColour(e){
-        this.setState({fontColour: e.target.value});
+
     }
 
     setFont(e){
-        this.setState({font: e.target.value});
+
     }
 
-    handleClick(e)  {
+    handleSave(e)  {
  
+    }
+
+    handleSaveGroupName(e) {
+
     }
 
     render() {
@@ -45,48 +48,73 @@ export default class Customize extends Component{
             <div>
                 <div className='modal-body' id='modalBody'>
                     <div className='row mb-2'>
-                    <h6 className='col-6'> Font Size: </h6>
-                     <div className='dropdown col-6'>
-                          <button type='button' className='btn btn-primary dropdown-toggle' data-toggle='dropdown'>
-                            {this.state.fontSize}
-                          </button>
-                          <div className='dropdown-menu'>
-                            <button className='dropdown-item' onClick={this.setFontSize} value='16'>16</button>
-                            <button className='dropdown-item' onClick={this.setFontSize} value='18'>18</button>
-                            <button className='dropdown-item' onClick={this.setFontSize} value='20'>20</button>
-                          </div>
+                        <div className='form-group col-12'>
+                            <label htmlFor='usr'>Chat Name:</label>
+                            <div className='input-group'>
+                                <input type='text' className='form-control' placeholder={this.props.chat.name}></input>
+                                <div className='input-group-append'>
+                                    <button className='btn btn-outline-primary' onClick={this.handleSaveGroupName}>Save</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div className='row mb-2'>
+                        <div className='col-5 form-group'>
+                            <label htmlFor='sel1'>Font Size:</label>
+                            <select className='form-control' id='sel1' onChange={this.setFontSize}>
+                                <option value='14'>14</option>
+                                <option value='16'>16</option>
+                                <option value='18'>18</option>
+                                <option value='20'>20</option>
+                            </select>
+                        </div> 
+                        <div className='col-2'></div>
+                        <div className='col-5 form-group'>
+                            <label htmlFor='sel2'>Font:</label>
+                            <select className='form-control' id='sel2' onChange={this.setFont}>
+                                <option value='Arial'>Arial</option>
+                                <option value='Helvetica'>Helvetica</option>
+                                <option value='...'>...</option>
+                                <option value='...'>...</option>
+                            </select>
                         </div> 
                     </div>
                     <div className='row mb-2'>
-                    <h6 className='col-6'> Font Colour: </h6>
-                     <div className='dropdown col-6'>
-                          <button type='button' className='btn btn-primary dropdown-toggle' data-toggle='dropdown'>
-                            {this.state.fontColour}
-                          </button>
-                          <div className='dropdown-menu'>
-                            <button className='dropdown-item' onClick={this.setFontColour} value='Black'>Black</button>
-                            <button className='dropdown-item' onClick={this.setFontColour} value='Blue'>Blue</button>
-                            <button className='dropdown-item' onClick={this.setFontColour} value='Red'>Red</button>
-                          </div>
+                        <div className='col-5 form-group'>
+                            <label htmlFor='sel3'>Font Colour:</label>
+                            <select className='form-control' id='sel3' onChange={this.setFontColour}>
+                                <option value='black'>black</option>
+                                <option value='red'>red</option>
+                                <option value='blue'>blue</option>
+                                <option value='green'>green</option>
+                            </select>
                         </div> 
                     </div>
                     <div className='row mb-2'>
-                    <h6 className='col-6'> Font: </h6>
-                     <div className='dropdown col-6'>
-                          <button type='button' className='btn btn-primary dropdown-toggle' data-toggle='dropdown'>
-                            {this.state.font}
-                          </button>
-                          <div className='dropdown-menu'>
-                            <button className='dropdown-item' onClick={this.setFont} value='Arial'>Arial</button>
-                            <button className='dropdown-item' onClick={this.setFont} value='Helvetica'>Helvetica</button>
-                            <button className='dropdown-item' onClick={this.setFont} value='...'>...</button>
-                          </div>
-                        </div> 
+                        <div className='col-5 form-group'>
+                            <label htmlFor='sel3'>My Bubble Colour:</label>
+                            <select className='form-control' id='sel3' onChange={this.setFontColour}>
+                                <option value='black'>black</option>
+                                <option value='red'>red</option>
+                                <option value='blue'>blue</option>
+                                <option value='green'>green</option>
+                            </select>
+                        </div>
+                        <div className='col-2'></div>
+                        <div className='col-5 form-group'>
+                            <label htmlFor='sel3'>Bubble Color:</label>
+                            <select className='form-control' id='sel3' onChange={this.setFontColour}>
+                                <option value='black'>black</option>
+                                <option value='red'>red</option>
+                                <option value='blue'>blue</option>
+                                <option value='green'>green</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
                 <div className="modal-footer">
                     <button className="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                    <button className="btn btn-danger" data-dismiss="modal" onClick={this.handleClick}>Okay</button>
+                    <button className="btn btn-primary" data-dismiss="modal" onClick={this.handleSave}>Save</button>
                 </div>
             </div>
         )

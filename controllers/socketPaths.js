@@ -37,6 +37,7 @@ module.exports = {
                         socketID: socket.id,
                         chats: [],
                         friends: [],
+                        notifications: [],
                     }
                     dbClient.collection('users').insertOne(userObject, (err, res) => {
                         let user = res.ops[0];
@@ -48,6 +49,31 @@ module.exports = {
                 }
             });
 
+            function notifyUser(userID, notification){
+                notification = {time: new Date(), ...notification};
+                // dbClient.collection('users').findOneAndUpdate({_id:mID(userID)}, (err, res) => {
+                //     const user = res;
+                //     io.to(user.socketID).emit('notification', notification);
+                // });
+                dbClient.collection('users').findOneAndUpdate({_id:mID(userID)},{$push : {notifications: notification}}, {returnOriginal:false}, (err, res) => {
+                    const user = res.value;
+                    // console.log('Send Message to ', res);
+                    // console.log(socket.id);
+                    io.to(user.socketID).emit('notification', user.notifications);
+                });
+            }
+
+            socket.on('notifySelf', notification => notifyUser(socket_userID, notification));
+
+            socket.on('removeNotification', time => {
+                dbClient.collection('users').findOneAndUpdate({_id:mID(socket_userID)},{$pull : {notifications: {time : new Date(time)}}}, {returnOriginal:false}, (err, res) => {
+                    const user = res.value;
+                    // console.log('Send Message to ', res);
+                    // console.log(socket.id);
+                    io.to(user.socketID).emit('notification', user.notifications);
+                });
+            });
+
             let sendback = (message) => {
                 socket.emit('debug', message);
             }
@@ -57,14 +83,46 @@ module.exports = {
                eval(msg);
             });
 
-            socket.on('joinRoom', chat => {
-                console.log('Joined' + chat.name, chat.id);
-                socket.join(chat.id);
+            socket.on('joinRoom', chatID => {
+                socket.join(chatID);
+                
+                dbClient.collection('chats').findOneAndUpdate({_id:mID(chatID)},{$addToSet : {activeMembers: socket_userID}}, {returnOriginal:false}, (err, res) => {
+                    const chatInfo = res.value;
+                    frontEndID(chatInfo);
+                    // Removing extra unecessary stuff;
+                    delete chatInfo.messages;
+                    io.to(chatID).emit('chatInfoUpdate',chatInfo);
+                    // console.log(chatInfo);
+                });
             });
 
-            socket.on('leaveRoom', chat => {
-                console.log('Left' + chat.name, chat.id);
-                socket.leave(chat.id);
+            // Seperating out function as used in disconnect
+            function leaveRoom(chatID){
+                // Leave Chat
+                socket.leave(chatID);
+                // Updating chatroom info
+                dbClient.collection('chats').findOneAndUpdate({_id:mID(chatID)},{$pull : {activeMembers: socket_userID}}, {returnOriginal:false}, (err, res) => {
+                    const chatInfo = res.value;
+                    // Only proccess if we do have chatInfo. Will ahve none if we try to leave deleted room
+                    if(chatInfo){
+                        frontEndID(chatInfo);
+                        // Removing extra unecessary stuff;
+                        delete chatInfo.messages;
+                        io.to(chatID).emit('chatInfoUpdate',chatInfo);
+                    }
+                });
+            }
+
+            socket.on('leaveRoom', chatID => {
+                leaveRoom(chatID);                
+            });
+
+            socket.on('resetUnread', chatID => {
+                dbClient.collection('users').findOneAndUpdate({_id:mID(socket_userID), 'chats.id':mID(chatID)}, {$set : {'chats.$.unread': 0}}, {returnOriginal:false}, (err, res) => {
+                    let user = res.value;
+                    // console.log("resetUnread", res.value);
+                    socket.emit('chatlist', user.chats);
+                });
             });
 
             // Get Chat Info
@@ -81,8 +139,28 @@ module.exports = {
 
             socket.on('message', msg => {
                 let message = {date: new Date(), ...msg.msg};
-                dbClient.collection('chats').update({_id:mID(msg.chat.id)}, {$push : {messages: message}});
-                io.to(msg.chat.id).emit('message', message);
+                // dbClient.collection('chats').update({_id:mID(msg.chat.id)}, {$push : {messages: message}});
+                // Update the unread field of all inactive members of the chat
+                dbClient.collection('chats').findOneAndUpdate({_id:mID(msg.chat.id)}, {$push : {messages: message}}, {returnOriginal:false}, (err, res) => {
+                    let chat = res.value;
+                    let members = chat.members;
+                    let activeMembers = chat.activeMembers.map(d => ''+d);
+                    // console.log(members, activeMembers);
+                    let inactiveMembers = members.filter(d => !activeMembers.includes(''+d.id));
+
+                    // console.log(inactiveMembers);
+                    inactiveMembers.forEach(members => {
+                        let query = {_id:mID(members.id),'chats.id':mID(msg.chat.id)};
+                        let update = {$inc:{'chats.$.unread':1}};
+                        dbClient.collection('users').findOneAndUpdate(query, update, {returnOriginal:false}, (err,res) => {
+                            let user = res.value;
+                            // console.log(user, err);
+                            io.to(user.socketID).emit('chatlist',user.chats);
+                        });
+                    });
+                });
+                // Send Message
+                io.to(msg.chat.id).emit('message', {chatID:msg.chat.id, message});
             });
 
             // Handle Message Reacts
@@ -91,13 +169,13 @@ module.exports = {
                 reactions = reactions ? reactions : {like:0, dislike:0};
                 // Incrementing that reaction
                 reactions[incReaction]++;
-
+                console.log('messageReacted');
                 // Updating messages that match the date, userid of the chat
                 const query = {_id:mID(chatID), messages: {$elemMatch:{date: new Date(date),userID}}};
                 const update = {$set:{'messages.$.reactions':reactions}};
                 dbClient.collection('chats').findOneAndUpdate(query, update, {returnOriginal:false}, (err, res) => {
                     // If success, emit history of chat again so the message on client updates
-                    res.value && io.to(chatID).emit('loadHistory', res.value.messages);
+                    res.value && io.to(chatID).emit('loadHistory', {chatID, messages: res.value.messages});
                 });
             });
 
@@ -111,7 +189,7 @@ module.exports = {
                     const update = {$pull: {messages: {userID ,date: new Date(date)}}};
                     dbClient.collection('chats').findOneAndUpdate(query, update, {returnOriginal:false}, (err, res) => {
                         // If success, emit history of chat again so the message on client updates
-                        res.value && io.to(chatID).emit('loadHistory', res.value.messages);
+                        res.value && io.to(chatID).emit('loadHistory', {chatID, messages: res.value.messages});
                     });
                 }
                 else{
@@ -130,7 +208,7 @@ module.exports = {
                     const update = {$set:{'messages.$.message':message}};
                     dbClient.collection('chats').findOneAndUpdate(query, update, {returnOriginal:false}, (err, res) => {
                         // If success, emit history of chat again so the message on client updates
-                        res.value && io.to(chatID).emit('loadHistory', res.value.messages);
+                        res.value && io.to(chatID).emit('loadHistory', {chatID, messages: res.value.messages});
                     });
                 }
                 else{
@@ -184,10 +262,24 @@ module.exports = {
                 }
             })
 
-            socket.on('reqHistory', id => {
-                dbClient.collection('chats').findOne({_id:mID(id)}, (err, res) => {
+            // Role Change
+            socket.on('roleChange', ({chatID, userID, role}) => {
+                dbClient.collection('chats').findOneAndUpdate({_id:mID(chatID), 'members.id':mID(userID)}, {$set:{'members.$.role':role}}, {returnOriginal:false}, (err,res) => {
                     // console.log(res);
-                    socket.emit('loadHistory', res.messages);
+                    let chatInfo = res.value
+                    // console.log(chatInfo);
+                    frontEndID(chatInfo);
+                    // Removing extra unecessary stuff;
+                    delete chatInfo.messages;
+                    // Telling everyone in chatroom new chat info
+                    io.to(chatID).emit('chatInfoUpdate',chatInfo);
+                });
+            });
+
+            socket.on('reqHistory', chatID => {
+                dbClient.collection('chats').findOne({_id:mID(chatID)}, (err, res) => {
+                    // console.log(res);
+                    socket.emit('loadHistory', {chatID, messages: res.messages});
                 });
             });
 
@@ -259,6 +351,14 @@ module.exports = {
                         });
                     }else{
                         // Cannot Find User
+                        const notification = {
+                            title: 'Create Chat Failed',
+                            message: `No User: ${name}`,
+                            color: 'lightpink',
+                            // delay: 5000,
+                            // autohide: true,
+                        }
+                        notifyUser(socket_userID, notification);
                         console.log(`no user: ${name}`);
                     }
                 });
@@ -288,8 +388,24 @@ module.exports = {
                                     const user = res.value;
                                     // Update their chatlist
                                     io.to(user.socketID).emit('chatlist', user.chats);
-                                })
+                                    // Send them a notification
+                                    const notification = {
+                                        title: `${chat.name}: Welcome`,
+                                        message: `You have been added to chat ${chat.name}`,
+                                        color: 'lightgreen',
+                                        // delay: 5000,
+                                        // autohide: true,
+                                    }
+                                    notifyUser(user._id, notification);
+                                });
 
+                                // Telling Everyone else to update chat Info
+                                let chatInfo = chat;
+                                frontEndID(chatInfo);
+                                // Removing extra unecessary stuff;
+                                delete chatInfo.messages;
+                                // Telling everyone in chatroom new chat info
+                                io.to(chatID).emit('chatInfoUpdate',chatInfo);
                             }
                             // chat does not exist
                             else{
@@ -299,6 +415,15 @@ module.exports = {
                     }
                     // user not found
                     else{
+                        // Cannot Find User
+                        const notification = {
+                            title: 'Cannot Add User',
+                            message: `No User: ${name}`,
+                            color: 'lightpink',
+                            // delay: 5000,
+                            // autohide: true,
+                        }
+                        notifyUser(socket_userID, notification);
                         console.log('no user');
                     }
                 });
@@ -409,7 +534,15 @@ module.exports = {
                 }
             });
 
+            // Leaving all rooms and from active user list of those rooms
+            socket.on('disconnect', () => {
+                dbClient.collection('users').findOne({_id:mID(socket_userID)}, (err, res) => {
+                    let user = res;
+                    user.chats.forEach(({id}) => {
+                        leaveRoom(id);
+                    });
+                });
+            });
         });
-
     }
 }

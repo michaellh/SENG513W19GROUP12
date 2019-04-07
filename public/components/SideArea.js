@@ -70,18 +70,14 @@ export default class SideArea extends Component {
     }
 
     render() {
-        const style = {
-            border: '2px solid black',
-            height: '100%'
-        }
         return (
-            <div className={this.props.className} id={this.props.id} style={style}>
-                <TopBar modal={this.props.modal}/>
+            <div className={this.props.className} id={this.props.id}>
+                <TopBar modal={this.props.modal} toggleSplitScreen={this.props.toggleSplitScreen} toggleNotification={this.props.toggleNotification}  splitScreenState={this.props.splitScreenState} notificationState={this.props.notificationState} resetChat={this.props.resetChat}/>
                 <SideControl updateMode={this.updateMode} filterResult={this.filterResult} modal={this.props.modal} socket={this.props.socket} mode={this.state.mode}/>
                 <br />
                 {
                     this.state.mode == 'chats' ? 
-                    (<Chats chats={this.state.chats} chooseChat={this.props.chooseChat} chosenChat={this.props.chosenChat} deleteChat={this.deleteChat}/>) :
+                    (<Chats chats={this.state.chats} chooseChat={this.props.chooseChat} chosenChat={this.props.chosenChat} deleteChat={this.deleteChat} resetChat={this.props.resetChat} />) :
                     (<Friends friends={this.state.friends} />)
                 }
             </div>
