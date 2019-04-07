@@ -63,6 +63,8 @@ module.exports = {
                 });
             }
 
+            socket.on('notifySelf', notification => notifyUser(socket_userID, notification));
+
             socket.on('removeNotification', time => {
                 dbClient.collection('users').findOneAndUpdate({_id:mID(socket_userID)},{$pull : {notifications: {time : new Date(time)}}}, {returnOriginal:false}, (err, res) => {
                     const user = res.value;
@@ -158,7 +160,7 @@ module.exports = {
                     });
                 });
                 // Send Message
-                io.to(msg.chat.id).emit('message', message);
+                io.to(msg.chat.id).emit('message', {chatID:msg.chat.id, message});
             });
 
             // Handle Message Reacts
@@ -173,7 +175,7 @@ module.exports = {
                 const update = {$set:{'messages.$.reactions':reactions}};
                 dbClient.collection('chats').findOneAndUpdate(query, update, {returnOriginal:false}, (err, res) => {
                     // If success, emit history of chat again so the message on client updates
-                    res.value && io.to(chatID).emit('loadHistory', res.value.messages);
+                    res.value && io.to(chatID).emit('loadHistory', {chatID, messages: res.value.messages});
                 });
             });
 
@@ -187,7 +189,7 @@ module.exports = {
                     const update = {$pull: {messages: {userID ,date: new Date(date)}}};
                     dbClient.collection('chats').findOneAndUpdate(query, update, {returnOriginal:false}, (err, res) => {
                         // If success, emit history of chat again so the message on client updates
-                        res.value && io.to(chatID).emit('loadHistory', res.value.messages);
+                        res.value && io.to(chatID).emit('loadHistory', {chatID, messages: res.value.messages});
                     });
                 }
                 else{
@@ -206,7 +208,7 @@ module.exports = {
                     const update = {$set:{'messages.$.message':message}};
                     dbClient.collection('chats').findOneAndUpdate(query, update, {returnOriginal:false}, (err, res) => {
                         // If success, emit history of chat again so the message on client updates
-                        res.value && io.to(chatID).emit('loadHistory', res.value.messages);
+                        res.value && io.to(chatID).emit('loadHistory', {chatID, messages: res.value.messages});
                     });
                 }
                 else{
@@ -274,10 +276,10 @@ module.exports = {
                 });
             });
 
-            socket.on('reqHistory', id => {
-                dbClient.collection('chats').findOne({_id:mID(id)}, (err, res) => {
+            socket.on('reqHistory', chatID => {
+                dbClient.collection('chats').findOne({_id:mID(chatID)}, (err, res) => {
                     // console.log(res);
-                    socket.emit('loadHistory', res.messages);
+                    socket.emit('loadHistory', {chatID, messages: res.messages});
                 });
             });
 

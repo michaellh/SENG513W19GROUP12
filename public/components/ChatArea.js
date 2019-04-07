@@ -26,22 +26,28 @@ export default class ChatArea extends Component {
 
         this.props.socket.emit('reqHistory', this.props.chat.id);
 
-        props.socket.on('message', msg => {
-            // console.log(msg);
-            msg.date = new Date(msg.date);
-            this.setState({messages : [...this.state.messages, msg]});
-            this.scrollToBottom();
+        props.socket.on('message', ({chatID, message}) => {
+            // console.log(message);
+            if (chatID == this.state.chat.id){
+                message.date = new Date(message.date);
+                this.setState({messages : [...this.state.messages, message]});
+                // console.log(this.state.chat.name + 'Got Here');
+                this.scrollToBottom();
+            }
         });
 
-        props.socket.on('loadHistory', messages => {
-            // console.log(msg);
-            messages.forEach(d => d.date = new Date(d.date));
-            this.messages = messages;
-            this.setState({messages});
-            this.filterMessages(this.state.searchTerm);
-            if (this.props.switchRoom){
-                this.scrollToBottom();
-                this.props.updateSwitchRoom(false);
+        props.socket.on('loadHistory', ({chatID, messages}) => {
+            // console.log(messages);
+            console.log(this.state.chatID, chatID);
+            if (this.state.chat.id == chatID){
+                messages.forEach(d => d.date = new Date(d.date));
+                this.messages = messages;
+                this.setState({messages});
+                this.filterMessages(this.state.searchTerm);
+                if (this.props.switchRoom){
+                    this.scrollToBottom();
+                    this.props.updateSwitchRoom(false);
+                }
             }
         });        
     }
@@ -76,7 +82,7 @@ export default class ChatArea extends Component {
     }
 
     scrollToBottom(){
-        this.messageRef.current.scrollToBottom();
+        this.messageRef.current && this.messageRef.current.scrollToBottom();
     }
 
     filterMessages(searchTerm){

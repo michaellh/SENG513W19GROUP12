@@ -84,7 +84,7 @@ export default class MessageUnit extends Component {
         const {date, userName, userID, message, reactions} = this.state.message;
         return (
         <div>
-            <div id={`message_${index}`} className={`alert alert-primary m-2 ${isSelf ? 'alert-primary' : 'alert-info'}`}>
+            <div id={`message_${this.props.chatID}_${index}`} className={`alert alert-primary m-2 ${isSelf ? 'alert-primary' : 'alert-info'}`}>
                 <div className='text-secondary'>
                     <small>{userName} | {this.fmtDate(date)}</small>
                 </div>
@@ -117,7 +117,7 @@ export default class MessageUnit extends Component {
                     :
                     ''
                 }
-                <UncontrolledPopover trigger='click' isOpen={this.state.popoverOpen} toggle={this.togglePopover} placement="right" target={`message_${this.props.index}`}>
+                <UncontrolledPopover trigger='click' isOpen={this.state.popoverOpen} toggle={this.togglePopover} placement="right" target={`message_${this.props.chatID}_${this.props.index}`}>
                     <div className='btn-group input-group-lg'>
                         <button className='btn btn-outline-primary' onClick={this.handleLike}><i className='fas fa-thumbs-up'></i></button>
                         <button className='btn btn-outline-primary' onClick={this.handleDislike}><i className='fas fa-thumbs-down'></i></button>

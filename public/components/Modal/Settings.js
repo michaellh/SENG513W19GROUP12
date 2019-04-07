@@ -30,8 +30,10 @@ export default class Settings extends Component {
 
     handleClickScreen(e) {
         e.preventDefault();
-        console.log(e.target.value);
+        // console.log(e.target.value);
         this.setState({modeS: !this.state.modeS});
+        this.props.toggleSplitScreen(!this.state.modeS);
+        this.state.modeS && this.props.resetChat(2);
     }
 
     handleSubmit() {
