@@ -6,9 +6,14 @@ var crypto = require('crypto');
 var bcrypt = require('bcrypt');
 var nodemailer = require('nodemailer');
 var sgTransport = require('nodemailer-sendgrid-transport');
+var middleware = require('./middleware')
 
 module.exports = {
     initRoutes: function (app, dbClient) {
+        app.get('/verify-token', middleware.withAuth, function(req, res) {
+          res.sendStatus(200);
+        });
+
         app.post('/register', function (req, res) {
             dbClient.collection('users').findOne({ email: req.body.email }, function(err, user) {
                 if (err) {
@@ -17,7 +22,7 @@ module.exports = {
                 }
                 if (user)
                 {
-                    res.json("Error: Please choose a different email address.");
+                    res.status(409).json("Error: Please choose a different email address.");
                     return;
                 }
                 if (!user) //Ensure user does not already exist
@@ -81,10 +86,10 @@ module.exports = {
                         expiresIn: constants.USER_TIMEOUT
                     }
                 ); //expire in 30 mins
-                res.status(200).json({
-                    auth_token: token,
-                    timeout: constants.USER_TIMEOUT
-                });
+                res.cookie('token', token, {httpOnly: true}).status(200).json({
+                      auth_token: token,
+                      timeout: constants.USER_TIMEOUT
+                })
             }
             // If user is not found
             else {

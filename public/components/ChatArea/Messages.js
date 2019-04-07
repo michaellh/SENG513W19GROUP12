@@ -26,7 +26,9 @@ export default function Messages(props) {
         return (
             <div key={i} style={{textAlign: d.userID == props.user.id  ? 'right':'left'}}>
                 <div className='alert alert-primary m-2'>
-                    [{fmtDate(d.date)}] {d.userName}: <span dangerouslySetInnerHTML={{__html:filterMessage(props.searchTerm, d.message)}}></span>
+                    [{fmtDate(d.date)}] {d.userName}: 
+                    {props.searchTerm ? <span dangerouslySetInnerHTML={{__html:filterMessage(props.searchTerm, d.message)}}></span> : d.message}
+                    
                     {/* {d.message} */}
                     {
                         // SHow reaction div if there is a reaction

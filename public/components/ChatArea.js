@@ -37,11 +37,12 @@ export default class ChatArea extends Component {
     }
 
     componentWillReceiveProps(newProp){
-        // console.log(newProp.chat);
+        // Only load messages for room change
         if(this.state.chat.id != newProp.chat.id){
-            this.setState({chat:newProp.chat});
             this.props.socket.emit('reqHistory', newProp.chat.id);
         }
+        // Update the chat propertys
+        this.setState({chat:newProp.chat});
     }
 
     onMessage(message){
