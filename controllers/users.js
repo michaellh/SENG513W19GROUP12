@@ -17,7 +17,7 @@ module.exports = {
                 }
                 if (user)
                 {
-                    res.json("Error: Please choose a different email address.");
+                    res.status(409).json("Error: Please choose a different email address.");
                     return;
                 }
                 if (!user) //Ensure user does not already exist
