@@ -132,6 +132,7 @@ export default class Container extends Component {
 
     toggleNotification(notification){
         this.setState({notification});
+        // notification && this.setState({user:this.state.user});
     }
 
     resetChat(num){
@@ -154,7 +155,10 @@ export default class Container extends Component {
         return (
             <div className='container-fluid h-100'>
                 <div className='row h-100'>
-                    <SideArea className='col-2' id='side-area' updateUser={this.updateUser} user={this.state.user} chooseChat={this.chooseChat} socket={this.socket} modal={this.openModal} chosenChat={[this.state.chat,this.state.chat2]} resetChat={this.resetChat} toggleSplitScreen={this.toggleSplitScreen} toggleNotification={this.toggleNotification} splitScreenState={this.state.splitScreen} notificationState={this.state.notification}/>
+                    <SideArea className='col-2' id='side-area' updateUser={this.updateUser} user={this.state.user} socket={this.socket} modal={this.openModal} 
+                        chooseChat={this.chooseChat} chosenChat={[this.state.chat,this.state.chat2]} resetChat={this.resetChat} 
+                        toggleSplitScreen={this.toggleSplitScreen} toggleNotification={this.toggleNotification} 
+                        splitScreenState={this.state.splitScreen} notificationState={this.state.notification}/>
                     {this.state.splitScreen ? 
                         (
                             <div className='col-10'>

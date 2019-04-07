@@ -5,7 +5,7 @@ export default function TopBar(props) {
 
     let handleSettings = () => {
         const title = <span><i className='fas fas fa-cog'></i>  Settings</span>
-        const body = <Settings socket={props.socket} toggleSplitScreen={props.toggleSplitScreen} toggleNotification={props.toggleNotification}  splitScreenState={props.splitScreen} notificationState={props.notification} resetChat={props.resetChat}/>;
+        const body = <Settings socket={props.socket} toggleSplitScreen={props.toggleSplitScreen} toggleNotification={props.toggleNotification}  splitScreenState={props.splitScreenState} notificationState={props.notificationState} resetChat={props.resetChat}/>;
 
         props.modal(title,body);
     }
