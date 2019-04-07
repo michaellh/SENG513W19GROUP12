@@ -4,7 +4,7 @@ export default function Chats(props) {
 
     let chosen = props.chosenChat && props.chosenChat.id;
     // console.log(props);
-    const style = {width:'100%'};
+    const style = {border:'none'};
 
     const groupChats = props.chats.filter(chat => chat.group).map((d,i) => {
         return (
@@ -32,7 +32,7 @@ export default function Chats(props) {
         <div id={props.id} className='row'>
             {/* Only Render when there is Elements */}
             {!groupChats.length ? '' :
-            <div className='col-12 card' style={style}>
+            <div className='col-12 card w-100' style={style}>
                 <h5 className="card-header text-center" 
                     data-toggle="collapse" data-target="#collapseGroupChat" 
                     aria-expanded="true" aria-controls="collapseGroupChat">
@@ -45,7 +45,7 @@ export default function Chats(props) {
             }
             {/* Only Render when there is Elements */}
             {!singleChats.length ? '' :
-            <div className='col-12 card' style={style}>
+            <div className='col-12 card w-100' style={style}>
                 <h5 className="card-header text-center"
                     data-toggle="collapse" data-target="#collapseSingleChat" 
                     aria-expanded="true" aria-controls="collapseSingleChat">

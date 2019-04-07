@@ -14,13 +14,16 @@ export default class Controls extends Component {
 
         this.handleSubmit = this.handleSubmit.bind(this);
         this.textInput = React.createRef();
+        this.handleClick = this.handleClick.bind(this);
     }
 
     componentDidUpdate(){
         // this.textInput.current.focus();
     }
     
-
+    handleClick(e) {
+        e.preventDefault();
+    }
 
     handleSubmit(e) {
         e.preventDefault();
@@ -39,8 +42,8 @@ export default class Controls extends Component {
                         <input ref={this.textInput} type="text" className='form-control' placeholder={deadChat ? "Other user has left" : "Type a message..."} disabled={deadChat}/>
                         <div className='input-group-append'>
                             <button className='btn btn-primary btn-lg'><i className='fas fa-paper-plane'></i></button>
-                            <button className='btn btn-outline-primary'><i className='fas fa-smile'></i></button>
-                            <button className='btn btn-outline-primary'>GIF</button>
+                            <button className='btn btn-outline-primary' onClick={this.handleClick}><i className='fas fa-smile'></i></button>
+                            <button className='btn btn-outline-primary' onClick={this.handleClick}>GIF</button>
                         </div>
                     </div>
                 </form>

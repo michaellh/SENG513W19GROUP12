@@ -11,7 +11,7 @@ html, body {
 }
 
 #container {
-
+    
 }
 
 #chat-messages {
@@ -31,7 +31,7 @@ html, body {
     padding-bottom: 10px;
 }
 
-#messages {
+#chat-messages {
     border: solid #d9d9d9 0.5px;
 }
 

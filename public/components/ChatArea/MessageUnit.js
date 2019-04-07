@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import Reactions from '../Popover/Reactions';
+//import Reactions from '../Popover/Reactions';
 import { UncontrolledPopover, Popover } from 'reactstrap';
 
 export default class MessageUnit extends Component {
@@ -85,9 +85,9 @@ export default class MessageUnit extends Component {
         const {date, userName, userID, message, reactions} = this.state.message;
         return (
         <div>
-            <div id={`message_${index}`} className={`alert alert-primary m-2 ${isSelf ? 'alert-primary' : 'alert-info'}`}>
-                <div className='text-secondary'>
-                    <small>{userName} | {this.fmtDate(date)}</small>
+            <div id={`message_${index}`} className={`alert alert-primary m-2 ${isSelf ? 'alert-primary' : 'alert-dark'}`}>
+                <div className='text-dark'>
+                    <strong>{userName}&nbsp;&nbsp;</strong><small>{this.fmtDate(date)}</small>
                 </div>
                 { //Change to Edit Mode
                     this.state.editMode ?
