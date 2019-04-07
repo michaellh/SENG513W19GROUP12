@@ -24,7 +24,7 @@ import '../css/main.css'
 // import 'bootstrap/dist/css/bootstrap.min.css';
 
 let name = 'userAlex';
-// while(!(name = prompt("Please enter your name")));
+while(!(name = prompt("Please enter your name")));
 document.cookie = `user=${name}`;
 
 ReactDOM.render(routing, document.getElementById('container'));

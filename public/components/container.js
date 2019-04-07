@@ -12,7 +12,7 @@ export default class Container extends Component {
 
         this.state = {
             loading: true,
-            redirect: false
+            redirect: false,
             user : null,
             chat : null,
             modal : {title: 'Title', component: 'component', custom: false},
@@ -32,8 +32,8 @@ export default class Container extends Component {
         
         this.chatAreaRef = React.createRef();
         // 
-        this.socket = io("http://localhost:3000");
-        // this.socket = io();
+        // this.socket = io("http://localhost:3000");
+        this.socket = io();
         // Debuging function
         this.socket.on('debug', message => console.log('DEBUG', message));
         this.socket.emit('debug', 'sendback("Hello")');
@@ -173,10 +173,10 @@ export default class Container extends Component {
 
     render() {
         if (this.state.loading) {
-            return null
+            return null;
         }
         if (this.state.redirect){
-            return <Redirect to='/login' />
+            return <Redirect to='/login' />;
         }    
         return (
             <div className='container-fluid h-100'>
