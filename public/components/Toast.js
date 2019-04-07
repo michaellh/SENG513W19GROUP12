@@ -35,7 +35,7 @@ export default class Toast extends Component {
         $('.toast').toast();
         $('.toast').toast('show');
         $('.toast').on('hide.bs.toast', (e) => {
-            console.log(e.target.attributes);
+            this.props.socket.emit('removeNotification', e.target.attributes.time.value);
         });
     }
 

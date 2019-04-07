@@ -28,7 +28,7 @@ export default class Controls extends Component {
     handleSubmit(e) {
         e.preventDefault();
         let input = e.target.querySelector('input');
-        this.props.onMessage(input.value);
+        input.value !== '' && this.props.onMessage(input.value);
         input.value = '';
     }
     

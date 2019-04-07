@@ -15,6 +15,7 @@ export default class Container extends Component {
             switchRoom : false,
             splitScreen : false,
             chat2 : null,
+            notification : true,
         }
 
         this.chooseChat = this.chooseChat.bind(this);
@@ -22,6 +23,7 @@ export default class Container extends Component {
         this.updateUser = this.updateUser.bind(this);
         this.updateSwitchRoom = this.updateSwitchRoom.bind(this);
         this.toggleSplitScreen = this.toggleSplitScreen.bind(this);
+        this.toggleNotification = this.toggleNotification.bind(this);
         this.resetChat = this.resetChat.bind(this);
         
         this.chatAreaRef = React.createRef();
@@ -128,6 +130,10 @@ export default class Container extends Component {
         this.setState({splitScreen});
     }
 
+    toggleNotification(notification){
+        this.setState({notification});
+    }
+
     resetChat(num){
         if (num == 1){
             this.state.chat && this.socket.emit('leaveRoom', this.state.chat.id);
@@ -148,7 +154,7 @@ export default class Container extends Component {
         return (
             <div className='container-fluid h-100'>
                 <div className='row h-100'>
-                    <SideArea className='col-2' id='side-area' updateUser={this.updateUser} user={this.state.user} chooseChat={this.chooseChat} socket={this.socket} modal={this.openModal} chosenChat={[this.state.chat,this.state.chat2]} resetChat={this.resetChat} toggleSplitScreen={this.toggleSplitScreen}/>
+                    <SideArea className='col-2' id='side-area' updateUser={this.updateUser} user={this.state.user} chooseChat={this.chooseChat} socket={this.socket} modal={this.openModal} chosenChat={[this.state.chat,this.state.chat2]} resetChat={this.resetChat} toggleSplitScreen={this.toggleSplitScreen} toggleNotification={this.toggleNotification} splitScreenState={this.state.splitScreen} notificationState={this.state.notification}/>
                     {this.state.splitScreen ? 
                         (
                             <div className='col-10'>
@@ -185,7 +191,7 @@ export default class Container extends Component {
                     } */}
                     
                     <Modal modal={this.state.modal} />
-                    <Toast user={this.state.user} socket={this.socket} />
+                    {this.state.notification ? <Toast user={this.state.user} socket={this.socket} /> : ''}
                 </div>
             </div>
         );

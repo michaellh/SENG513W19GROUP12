@@ -72,7 +72,7 @@ export default class SideArea extends Component {
     render() {
         return (
             <div className={this.props.className} id={this.props.id}>
-                <TopBar modal={this.props.modal} toggleSplitScreen={this.props.toggleSplitScreen} resetChat={this.props.resetChat}/>
+                <TopBar modal={this.props.modal} toggleSplitScreen={this.props.toggleSplitScreen} toggleNotification={this.props.toggleNotification}  splitScreenState={this.props.splitScreen} notificationState={this.props.notification} resetChat={this.props.resetChat}/>
                 <SideControl updateMode={this.updateMode} filterResult={this.filterResult} modal={this.props.modal} socket={this.props.socket} mode={this.state.mode}/>
                 <br />
                 {

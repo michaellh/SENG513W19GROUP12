@@ -5,8 +5,8 @@ export default class Settings extends Component {
         super(props)
         
         this.state = {
-            modeN: false,
-            modeS: false,
+            modeN: this.props.notificationState,
+            modeS: this.props.splitScreenState,
         }
 
         this.handleClickNotifcations = this.handleClickNotifcations.bind(this);
@@ -24,8 +24,10 @@ export default class Settings extends Component {
 
     handleClickNotifcations(e) {
         e.preventDefault();
-        console.log(e.target.value);
+        // console.log(e.target.value);
         this.setState({modeN: !this.state.modeN});
+        this.props.toggleNotification(this.state.modeN);
+        !this.state.modeN && console.log('notifiy')
     }
 
     handleClickScreen(e) {
@@ -58,9 +60,9 @@ export default class Settings extends Component {
                         }
                         <button className='btn btn-danger btn-block'>Log Out</button>
                     </div>
-                    <div className="modal-footer">
+                    {/* <div className="modal-footer">
                         <button type="submit" className="btn btn-primary" data-dismiss="modal" onClick={this.handleSubmit}>Okay</button>
-                    </div>
+                    </div> */}
                 </form>
         )
     }
