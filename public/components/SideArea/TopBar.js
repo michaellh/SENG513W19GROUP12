@@ -4,7 +4,7 @@ import Settings from '../Modal/Settings';
 export default function TopBar(props) {
 
     let handleSettings = () => {
-        const title = 'Settings'
+        const title = <span><i className='fas fas fa-cog'></i>  Settings</span>
         const body = <Settings socket={props.socket} toggleSplitScreen={props.toggleSplitScreen} resetChat={props.resetChat}/>;
 
         props.modal(title,body);
