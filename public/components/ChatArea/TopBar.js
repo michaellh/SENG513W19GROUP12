@@ -9,8 +9,8 @@ import { UncontrolledPopover } from 'reactstrap';
 export default function TopBar(props) {
 
 	// Using group chatname from chat if groupchat. Else use the name from the user's table
-	let chatName = props.chat.group ? props.chat.name : props.user.chats.find(({id}) => id == props.chat.id).name;
-	let role = props.chat.group && props.chat.members.find(({id}) => id == props.user.id).role;
+	let chatName = props.chat && props.chat.group ? props.chat.name : props.user.chats.find(({id}) => id == props.chat.id).name;
+	let role = props.chat && props.chat.group && props.chat.members.find(({id}) => id == props.user.id).role;
 
 	let handleAddUser = () => {
 	    const title = 'Add User'
