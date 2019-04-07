@@ -116,7 +116,7 @@ module.exports = {
             socket.on('resetUnread', chatID => {
                 dbClient.collection('users').findOneAndUpdate({_id:mID(socket_userID), 'chats.id':mID(chatID)}, {$set : {'chats.$.unread': 0}}, {returnOriginal:false}, (err, res) => {
                     let user = res.value;
-                    console.log("resetUnread", res.value);
+                    // console.log("resetUnread", res.value);
                     socket.emit('chatlist', user.chats);
                 });
             });
@@ -150,7 +150,7 @@ module.exports = {
                         let update = {$inc:{'chats.$.unread':1}};
                         dbClient.collection('users').findOneAndUpdate(query, update, {returnOriginal:false}, (err,res) => {
                             let user = res.value;
-                            console.log(user, err);
+                            // console.log(user, err);
                             io.to(user.socketID).emit('chatlist',user.chats);
                         });
                     });
@@ -257,6 +257,20 @@ module.exports = {
                     renameUserChatTable(chat.id, socket_userID, name);
                 }
             })
+
+            // Role Change
+            socket.on('roleChange', ({chatID, userID, role}) => {
+                dbClient.collection('chats').findOneAndUpdate({_id:mID(chatID), 'members.id':mID(userID)}, {$set:{'members.$.role':role}}, {returnOriginal:false}, (err,res) => {
+                    // console.log(res);
+                    let chatInfo = res.value
+                    // console.log(chatInfo);
+                    frontEndID(chatInfo);
+                    // Removing extra unecessary stuff;
+                    delete chatInfo.messages;
+                    // Telling everyone in chatroom new chat info
+                    io.to(chatID).emit('chatInfoUpdate',chatInfo);
+                });
+            });
 
             socket.on('reqHistory', id => {
                 dbClient.collection('chats').findOne({_id:mID(id)}, (err, res) => {

@@ -12,7 +12,7 @@ export default function Chats(props) {
             <li key={i} className={`list-group-item ${chosen == d.id ? 'list-group-item-action active' : 'list-group-item-action' } `} 
                 onClick={() => {console.log(d.group);props.chooseChat(d)}}
                 >
-                {d.name} {d.unread ? <span class="badge badge-light">{d.unread}</span> : ''}
+                {d.name} {d.unread ? <span className="badge badge-light">{d.unread}</span> : ''}
             </li>
         )
     });
@@ -23,7 +23,7 @@ export default function Chats(props) {
             <li key={i} className={`list-group-item ${chosen == d.id ? 'list-group-item-action active' : 'list-group-item-action' } `} 
                 onClick={() => {console.log(d.group);props.chooseChat(d)}}
                 >
-                {d.name} {d.unread ? <span class="badge badge-light">{d.unread}</span> : ''}
+                {d.name} {d.unread ? <span className="badge badge-light">{d.unread}</span> : ''}
             </li>
         )
     });
