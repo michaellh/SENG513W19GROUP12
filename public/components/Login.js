@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import FormEditor from './Forms/FormEditor';
+import { Redirect } from 'react-router';
 import { Link } from 'react-router-dom'
 
 class Login extends Component {
@@ -8,6 +9,7 @@ class Login extends Component {
     this.state = {
       Username: {hasError: false, value: ""},
       Password: {hasError: false, value: ""},
+      Success: false
     };
 
     this.handleFieldChange = this.handleFieldChange.bind(this);
@@ -15,11 +17,10 @@ class Login extends Component {
   }
 
   handleFieldChange(fieldId, val) {
-    this.setState({ [fieldId]: { value : val, hasError: this.state[fieldId].hasError}});
+    this.setState({ [fieldId]: { value : val, hasError: false}});
   }
 
   handleSubmit(event) {
-      this.setState({ Username: { value : this.state.Username.value, hasError: !this.state.Username.hasError}});
       event.preventDefault()
 
       const userInfo = {
@@ -29,11 +30,41 @@ class Login extends Component {
 
       fetch("http://localhost:3000/sign-in", {
                 method: "POST",
-                mode: 'no-cors',
                 headers: new Headers({
-                  'Content-Type': 'application/json',
+                    "Content-Type": "application/x-www-form-urlencoded",
                 }),
-                body: userInfo
+                body: $.param(userInfo)
+            })
+            .then(response => {
+                if (!response.ok) {
+                  if (response.status === 401) {
+                    return response.json();
+                  }
+                  throw new Error(response.status);
+                }
+                else {
+                  return response.json();
+                }
+            }).then(data => {
+              console.log(data.message)
+              if (data.message === "The specified account does not exist.") {
+                this.setState({
+                  Username: { value: this.state.Username.value, hasError: true}
+                })
+              }
+              else if (data.message === "Incorrect password") {
+                this.setState({
+                  Password: { value: this.state.Password.value, hasError: true}
+                })
+              }
+              else {
+                console.log("SUCCESS")
+                alert("Sigin Sucessful")
+                console.log(data)
+                this.setState({
+                  Success: true
+                })
+              }
             })
             .catch((error) => {
                 console.error(error);
@@ -41,6 +72,10 @@ class Login extends Component {
   }
 
   render() {
+    if (this.state.Success === true ) {
+      return <Redirect to="/" />
+    }
+
     const fields = [{name: "Username", hasError: this.state.Username.hasError, placeholder:"Enter username"},
                     {name: "Password", hasError: this.state.Password.hasError, placeholder:"Enter password"}]
 

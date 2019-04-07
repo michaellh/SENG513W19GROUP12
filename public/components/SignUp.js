@@ -19,7 +19,7 @@ class SignUp extends Component {
   }
 
   handleFieldChange(fieldId, val) {
-    this.setState({ [fieldId]: { value : val, hasError: this.state[fieldId].hasError}});
+    this.setState({ [fieldId]: { value : val, hasError: false}});
   }
 
   handleSubmit(event) {
