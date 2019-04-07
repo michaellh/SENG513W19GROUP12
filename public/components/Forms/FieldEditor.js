@@ -20,8 +20,8 @@ class FieldEditor extends Component {
     return (
       <div className="form-group">
         <label style={{marginBottom:0}}><b>{this.props.id}</b></label>
-        <input className={"form-control " + (this.props.hasError ? 'is-invalid' : '')} onChange={this.handleChange} value={this.props.value} placeholder={this.props.placeholder} />
-        <div style={errorStyle}>Invalid {this.props.id}</div>
+        <input type={this.props.type} className={"form-control " + (this.props.hasError ? 'is-invalid' : '')} onChange={this.handleChange} value={this.props.value} placeholder={this.props.placeholder} />
+        <div style={errorStyle}>{this.props.errorMessage}</div>
       </div>
     );
   }

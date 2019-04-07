@@ -77,7 +77,7 @@ class Login extends Component {
     }
 
     const fields = [{name: "Username", hasError: this.state.Username.hasError, placeholder:"Enter username"},
-                    {name: "Password", hasError: this.state.Password.hasError, placeholder:"Enter password"}]
+                    {name: "Password", hasError: this.state.Password.hasError, placeholder:"Enter password", type: "password"}]
 
     return (
       <div className="container">

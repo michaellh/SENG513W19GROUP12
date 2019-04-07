@@ -19,8 +19,10 @@ class FormEditor extends Component {
         id={field.name}
         placeholder={field.placeholder}
         hasError={field.hasError}
+        errorMessage={field.errorMessage != null ? field.errorMessage : "Invalid " + field.name}
         onChange={this.handleFieldChange}
         value={this.props[field.name]}
+        type={field.type != null ? field.type : "text"}
       />
     ));
 

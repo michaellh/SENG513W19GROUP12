@@ -16,6 +16,49 @@ class SignUp extends Component {
 
     this.handleFieldChange = this.handleFieldChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
+    this.validateFields = this.validateFields.bind(this);
+    this.validateUsername = this.validateUsername.bind(this);
+    this.validatePassword = this.validatePassword.bind(this);
+    this.validatePasswordMatch = this.validatePasswordMatch.bind(this);
+    this.validateEmail = this.validateEmail.bind(this);
+  }
+
+  validateFields() {
+    this.validateUsername()
+    this.validatePassword()
+    this.validatePasswordMatch()
+    this.validateEmail()
+
+    if (this.state.Username.hasError || this.state.Password.hasError || this.state["Confirm Password"].hasError || this.state.Email.hasError) {
+      return false
+    }
+    return true
+  }
+
+  validateUsername() {
+    // TODO
+    this.setState({Username: {value: this.state.Username.value, hasError: true, errorMessage: "Invalid Username"}})
+    return false
+  }
+
+  validatePassword() {
+    // TODO
+    this.setState({Password: {value: this.state.Password.value, hasError: true, errorMessage: "Invalid Password"}})
+    return false
+  }
+
+  validatePasswordMatch() {
+    if (this.state.Password.value !== this.state["Confirm Password"].value) {
+      this.setState({"Confirm Password": {value: this.state["Confirm Password"].value, hasError: true}})
+    } else {
+      this.setState({"Confirm Password": {value: this.state["Confirm Password"].value, hasError: false}})
+    }
+  }
+
+  validateEmail() {
+    // TODO
+    this.setState({Email: {value: this.state.Email.value, hasError: true}})
+    return false
   }
 
   handleFieldChange(fieldId, val) {
@@ -24,46 +67,46 @@ class SignUp extends Component {
 
   handleSubmit(event) {
       event.preventDefault()
-      //this.setState({ Username: { value : this.state.Username.value, hasError: !this.state.Username.hasError}});
 
-      // TODO Handle Validiation
+      if (this.validateFields()) {
+        const userInfo = {
+          name: this.state.Username.value,
+          password: this.state.Password.value,
+          email: this.state.Email.value
+        }
 
-      const userInfo = {
-        name: this.state.Username.value,
-        password: this.state.Password.value,
-        email: this.state.Email.value
-      }
-
-      fetch("http://localhost:3000/register", {
-                method: "POST",
-                headers: new Headers({
-                    "Content-Type": "application/x-www-form-urlencoded",
-                }),
-                body: $.param(userInfo)
-            })
-            .then(response => {
-                if (!response.ok) {
-                  if (response.status === 409) {
-                    this.setState({
-                      Username: { value: this.state.Username.value, hasError: true}
-                    })
-                  }
-                  throw new Error(response.status);
-                }
-                else {
-                  return response.json();
-                }
-            }).then(data => {
-              console.log("SUCCESS")
-              alert("Signup Sucessful")
-              console.log(data)
-              this.setState({
-                Success: true
+        fetch("http://localhost:3000/register", {
+                  method: "POST",
+                  headers: new Headers({
+                      "Content-Type": "application/x-www-form-urlencoded",
+                  }),
+                  body: $.param(userInfo)
               })
-            })
-            .catch((error) => {
-                console.error(error);
-            });
+              .then(response => {
+                  if (!response.ok) {
+                    if (response.status === 409) {
+                      this.setState({
+                        // TODO
+                        Username: { value: this.state.Username.value, hasError: true}
+                      })
+                    }
+                    throw new Error(response.status);
+                  }
+                  else {
+                    return response.json();
+                  }
+              }).then(data => {
+                console.log("SUCCESS")
+                alert("Signup Sucessful")
+                console.log(data)
+                this.setState({
+                  Success: true
+                })
+              })
+              .catch((error) => {
+                  console.error(error);
+              });
+      }
   }
 
   render() {
@@ -72,8 +115,8 @@ class SignUp extends Component {
     }
 
     const fields = [{name: "Username", hasError: this.state.Username.hasError, placeholder:"Enter username"},
-                    {name: "Password", hasError: this.state.Password.hasError, placeholder:"Enter password"},
-                    {name: "Confirm Password", hasError: this.state["Confirm Password"].hasError, placeholder:"Confirm password"},
+                    {name: "Password", hasError: this.state.Password.hasError, placeholder:"Enter password", type: "password"},
+                    {name: "Confirm Password", hasError: this.state["Confirm Password"].hasError, placeholder:"Confirm password", type: "password", errorMessage:"Passwords do not match"},
                     {name: "Email", hasError: this.state.Email.hasError, placeholder:"Enter username"}];
 
     return (
