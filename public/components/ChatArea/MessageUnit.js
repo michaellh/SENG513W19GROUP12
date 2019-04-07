@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
-//import Reactions from '../Popover/Reactions';
-import { UncontrolledPopover, Popover } from 'reactstrap';
+
+import { UncontrolledPopover } from 'reactstrap';
 
 export default class MessageUnit extends Component {
     constructor(props) {

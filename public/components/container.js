@@ -57,7 +57,7 @@ export default class Container extends Component {
             // Only reset chat if we are on it
             if (this.state.chat && this.state.chat.id == chatID){
                 console.log('actual reset Chat')
-                this.state.chat && this.socket.emit('leaveRoom', this.state.chat);
+                this.state.chat && this.socket.emit('leaveRoom', this.state.chat.id);
                 this.setState({chat:null});
             }
         });
