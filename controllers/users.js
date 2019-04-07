@@ -6,9 +6,15 @@ var crypto = require('crypto');
 var bcrypt = require('bcrypt');
 var nodemailer = require('nodemailer');
 var sgTransport = require('nodemailer-sendgrid-transport');
+var middleware = require('./middleware')
 
 module.exports = {
     initRoutes: function (app, dbClient) {
+        app.get('/verify-token', middleware.withAuth, function(req, res) {
+          console.log("Hello")
+          res.sendStatus(200);
+        });
+
         app.post('/register', function (req, res) {
             dbClient.collection('users').findOne({ email: req.body.email }, function(err, user) {
                 if (err) {
@@ -81,10 +87,10 @@ module.exports = {
                         expiresIn: constants.USER_TIMEOUT
                     }
                 ); //expire in 30 mins
-                res.status(200).json({
-                    auth_token: token,
-                    timeout: constants.USER_TIMEOUT
-                });
+                res.cookie('token', token, {httpOnly: true}).status(200).json({
+                      auth_token: token,
+                      timeout: constants.USER_TIMEOUT
+                })
             }
             // If user is not found
             else {

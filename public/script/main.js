@@ -4,18 +4,18 @@ import Container from '../components/Container';
 import Navigation from '../components/Navigation';
 import Login from '../components/Login';
 import SignUp from '../components/SignUp';
-import { Route, BrowserRouter as Router } from 'react-router-dom'
+import { Route, Switch, BrowserRouter as Router } from 'react-router-dom'
 
 // import routes from './routes'
 
 const routing = (
   <Router>
-    <div>
-      <Route exact path="/" component={Navigation} />
+    <Switch>
+      <Route exact path="/" component={Container}/>
       <Route path="/login" component={Login} />
       <Route path="/reset-password" component={SignUp} />
       <Route path="/signup" component={SignUp} />
-    </div>
+    </Switch>
   </Router>
 )
 

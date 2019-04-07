@@ -8,12 +8,14 @@ const mongoClient = require('mongodb').MongoClient;
 const mongoURI = require('./controllers/constants').MONGO_URI;
 const mObjectId = require('mongodb').ObjectId;
 const passport = require('passport');
+const cookieParser = require('cookie-parser');
 
 // Serving Public Folder for Scripts
 app.use(express.static('public/dist'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(passport.initialize());
+app.use(cookieParser());
 
 var controllers = require('./controllers');
 var auth = require('./config');
