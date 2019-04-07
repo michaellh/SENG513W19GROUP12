@@ -11,7 +11,6 @@ var middleware = require('./middleware')
 module.exports = {
     initRoutes: function (app, dbClient) {
         app.get('/verify-token', middleware.withAuth, function(req, res) {
-          console.log("Hello")
           res.sendStatus(200);
         });
 

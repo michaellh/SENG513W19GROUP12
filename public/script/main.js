@@ -1,7 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import Container from '../components/Container';
-import Navigation from '../components/Navigation';
 import Login from '../components/Login';
 import SignUp from '../components/SignUp';
 import { Route, Switch, BrowserRouter as Router } from 'react-router-dom'

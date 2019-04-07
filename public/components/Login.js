@@ -49,12 +49,12 @@ class Login extends Component {
               console.log(data.message)
               if (data.message === "The specified account does not exist.") {
                 this.setState({
-                  Username: { value: this.state.Username.value, hasError: true}
+                  Username: { value: this.state.Username.value, hasError: true, errorMessage: data.message}
                 })
               }
               else if (data.message === "Incorrect password") {
                 this.setState({
-                  Password: { value: this.state.Password.value, hasError: true}
+                  Password: { value: this.state.Password.value, hasError: true, errorMessage: data.message}
                 })
               }
               else {

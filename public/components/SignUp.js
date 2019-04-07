@@ -36,15 +36,15 @@ class SignUp extends Component {
   }
 
   validateUsername() {
-    // TODO
-    this.setState({Username: {value: this.state.Username.value, hasError: true, errorMessage: "Invalid Username"}})
-    return false
+    if (this.state.Username.value.length < 3) {
+      this.setState({Username: {value: this.state.Username.value, hasError: true, errorMessage: "Username must have a minimum length of 3 characters"}})
+    }
   }
 
   validatePassword() {
-    // TODO
-    this.setState({Password: {value: this.state.Password.value, hasError: true, errorMessage: "Invalid Password"}})
-    return false
+    if (this.state.Username.value.length < 3) {
+      this.setState({Password: {value: this.state.Password.value, hasError: true, errorMessage: "Password must have a minimum length of 3"}})
+    }
   }
 
   validatePasswordMatch() {
@@ -56,13 +56,17 @@ class SignUp extends Component {
   }
 
   validateEmail() {
-    // TODO
-    this.setState({Email: {value: this.state.Email.value, hasError: true}})
-    return false
+    var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    if (this.state.Email.value.length < 1) {
+      this.setState({Email: {value: this.state.Email.value, hasError: true, errorMessage: "Email address is required"}})
+    }
+    else if (!re.test(String(this.state.Email.value).toLowerCase())) {
+      this.setState({Email: {value: this.state.Email.value, hasError: true, errorMessage: "Please enter a valid email address"}})
+    }
   }
 
   handleFieldChange(fieldId, val) {
-    this.setState({ [fieldId]: { value : val, hasError: false}});
+    this.setState({ [fieldId]: { value : val, hasError: false }});
   }
 
   handleSubmit(event) {
@@ -85,10 +89,7 @@ class SignUp extends Component {
               .then(response => {
                   if (!response.ok) {
                     if (response.status === 409) {
-                      this.setState({
-                        // TODO
-                        Username: { value: this.state.Username.value, hasError: true}
-                      })
+                      return response.json()
                     }
                     throw new Error(response.status);
                   }
@@ -96,12 +97,19 @@ class SignUp extends Component {
                     return response.json();
                   }
               }).then(data => {
-                console.log("SUCCESS")
-                alert("Signup Sucessful")
-                console.log(data)
-                this.setState({
-                  Success: true
-                })
+                if (data === "Error: Please choose a different email address.") {
+                  this.setState({
+                    Username: { value: this.state.Username.value, hasError: true, errorMessage: "Please choose a different email address"}
+                  })
+                }
+                else {
+                  console.log("SUCCESS")
+                  alert("Signup Sucessful")
+                  console.log(data)
+                  this.setState({
+                    Success: true
+                  })
+                }
               })
               .catch((error) => {
                   console.error(error);
@@ -114,10 +122,10 @@ class SignUp extends Component {
       return <Redirect to="/login" />
     }
 
-    const fields = [{name: "Username", hasError: this.state.Username.hasError, placeholder:"Enter username"},
-                    {name: "Password", hasError: this.state.Password.hasError, placeholder:"Enter password", type: "password"},
+    const fields = [{name: "Username", hasError: this.state.Username.hasError, placeholder:"Enter username", errorMessage: this.state.Username.errorMessage},
+                    {name: "Password", hasError: this.state.Password.hasError, placeholder:"Enter password", type: "password", errorMessage: this.state.Password.errorMessage},
                     {name: "Confirm Password", hasError: this.state["Confirm Password"].hasError, placeholder:"Confirm password", type: "password", errorMessage:"Passwords do not match"},
-                    {name: "Email", hasError: this.state.Email.hasError, placeholder:"Enter username"}];
+                    {name: "Email", hasError: this.state.Email.hasError, placeholder:"Enter username", errorMessage: this.state.Email.errorMessage}];
 
     return (
       <div className="container">
