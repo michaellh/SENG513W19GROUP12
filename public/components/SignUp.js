@@ -79,7 +79,7 @@ class SignUp extends Component {
           email: this.state.Email.value
         }
 
-        fetch("http://localhost:3000/register", {
+        fetch("/register", {
                   method: "POST",
                   headers: new Headers({
                       "Content-Type": "application/x-www-form-urlencoded",

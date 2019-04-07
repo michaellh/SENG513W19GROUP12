@@ -28,7 +28,7 @@ class Login extends Component {
         password: this.state.Password.value
       }
 
-      fetch("http://localhost:3000/sign-in", {
+      fetch("/sign-in", {
                 method: "POST",
                 headers: new Headers({
                     "Content-Type": "application/x-www-form-urlencoded",
@@ -46,8 +46,13 @@ class Login extends Component {
                   return response.json();
                 }
             }).then(data => {
-              console.log(data.message)
-              if (data.message === "The specified account does not exist.") {
+              if (data.message === "Missing credentials") {
+                this.setState({
+                  Username: { value: this.state.Username.value, hasError: true, errorMessage: "Invalid Username"},
+                  Password: { value: this.state.Password.value, hasError: true, errorMessage: "Invalid Password"}
+                })
+              }
+              else if(data.message === "The specified account does not exist.") {
                 this.setState({
                   Username: { value: this.state.Username.value, hasError: true, errorMessage: data.message}
                 })
