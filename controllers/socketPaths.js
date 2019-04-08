@@ -263,7 +263,7 @@ module.exports = {
             });
 
             // Set Style
-            socket.on('setStyle', ({chatID, style}) => {
+            socket.on('setStyle', ({userID, chatID, style}) => {
                 // Updating User Own Chat table
                 const query = {_id:mID(userID), 'chats.id': mID(chatID)};
                 const update = {$set:{'chats.$.style':style}};

@@ -4,12 +4,14 @@ export default class Customize extends Component{
     constructor(props) {
         super(props)
 
+        const {chosenFontSize,chosenFont,chosenFontColour,chosenMyBubbleColour,chosenOtherBubbleColour} = props.getStyle();
+
         this.state = {
-            chosenFontSize: 14,
-            chosenFont: 'Helvetica',
-            chosenFontColour: 'black',
-            chosenMyBubbleColour: 'Blue',
-            chosenOtherBubbleColour: 'darkGrey'
+            chosenFontSize,
+            chosenFont,
+            chosenFontColour,
+            chosenMyBubbleColour,
+            chosenOtherBubbleColour,
         }
 
         this.setFontSize = this.setFontSize.bind(this);
@@ -19,13 +21,11 @@ export default class Customize extends Component{
         this.handleDeleteChat = this.handleDeleteChat.bind(this);
         this.setMyBubbleColour = this.setMyBubbleColour.bind(this);
         this.setOtherBubbleColour = this.setOtherBubbleColour.bind(this);
+    }
 
-        $('#myModal').on('show.bs.modal', (e) => {
-            this.setState({
-                mode: false,
-                text:'',
-            })
-        });
+    componentWillReceiveProps(props){
+        const {chosenFontSize,chosenFont,chosenFontColour,chosenMyBubbleColour,chosenOtherBubbleColour} = props.getStyle();
+        this.setState({chosenFontSize,chosenFont,chosenFontColour,chosenMyBubbleColour,chosenOtherBubbleColour});
     }
 
     setFontSize(e){
@@ -59,6 +59,17 @@ export default class Customize extends Component{
         this.props.setFontState('fontColour', this.state.chosenFontColour);
         this.props.setBubbleColours('me', this.state.chosenMyBubbleColour);
         this.props.setBubbleColours('other', this.state.chosenOtherBubbleColour);
+        
+        
+        const style = {
+            'fontSize': this.state.chosenFontSize,
+            'font': this.state.chosenFont,
+            'fontColour': this.state.chosenFontColour,
+            'myBubbleColour': this.state.chosenMyBubbleColour,
+            'otherBubbleColour': this.state.chosenOtherBubbleColour
+        }
+        console.log(style);
+        this.props.socket.emit('setStyle',{userID: this.props.userID, chatID:this.props.chat.id, style});
     }
 
     render() {
@@ -79,7 +90,7 @@ export default class Customize extends Component{
                     <div className='row mb-2'>
                         <div className='col-5 form-group'>
                             <label htmlFor='sel1'>Font Size:</label>
-                            <select className='form-control' id='sel1' onChange={this.setFontSize} defaultValue={this.state.chosenFontSize}>
+                            <select className='form-control' id='sel1' onChange={this.setFontSize} value={this.state.chosenFontSize}>
                                 {/*<option value="" selected disabled hidden>{this.state.chosenFontSize}</option>*/}
                                 <option value='12'>12</option>
                                 <option value='14'>14</option>
@@ -93,7 +104,7 @@ export default class Customize extends Component{
                         <div className='col-2'></div>
                         <div className='col-5 form-group'>
                             <label htmlFor='sel2'>Font:</label>
-                            <select className='form-control' id='sel2' onChange={this.setFont}  defaultValue={this.state.chosenFont}>
+                            <select className='form-control' id='sel2' onChange={this.setFont}  value={this.state.chosenFont}>
                                 <option value='Helvetica'>Helvetica</option>
                                 <option value='Arial'>Arial</option>
                                 <option value='Times New Roman'>Times New Roman</option>
@@ -106,7 +117,7 @@ export default class Customize extends Component{
                     <div className='row mb-2'>
                         <div className='col-5 form-group'>
                             <label htmlFor='sel3'>Font Colour:</label>
-                            <select className='form-control' id='sel3' onChange={this.setFontColour} defaultValue={this.state.chosenFontColour}>
+                            <select className='form-control' id='sel3' onChange={this.setFontColour} value={this.state.chosenFontColour}>
                                 <option value='black'>Black</option>
                                 <option value='White'>White</option>
                                 <option value='Grey'>Grey</option>
@@ -122,7 +133,7 @@ export default class Customize extends Component{
                     <div className='row mb-2'>
                         <div className='col-5 form-group'>
                             <label htmlFor='sel3'>My Bubble Colour:</label>
-                            <select className='form-control' id='sel3' onChange={this.setMyBubbleColour} defaultValue={this.state.chosenMyBubbleColour}>
+                            <select className='form-control' id='sel3' onChange={this.setMyBubbleColour} value={this.state.chosenMyBubbleColour}>
                                 <option value='darkGrey'>Dark Grey</option>
                                 <option value='White'>White</option>
                                 <option value='Grey'>Grey</option>
@@ -135,7 +146,7 @@ export default class Customize extends Component{
                         <div className='col-2'></div>
                         <div className='col-5 form-group'>
                             <label htmlFor='sel3'>Other Bubble Color:</label>
-                            <select className='form-control' id='sel3' onChange={this.setOtherBubbleColour} defaultValue={this.state.chosenOtherBubbleColour}>
+                            <select className='form-control' id='sel3' onChange={this.setOtherBubbleColour} value={this.state.chosenOtherBubbleColour}>
                                 <option value='darkGrey'>Dark Grey</option>
                                 <option value='White'>White</option>
                                 <option value='Grey'>Grey</option>
