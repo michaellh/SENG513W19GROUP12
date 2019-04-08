@@ -83,6 +83,7 @@ export default class MessageUnit extends Component {
     render() {
         const {searchTerm, isSelf, index} = this.props;
         const {date, userName, userID, message, reactions} = this.state.message;
+        const fontObj = this.props.fontObj;
         return (
         <div>
             <div id={`message_${this.props.chatID}_${index}`} className={`alert alert-primary m-2 ${isSelf ? 'alert-primary' : 'alert-dark'}`}>
@@ -99,7 +100,7 @@ export default class MessageUnit extends Component {
                         </div>
                     </div>
                     :
-                    <div>
+                    <div style={{fontSize: fontObj.fontSize, fontFamily: fontObj.font, color: fontObj.fontColour}}>
                         {searchTerm ? <span dangerouslySetInnerHTML={{__html:message}}></span> : message}
                     </div> 
                 }

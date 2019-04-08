@@ -15,12 +15,16 @@ export default class ChatArea extends Component {
             messages:[],
             searchTerm:'',
             chatHeight: 0,
+            fontSize: 14,
+            font: 'Helvetica',
+            fontColour: 'black',
         };
 
         this.onMessage = this.onMessage.bind(this);
         this.filterMessages = this.filterMessages.bind(this);
         this.updateChatHeight = this.updateChatHeight.bind(this);
         this.scrollToBottom = this.scrollToBottom.bind(this);
+        this.setFontState = this.setFontState.bind(this);
 
         this.messageRef = React.createRef();
 
@@ -91,11 +95,21 @@ export default class ChatArea extends Component {
         this.setState({messages});
     }
 
+    setFontState(state, value) {
+        if (state=='fontSize') {
+            this.setState({fontSize: value});
+        } else if (state=='font') {
+            this.setState({font: value});
+        } else if (state=='fontColour') {
+            this.setState({fontColour: value});
+        }   
+    }
+
     render() {
         return (
             <div className={this.props.className} id={this.props.id}>
-                <TopBar  id='chat-topBar' className='row' chat={this.state.chat} user={this.props.user} socket={this.props.socket} modal={this.props.modal} filterMessages={this.filterMessages}/>
-                <Messages ref={this.messageRef} className='row' id='chat-messages' messages={this.state.messages} chat={this.state.chat} user={this.props.user} socket={this.props.socket} searchTerm={this.state.searchTerm} height={this.state.chatHeight}/>
+                <TopBar  id='chat-topBar' className='row' chat={this.state.chat} user={this.props.user} socket={this.props.socket} modal={this.props.modal} filterMessages={this.filterMessages} setFontState={this.setFontState}/>
+                <Messages ref={this.messageRef} className='row' id='chat-messages' messages={this.state.messages} chat={this.state.chat} user={this.props.user} socket={this.props.socket} searchTerm={this.state.searchTerm} height={this.state.chatHeight} fontObj={{fontSize: this.state.fontSize, font: this.state.font, fontColour: this.state.fontColour}}/>
                 <Controls  id='chat-controls' className='row' onMessage={this.onMessage} chat={this.state.chat} />
             </div>
         )
