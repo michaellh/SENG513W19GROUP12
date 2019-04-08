@@ -22,7 +22,7 @@ export default class Messages extends Component {
             const isSelf = message.userID == this.props.user.id;
             return (
                 <div key={i} className={`row ${isSelf ? 'justify-content-end' : 'justify-content-start'}`} style={{textAlign: isSelf ? 'right':'left'}}>
-                    <MessageUnit socket={this.props.socket} chatID={this.props.chat.id} searchTerm={this.props.searchTerm} message={message} isSelf={isSelf} index={i} />
+                    <MessageUnit socket={this.props.socket} chatID={this.props.chat.id} searchTerm={this.props.searchTerm} message={message} isSelf={isSelf} index={i} fontObj={this.props.fontObj}/>
                 </div>
             )
         });

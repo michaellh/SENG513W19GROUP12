@@ -33,7 +33,7 @@ export default function TopBar(props) {
 		// console.log(props.chat.id);
 		
 		const title = <span><i className='fas fas fa-tools'></i>  Customize</span>
-		const body = <Customize socket={props.socket} chat={props.chat}/>;
+		const body = <Customize socket={props.socket} chat={props.chat} setFontState={props.setFontState}/>;
 
 		props.modal(title,body);
   	}
