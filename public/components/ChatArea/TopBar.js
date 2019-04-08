@@ -42,7 +42,7 @@ export default function TopBar(props) {
 		// console.log(props.chat.id);
 		
 		const title = <span><i className='fas fas fa-user-cog'></i>  Manage Users</span>
-		const body = <ManageUsers socket={props.socket} chat={props.chat}/>;
+		const body = <ManageUsers socket={props.socket} chat={props.chat} role={role} userID={props.user.id}/>;
 
 		props.modal(title,body);
   	}
