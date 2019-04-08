@@ -28,7 +28,7 @@ export default class Messages extends Component {
         });
 
         return (
-            <div className={this.props.className} id={this.props.id} style={{height:this.props.height}}>
+            <div className={this.props.className} id={this.props.id} style={{height:this.props.height, background:this.props.bgColour}}>
                 <div className='col-12'>
                     {messages}
                     <div ref={this.endMessageRef}></div>
