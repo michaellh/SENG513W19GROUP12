@@ -83,7 +83,7 @@ export default class MessageUnit extends Component {
 
     render() {
         const {searchTerm, isSelf, index} = this.props;
-        const {date, userName, userID, message, reactions} = this.state.message;
+        const {date, userName, userID, message, reactions, type} = this.state.message;
         const fontObj = this.props.fontObj;
         const bubbleColours = this.props.bubbleColours;
         const bubbleColoursConv = {
@@ -113,7 +113,12 @@ export default class MessageUnit extends Component {
                     </div>
                     :
                     <div style={{fontSize: fontObj.fontSize, fontFamily: fontObj.font, color: fontObj.fontColour}}>
-                        {searchTerm ? <span dangerouslySetInnerHTML={{__html:message}}></span> : message}
+                        {
+                            type == 'GIF' ? 
+                            <img height={message.split(',')[0]} src={message.split(',')[1]}></img>
+                            :
+                            (searchTerm ? <span dangerouslySetInnerHTML={{__html:message}}></span> : message)
+                        }
                     </div> 
                 }
                 { // Show reaction div if there is a reaction
@@ -135,7 +140,10 @@ export default class MessageUnit extends Component {
                     <div className='btn-group input-group-lg'>
                         <button className='btn btn-outline-primary' onClick={this.handleLike}><i className='fas fa-thumbs-up'></i></button>
                         <button className='btn btn-outline-primary' onClick={this.handleDislike}><i className='fas fa-thumbs-down'></i></button>
-                        <button className={`btn ${this.state.editMode ? 'btn-primary' : 'btn-outline-primary'}`} onClick={this.toggleEdit} ><i className='fas fa-edit'></i></button>
+                        {/* Only addlow edit when message is text */}
+                        {!type ?
+                            <button className={`btn ${this.state.editMode ? 'btn-primary' : 'btn-outline-primary'}`} onClick={this.toggleEdit} ><i className='fas fa-edit'></i></button>
+                        : ''}
                         <button className='btn btn-outline-primary' onClick={this.handleDelete}><i className='fas fa-trash-alt'></i></button>
                     </div>
                 </UncontrolledPopover>

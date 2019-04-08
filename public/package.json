@@ -14,8 +14,10 @@
   "dependencies": {
     "bootstrap": "^4.3.1",
     "css-loader": "^2.1.1",
+    "emoji-picker-react": "^2.1.1",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
+    "react-giphy-component": "^1.0.5",
     "reactstrap": "^7.1.0",
     "style-loader": "^0.23.1",
     "styled-components": "^4.2.0"

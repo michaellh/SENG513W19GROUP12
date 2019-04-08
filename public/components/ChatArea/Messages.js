@@ -14,7 +14,7 @@ export default class Messages extends Component {
     }
 
     scrollToBottom(){
-        this.endMessageRef.current.scrollIntoView({ behavior: 'smooth' });
+        this.endMessageRef.current.scrollIntoView({ behavior: 'smooth' });       
     }
 
     render() {

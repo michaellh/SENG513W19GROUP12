@@ -97,14 +97,14 @@ export default class ChatArea extends Component {
         this.setState({chatHeight})
     }
 
-    onMessage(message){
+    onMessage(message, type = null){
         const {id:userID, name:userName} =this.props.user;
-        this.props.socket.emit('message', {chat : this.props.chat, msg : {userID, userName, message}});
+        this.props.socket.emit('message', {chat : this.props.chat, msg : {userID, userName, message, type}});
         // this.setState({messages : [...this.state.messages, message]});
     }
 
     scrollToBottom(){
-        this.messageRef.current && this.messageRef.current.scrollToBottom();
+            this.messageRef.current && this.messageRef.current.scrollToBottom();
     }
 
     filterMessages(searchTerm){
