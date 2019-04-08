@@ -38,23 +38,9 @@ var dbConnectPromise = new Promise(function(resolve, reject) {
         resolve();
     });
 });
-
 dbConnectPromise.then(function() {
-    console.log("bullshit");
-    // Catch all other GET requests and return our app
+    // Catch all other GET requests and serve our app in response
     app.get('*', (req, res) => {
         res.sendFile(path.join(__dirname, 'public/dist/index.html'));
     });
 });
-
-// mongoClient.connect(mongoURI, (err, client) => {
-//     if (err) throw err;
-
-//     dbClient = client.db("SENG513");
-//     console.log("Connected to the database!");
-//     //app.emit('db ready');
-//     controllers.initialize(io, dbClient);
-//     controllers.initRoutes(app, dbClient);
-//     controllers.startListening(http);
-//     auth.initPassport(dbClient);
-// });

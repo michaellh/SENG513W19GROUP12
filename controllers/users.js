@@ -184,7 +184,7 @@ function sendPasswordReset(req, res, user) {
             console.log("Error! Unable to send out reset email: " + err)
         }
         else {
-            res.sendStatus(200);
+            res.status(200).json("ok");
         }
     });
 }

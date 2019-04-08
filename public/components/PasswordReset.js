@@ -29,10 +29,9 @@ export default class PasswordReset extends Component {
         
         // Error-handle if the passwords don't match
         if(this.state.newPassword !== this.state.confirmPassword) {
-            console.log("Wrong passwords mango!");
+            alert("The passwords don't match!");
         }
         else {
-            console.log("Great passwords mango!");
             fetch(resetRoute + this.props.match.params.token, {
                 method: "POST",
                 mode: 'no-cors',
@@ -50,6 +49,7 @@ export default class PasswordReset extends Component {
     render() {
         return (
             <div>
+                <h1 style={{"textAlign" : "center"}}>NetChatter</h1>
                 <form id="reset-password-form">
                     <p>New Password</p>
                     <input type="text" id="new-password" onChange={this.handleNewPasswordTextChange} autoComplete="off"/>
