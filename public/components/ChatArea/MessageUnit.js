@@ -24,6 +24,7 @@ export default class MessageUnit extends Component {
 
         this.togglePopover = this.togglePopover.bind(this);
         this.toggleEdit = this.toggleEdit.bind(this);
+
     }
 
     fmtDate(date){
@@ -84,9 +85,20 @@ export default class MessageUnit extends Component {
         const {searchTerm, isSelf, index} = this.props;
         const {date, userName, userID, message, reactions} = this.state.message;
         const fontObj = this.props.fontObj;
+        const bubbleColours = this.props.bubbleColours;
+        const bubbleColoursConv = {
+            darkGrey: 'alert-dark',
+            White: 'alert-light',
+            Grey: 'alert-secondary',
+            Blue: 'alert-primary',
+            Red: 'alert-danger',
+            Green: 'alert-success',
+            Yellow: 'alert-warning',
+        };
+
         return (
         <div>
-            <div id={`message_${this.props.chatID}_${index}`} className={`alert alert-primary m-2 ${isSelf ? 'alert-primary' : 'alert-dark'}`}>
+            <div id={`message_${this.props.chatID}_${index}`} className={`alert m-2 ${isSelf ? bubbleColoursConv[bubbleColours.myBubbleColour] : bubbleColoursConv[bubbleColours.otherBubbleColour]}`}>
                 <div className='text-dark'>
                     <strong>{userName}&nbsp;&nbsp;</strong><small>{this.fmtDate(date)}</small>
                 </div>
