@@ -23,7 +23,6 @@ var auth = require('./config');
 
 // Connect to the MongoDB Atlas database
 let dbClient;
-
 var dbConnectPromise = new Promise(function(resolve, reject) {
     mongoClient.connect(mongoURI, (err, client) => {
         if (err) throw err;

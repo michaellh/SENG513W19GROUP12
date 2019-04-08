@@ -19,7 +19,7 @@ export default class ForgotPassword extends Component {
 
     handleFieldChange(fieldId, val) {
         this.setState({ [fieldId]: { value : val, hasError: false}});
-      }
+    }
 
     handleSubmit(e) {
         e.preventDefault();
@@ -47,13 +47,13 @@ export default class ForgotPassword extends Component {
             if(resData != "ok") {
                 this.setState({
                     Email: { value: this.state.Email.value, hasError: true, errorMessage: resData}
-                })
+                });
             }
             else {
                 alert("Email sent!");
                 this.setState({
                     Success: true
-                })
+                });
             }
         })
         .catch((error) => {
