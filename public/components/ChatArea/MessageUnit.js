@@ -124,8 +124,7 @@ export default class MessageUnit extends Component {
                 { // Show reaction div if there is a reaction
                     reactions ? 
                     <div>
-                        <small> </small>
-                        <small style={{float: isSelf ? 'left' : 'right'}}>
+                        <small style={{float: isSelf ? 'left' : 'right'}} className='mt-1'>
                             {reactions && reactions.like ? 
                                 <span className='badge badge-pill badge-success'>{reactions.like} <i className='fas fa-thumbs-up'></i></span> 
                             : ''} {reactions && reactions.dislike ? 

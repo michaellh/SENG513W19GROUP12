@@ -18,6 +18,17 @@ export default class Messages extends Component {
     }
 
     render() {
+        const bgColourConv = {
+            White: '#ffffff',
+            Black: '#262626',
+            Grey: '#b3b3b3',
+            Red: '#dc3545',
+            Blue:  '#007bff',
+            Green: '#28a745',
+            Purple: '#6f42c1',
+            Yellow: '#ffff99',
+            Orange: '#fd7e14',
+        }
         const messages = this.props.messages.map((message,i) => {
             const isSelf = message.userID == this.props.user.id;
             return (
@@ -28,7 +39,7 @@ export default class Messages extends Component {
         });
 
         return (
-            <div className={this.props.className} id={this.props.id} style={{height:this.props.height, background:this.props.bgColour}}>
+            <div className={this.props.className} id={this.props.id} style={{height:this.props.height, background:bgColourConv[this.props.bgColour]}}>
                 <div className='col-12'>
                     {messages}
                     <div ref={this.endMessageRef}></div>
