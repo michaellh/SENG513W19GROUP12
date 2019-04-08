@@ -50,6 +50,7 @@ export default class Customize extends Component{
     }
 
     handleDeleteChat(e) {
+        this.props.socket.emit('deleteChat', this.props.chat.id);
     }
 
     handleSave(e)  {
@@ -61,7 +62,6 @@ export default class Customize extends Component{
     }
 
     render() {
-
         return (
             <div>
                 <div className='modal-body' id='modalBody'>
@@ -69,7 +69,7 @@ export default class Customize extends Component{
                         <div className='form-group col-12'>
                             <label htmlFor='usr'>Chat Name:</label>
                             <div className='input-group'>
-                                <input type='text' className='form-control' placeholder={this.props.chat.name}></input>
+                                <input type='text' className='form-control' placeholder={this.props.chatName}></input>
                                 <div className='input-group-append'>
                                     <button className='btn btn-outline-primary' onClick={this.handleSaveGroupName}>Save</button>
                                 </div>

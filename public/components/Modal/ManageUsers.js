@@ -40,7 +40,7 @@ export default function ManageUser(props) {
         Object.keys(changesMade).forEach(userID => {
             if(changesMade[userID] == 'remove'){
                 // console.log('removed');
-                props.socket.emit('removeFromChat', {chatID, id:userID});
+                props.socket.emit('removeFromChat', {chatID,userID});
             }else{
                 // console.log('Emit', changesMade[userID]);
                 props.socket.emit('roleChange', {chatID, userID, role:changesMade[userID]});

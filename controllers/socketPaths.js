@@ -530,7 +530,7 @@ module.exports = {
                     io.to(user.socketID).emit('chatlist', user.chats);
                 });
                 // Updating the chat table member list
-                dbClient.collection('chats').findOneAndUpdate({_id:mID(chatID)},{$pull : {members: {id}}}, {returnOriginal:false}, (err, res) => {
+                dbClient.collection('chats').findOneAndUpdate({_id:mID(chatID)},{$pull : {members: {id:mID(id)}}}, {returnOriginal:false}, (err, res) => {
                     // console.log(res);
                     let chatInfo = res.value;
                     frontEndID(chatInfo);
@@ -538,7 +538,7 @@ module.exports = {
                     delete chatInfo.messages;
                     // Telling everyone in chatroom new chat info
                     io.to(chatID).emit('chatInfoUpdate',chatInfo);
-                    console.log(chatInfo);
+                    // console.log(chatInfo);
 
                     // Send Notification
                     const notification = {
@@ -552,7 +552,7 @@ module.exports = {
                 });
             }
 
-            socket.on('removeFromChat', ({chatID, id}) => leaveChat(chatID, id));
+            socket.on('removeFromChat', ({chatID, userID}) => leaveChat(chatID, userID));
 
             socket.on('deleteChat', chatID => deleteChat(chatID));
 

@@ -23,7 +23,7 @@ export default function TopBar(props) {
 		// console.log(props.chat.id);
 		
 		
-		const title = <span><i className='fas fa-trash-alt'></i>  {role == 'member' ? 'Leave' : 'Delete'} {chatName}?</span>
+		const title = <span><i className='fas fa-trash-alt'></i>  Leave {chatName}?</span>
 		const body = <LeaveChat socket={props.socket} chat={props.chat}/>;
 
 		props.modal(title,body);
@@ -33,7 +33,7 @@ export default function TopBar(props) {
 		// console.log(props.chat.id);
 		
 		const title = <span><i className='fas fas fa-tools'></i>  Customize</span>
-		const body = <Customize socket={props.socket} chat={props.chat} setFontState={props.setFontState} setBubbleColours={props.setBubbleColours}/>;
+		const body = <Customize socket={props.socket} chat={props.chat} chatName={chatName} setFontState={props.setFontState} setBubbleColours={props.setBubbleColours}/>;
 
 		props.modal(title,body);
   	}
