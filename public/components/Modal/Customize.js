@@ -21,11 +21,12 @@ export default class Customize extends Component{
         this.handleDeleteChat = this.handleDeleteChat.bind(this);
         this.setMyBubbleColour = this.setMyBubbleColour.bind(this);
         this.setOtherBubbleColour = this.setOtherBubbleColour.bind(this);
-    }
 
-    componentWillReceiveProps(props){
-        const {chosenFontSize,chosenFont,chosenFontColour,chosenMyBubbleColour,chosenOtherBubbleColour} = props.getStyle();
-        this.setState({chosenFontSize,chosenFont,chosenFontColour,chosenMyBubbleColour,chosenOtherBubbleColour});
+        // When animation finished, and modal closed, reset state
+        $('#myModal').on('show.bs.modal', (e) => {
+            const {chosenFontSize,chosenFont,chosenFontColour,chosenMyBubbleColour,chosenOtherBubbleColour} = props.getStyle();
+            this.setState({chosenFontSize,chosenFont,chosenFontColour,chosenMyBubbleColour,chosenOtherBubbleColour})
+        });
     }
 
     setFontSize(e){
@@ -53,14 +54,7 @@ export default class Customize extends Component{
         this.props.socket.emit('deleteChat', this.props.chat.id);
     }
 
-    handleSave(e)  {
-        this.props.setFontState('fontSize', this.state.chosenFontSize);
-        this.props.setFontState('font', this.state.chosenFont);
-        this.props.setFontState('fontColour', this.state.chosenFontColour);
-        this.props.setBubbleColours('me', this.state.chosenMyBubbleColour);
-        this.props.setBubbleColours('other', this.state.chosenOtherBubbleColour);
-        
-        
+    handleSave(e)  {  
         const style = {
             'fontSize': this.state.chosenFontSize,
             'font': this.state.chosenFont,

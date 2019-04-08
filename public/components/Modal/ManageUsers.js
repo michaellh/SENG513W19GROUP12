@@ -16,7 +16,8 @@ export default class ManageUser extends Component{
 
     }    
     
-    handleOnChange(userID, e) {
+    handleOnChange(d, userID, e) {
+        d.remove = true;
         this.changesMade[userID] = e.target.value;
     }
     
@@ -44,13 +45,13 @@ export default class ManageUser extends Component{
                     <div className='col-5 form-group'>
                         {
                             d.role=='member'?
-                            <select className='form-control' disabled={!this.isAdmin} onChange={(e)=>this.handleOnChange(d.id,e)}>
+                            <select className='form-control' disabled={!this.isAdmin} onChange={(e)=>this.handleOnChange(d, d.id,e)}>
                                 <option value='member'>Member</option>
                                 <option value='admin'>Admin</option>
                                 <option className='text-light bg-danger' value='remove'>Remove</option>
                             </select>
                             :
-                            <select className='form-control' disabled={!this.isAdmin} onChange={(e)=>this.handleOnChange(d.id,e)}>
+                            <select className='form-control' disabled={!this.isAdmin} onChange={(e)=>this.handleOnChange(d, d.id,e)}>
                                 <option value='admin'>Admin</option>
                                 <option value='member'>Member</option>
                                 <option className='text-light bg-danger' value='remove'>Remove</option>

@@ -26,8 +26,6 @@ export default class ChatArea extends Component {
         this.filterMessages = this.filterMessages.bind(this);
         this.updateChatHeight = this.updateChatHeight.bind(this);
         this.scrollToBottom = this.scrollToBottom.bind(this);
-        this.setFontState = this.setFontState.bind(this);
-        this.setBubbleColours = this.setBubbleColours.bind(this);
         this.getStyle = this.getStyle.bind(this);
 
         this.messageRef = React.createRef();
@@ -54,22 +52,6 @@ export default class ChatArea extends Component {
                 this.filterMessages(this.state.searchTerm);
                 // If we are switching rooms
                 if (this.props.switchRoom){
-                    // Load Styles for different room
-                    let style = props.user.chats.find(({id}) => id == chatID).style;
-                    console.log(style);
-                    if (style){
-                        const {fontSize,font,fontColour,myBubbleColour,otherBubbleColour} = style;
-                        this.setState({fontSize,font,fontColour,myBubbleColour,otherBubbleColour});
-                    }else{
-                        // Set to default state if style is not found
-                        this.setState({
-                                fontSize: 14,
-                                font: 'Helvetica',
-                                fontColour: 'black',
-                                myBubbleColour: 'Blue',
-                                otherBubbleColour: 'darkGrey',
-                            });
-                    }
                     this.scrollToBottom();
                     this.props.updateSwitchRoom(false);
                 }
@@ -81,6 +63,21 @@ export default class ChatArea extends Component {
         // Only load messages for room change
         if(this.state.chat.id != props.chat.id){
             this.props.socket.emit('reqHistory', props.chat.id);
+        }
+        // Load Styles for the room
+        let style = props.user.chats.find(({id}) => id == props.chat.id).style;
+        if (style){
+            const {fontSize,font,fontColour,myBubbleColour,otherBubbleColour} = style;
+            this.setState({fontSize,font,fontColour,myBubbleColour,otherBubbleColour});
+        }else{
+            // Set to default state if style is not found
+            this.setState({
+                    fontSize: 14,
+                    font: 'Helvetica',
+                    fontColour: 'black',
+                    myBubbleColour: 'Blue',
+                    otherBubbleColour: 'darkGrey',
+                });
         }
         // Update the chat propertys
         this.setState({chat:props.chat});
@@ -116,28 +113,10 @@ export default class ChatArea extends Component {
         this.setState({messages});
     }
 
-    setFontState(state, value) {
-        if (state=='fontSize') {
-            this.setState({fontSize: value});
-        } else if (state=='font') {
-            this.setState({font: value});
-        } else if (state=='fontColour') {
-            this.setState({fontColour: value});
-        }   
-    }
-
-    setBubbleColours(who, value) {
-        if (who=='me') {
-            this.setState({myBubbleColour: value});
-        } else if (who=='other') {
-            this.setState({otherBubbleColour: value});
-        }
-    }
-
     getStyle() {
         return {
             chosenFont:this.state.font,
-            chosenFontColor:this.state.fontColor,
+            chosenFontColour:this.state.fontColour,
             chosenFontSize:this.state.fontSize,
             chosenMyBubbleColour:this.state.myBubbleColour,
             chosenOtherBubbleColour:this.state.otherBubbleColour,
@@ -147,7 +126,7 @@ export default class ChatArea extends Component {
     render() {
         return (
             <div className={this.props.className} id={this.props.id}>
-                <TopBar  id='chat-topBar' className='row' chat={this.state.chat} user={this.props.user} socket={this.props.socket} modal={this.props.modal} filterMessages={this.filterMessages} setFontState={this.setFontState} setBubbleColours={this.setBubbleColours} getStyle={this.getStyle}/>
+                <TopBar  id='chat-topBar' className='row' chat={this.state.chat} user={this.props.user} socket={this.props.socket} modal={this.props.modal} filterMessages={this.filterMessages} getStyle={this.getStyle}/>
                 <Messages ref={this.messageRef} className='row' id='chat-messages' messages={this.state.messages} chat={this.state.chat} user={this.props.user} socket={this.props.socket} searchTerm={this.state.searchTerm} height={this.state.chatHeight} fontObj={{fontSize: this.state.fontSize, font: this.state.font, fontColour: this.state.fontColour}} bubbleColours={{myBubbleColour: this.state.myBubbleColour, otherBubbleColour: this.state.otherBubbleColour}}/>
                 <Controls  id='chat-controls' className='row' onMessage={this.onMessage} chat={this.state.chat} />
             </div>
