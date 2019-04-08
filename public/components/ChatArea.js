@@ -18,6 +18,8 @@ export default class ChatArea extends Component {
             fontSize: 14,
             font: 'Helvetica',
             fontColour: 'black',
+            myBubbleColour: 'Blue',
+            otherBubbleColour: 'darkGrey',
         };
 
         this.onMessage = this.onMessage.bind(this);
@@ -25,6 +27,7 @@ export default class ChatArea extends Component {
         this.updateChatHeight = this.updateChatHeight.bind(this);
         this.scrollToBottom = this.scrollToBottom.bind(this);
         this.setFontState = this.setFontState.bind(this);
+        this.setBubbleColours = this.setBubbleColours.bind(this);
 
         this.messageRef = React.createRef();
 
@@ -105,11 +108,19 @@ export default class ChatArea extends Component {
         }   
     }
 
+    setBubbleColours(who, value) {
+        if (who=='me') {
+            this.setState({myBubbleColour: value});
+        } else if (who=='other') {
+            this.setState({otherBubbleColour: value});
+        }
+    }
+
     render() {
         return (
             <div className={this.props.className} id={this.props.id}>
-                <TopBar  id='chat-topBar' className='row' chat={this.state.chat} user={this.props.user} socket={this.props.socket} modal={this.props.modal} filterMessages={this.filterMessages} setFontState={this.setFontState}/>
-                <Messages ref={this.messageRef} className='row' id='chat-messages' messages={this.state.messages} chat={this.state.chat} user={this.props.user} socket={this.props.socket} searchTerm={this.state.searchTerm} height={this.state.chatHeight} fontObj={{fontSize: this.state.fontSize, font: this.state.font, fontColour: this.state.fontColour}}/>
+                <TopBar  id='chat-topBar' className='row' chat={this.state.chat} user={this.props.user} socket={this.props.socket} modal={this.props.modal} filterMessages={this.filterMessages} setFontState={this.setFontState} setBubbleColours={this.setBubbleColours}/>
+                <Messages ref={this.messageRef} className='row' id='chat-messages' messages={this.state.messages} chat={this.state.chat} user={this.props.user} socket={this.props.socket} searchTerm={this.state.searchTerm} height={this.state.chatHeight} fontObj={{fontSize: this.state.fontSize, font: this.state.font, fontColour: this.state.fontColour}} bubbleColours={{myBubbleColour: this.state.myBubbleColour, otherBubbleColour: this.state.otherBubbleColour}}/>
                 <Controls  id='chat-controls' className='row' onMessage={this.onMessage} chat={this.state.chat} />
             </div>
         )

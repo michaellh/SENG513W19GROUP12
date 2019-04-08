@@ -8,13 +8,17 @@ export default class Customize extends Component{
             chosenFontSize: 14,
             chosenFont: 'Helvetica',
             chosenFontColour: 'black',
+            chosenMyBubbleColour: 'Blue',
+            chosenOtherBubbleColour: 'darkGrey'
         }
 
         this.setFontSize = this.setFontSize.bind(this);
         this.setFontColour = this.setFontColour.bind(this);
         this.setFont = this.setFont.bind(this);
         this.handleSave = this.handleSave.bind(this);
-        this.handleSaveGroupName = this.handleSaveGroupName.bind(this);
+        this.handleDeleteChat = this.handleDeleteChat.bind(this);
+        this.setMyBubbleColour = this.setMyBubbleColour.bind(this);
+        this.setOtherBubbleColour = this.setOtherBubbleColour.bind(this);
 
         $('#myModal').on('show.bs.modal', (e) => {
             this.setState({
@@ -37,14 +41,23 @@ export default class Customize extends Component{
         this.setState({chosenFont: e.target.value});
     }
 
+    setMyBubbleColour(e) {
+        this.setState({chosenMyBubbleColour: e.target.value});
+    }
 
-    handleSaveGroupName(e) {
+    setOtherBubbleColour(e) {
+        this.setState({chosenOtherBubbleColour: e.target.value});
+    }
+
+    handleDeleteChat(e) {
     }
 
     handleSave(e)  {
         this.props.setFontState('fontSize', this.state.chosenFontSize);
         this.props.setFontState('font', this.state.chosenFont);
         this.props.setFontState('fontColour', this.state.chosenFontColour);
+        this.props.setBubbleColours('me', this.state.chosenMyBubbleColour);
+        this.props.setBubbleColours('other', this.state.chosenOtherBubbleColour);
     }
 
     render() {
@@ -109,26 +122,33 @@ export default class Customize extends Component{
                     <div className='row mb-2'>
                         <div className='col-5 form-group'>
                             <label htmlFor='sel3'>My Bubble Colour:</label>
-                            <select className='form-control' id='sel3' onChange={this.setFontColour}>
-                                <option value='black'>black</option>
-                                <option value='red'>red</option>
-                                <option value='blue'>blue</option>
-                                <option value='green'>green</option>
+                            <select className='form-control' id='sel3' onChange={this.setMyBubbleColour} defaultValue={this.state.chosenMyBubbleColour}>
+                                <option value='darkGrey'>Dark Grey</option>
+                                <option value='White'>White</option>
+                                <option value='Grey'>Grey</option>
+                                <option value='Blue'>Blue</option>
+                                <option value='Red'>Red</option>
+                                <option value='Green'>Green</option>
+                                <option value='Yellow'>Yellow</option>
                             </select>
                         </div>
                         <div className='col-2'></div>
                         <div className='col-5 form-group'>
-                            <label htmlFor='sel3'>Bubble Color:</label>
-                            <select className='form-control' id='sel3' onChange={this.setFontColour}>
-                                <option value='black'>black</option>
-                                <option value='red'>red</option>
-                                <option value='blue'>blue</option>
-                                <option value='green'>green</option>
+                            <label htmlFor='sel3'>Other Bubble Color:</label>
+                            <select className='form-control' id='sel3' onChange={this.setOtherBubbleColour} defaultValue={this.state.chosenOtherBubbleColour}>
+                                <option value='darkGrey'>Dark Grey</option>
+                                <option value='White'>White</option>
+                                <option value='Grey'>Grey</option>
+                                <option value='Blue'>Blue</option>
+                                <option value='Red'>Red</option>
+                                <option value='Green'>Green</option>
+                                <option value='Yellow'>Yellow</option>
                             </select>
                         </div>
                     </div>
                 </div>
                 <div className="modal-footer">
+                    <button className="btn btn-danger mr-auto" data-dismiss="modal" onClick={this.handleDeleteChat}>Delete Chat</button>
                     <button className="btn btn-secondary" data-dismiss="modal">Cancel</button>
                     <button className="btn btn-primary" data-dismiss="modal" onClick={this.handleSave}>Save</button>
                 </div>
