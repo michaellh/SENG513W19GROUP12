@@ -91,7 +91,7 @@ export default class ChatArea extends Component {
     updateChatHeight(){
         const windowHeight = parseInt(window.innerHeight);     
         const topBarHeight = $('#chat-topBar').outerHeight(true);
-        const controlsHeight = $('#chat-controls').outerHeight(true);;
+        const controlsHeight = $('#chat-controls').outerHeight(true);
 
         const chatHeight = windowHeight - topBarHeight - controlsHeight + 'px';
         this.setState({chatHeight})
