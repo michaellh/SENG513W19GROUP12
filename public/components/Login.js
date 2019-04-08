@@ -100,7 +100,7 @@ class Login extends Component {
             </div>
           </div>
         </form>
-        <Link to="/reset-password"><button className="btn btn-link" style={{paddingLeft:0}}>Forgot Password?</button></Link>
+        <Link to="/forgot-password"><button className="btn btn-link" style={{paddingLeft:0}}>Forgot Password?</button></Link>
       </div>
     )
   }
