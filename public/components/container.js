@@ -193,13 +193,13 @@ export default class Container extends Component {
                                         this.state.chat ? 
                                         <ChatArea split={1} className='col-6' id='chat-area' chat={this.state.chat} socket={this.socket} user={this.state.user} modal={this.openModal} switchRoom={this.state.switchRoom} updateSwitchRoom={this.updateSwitchRoom} />
                                         :
-                                        <h1 className='col text-center align-self-center'>You have no chats...</h1>
+                                        <h1 className='col text-center align-self-center'>Open a chat...</h1>
                                     }
                                     {
                                         this.state.chat2 ? 
                                         <ChatArea split={2} className='col-6' id='chat-area' chat={this.state.chat2} socket={this.socket} user={this.state.user} modal={this.openModal} switchRoom={this.state.switchRoom} updateSwitchRoom={this.updateSwitchRoom} />
                                         :
-                                        <h1 className='col text-center align-self-center'>You have no chats...</h1>
+                                        <h1 className='col text-center align-self-center'>Open a chat...</h1>
                                     }
                                 </div>
                             </div>
@@ -209,7 +209,7 @@ export default class Container extends Component {
                             this.state.chat ? 
                             <ChatArea split={1} className='col-10' id='chat-area' chat={this.state.chat} socket={this.socket} user={this.state.user} modal={this.openModal} switchRoom={this.state.switchRoom} updateSwitchRoom={this.updateSwitchRoom} />
                             :
-                            <h1 className='col-10 text-center align-self-center'>You have no chats...</h1>
+                            <h1 className='col-10 text-center align-self-center'>Open a chat...</h1>
                         )
                     
                     }
@@ -217,7 +217,7 @@ export default class Container extends Component {
                         this.state.chat ? 
                         <ChatArea className='col-10' id='chat-area' chat={this.state.chat} socket={this.socket} user={this.state.user} modal={this.openModal} switchRoom={this.state.switchRoom} updateSwitchRoom={this.updateSwitchRoom} />
                         :
-                        <h1 className='col-10 text-center align-self-center'>You have no chats...</h1>
+                        <h1 className='col-10 text-center align-self-center'>Open a chat...</h1>
                     } */}
                     
                     <Modal modal={this.state.modal} />

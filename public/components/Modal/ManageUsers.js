@@ -1,43 +1,78 @@
 import React, { Component } from 'react'
 
-export default function ManageUser(props) {
-    const members = props.chat.members.map((d,i) => {
-        return (
-            <div key={i} className='row'>
-                <div className='col-5'>
-                    <h5>{d.name}</h5>
-                </div>
-                <div className='col-5 form-group'>
-                    {
-                        d.role=='member'?
-                        <select className='form-control'>
-                            <option value='member'>Member</option>
-                            <option value='admin'>Admin</option>
-                        </select>
-                        :
-                        <select className='form-control'>
-                            <option value='admin'>Admin</option>
-                            <option value='member'>Member</option>
-                        </select>
-                    }
-                </div>
-            </div>
-        )
-    });
+export default class ManageUser extends Component{
+    constructor(props) {
+        super(props)
+        
+        this.state ={
+            isAdmin : props.role == 'admin',
+        }
 
-    let handleSave = (e) => {
+        this.changesMade = {};
+
+        this.handleOnChange = this.handleOnChange.bind(this);
+        this.handleSave - this.handleSave.bind(this);
+
     }
 
-
-    return (
-        <div>
+    componentWillReceiveProps(props){
+        this.setState({isAdmin : props.role == 'admin'});
+    }
+    
+    handleOnChange(userID, e) {
+        this.changesMade[userID] = e.target.value;
+    }
+    
+    handleSave() {
+        const chatID = this.props.chat.id;
+        Object.keys(this.changesMade).forEach(userID => {
+            if(this.changesMade[userID] == 'remove'){
+                // console.log('removed');
+                this.props.socket.emit('removeFromChat', {chatID,userID});
+            }else{
+                // console.log('Emit', changesMade[userID]);
+                this.props.socket.emit('roleChange', {chatID, userID, role:changesMade[userID]});
+            }
+        });
+        // changesMade.forEach(change => console.log(change));
+    }
+    
+    render(){
+        const members = this.props.chat.members.map((d,i) => {
+            return (
+                <div key={i} className='row'>
+                    <div className='col-5'>
+                        <h5>{d.name}</h5>
+                    </div>
+                    <div className='col-5 form-group'>
+                        {
+                            d.role=='member'?
+                            <select className='form-control' disabled={!this.state.isAdmin} onChange={(e)=>this.handleOnChange(d.id,e)}>
+                                <option value='member'>Member</option>
+                                <option value='admin'>Admin</option>
+                                <option className='text-light bg-danger' value='remove'>Remove</option>
+                            </select>
+                            :
+                            <select className='form-control' disabled={!this.state.isAdmin} onChange={(e)=>this.handleOnChange(d.id,e)}>
+                                <option value='admin'>Admin</option>
+                                <option value='member'>Member</option>
+                                <option className='text-light bg-danger' value='remove'>Remove</option>
+                            </select>
+                        }
+                    </div>
+                </div>
+            )
+        });
+        return (
+            <div>
                 <div className='modal-body' id='modalBody'>
                     {members}
                 </div>
                 <div className='modal-footer'>
                     <button className='btn btn-secondary' data-dismiss='modal'>Cancel</button>
-                    <button className='btn btn-primary' data-dismiss='modal' onClick={handleSave}>Save</button>
+                    {this.state.isAdmin ? <button className='btn btn-primary' data-dismiss='modal' onClick={this.handleSave}>Save</button> : ''}
                 </div>
             </div>
-    )
+        )       
+    }
 }

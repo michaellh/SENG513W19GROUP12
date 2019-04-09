@@ -16,10 +16,12 @@ export default class SideArea extends Component {
             chats: this.chats,
             friends: this.friends,
             searchTerm: '',
+            chatHeight: 0,
         }
 
         this.updateMode = this.updateMode.bind(this);
         this.filterResult = this.filterResult.bind(this);
+        this.updateChatHeight = this.updateChatHeight.bind(this);
         // console.log(this.props);
 
         props.socket.on('chatlist', chats => {
@@ -50,6 +52,19 @@ export default class SideArea extends Component {
         this.filterResult(this.state.searchTerm);
     }
 
+    componentDidMount(){
+        this.updateChatHeight();
+        window.addEventListener('resize', this.updateChatHeight);
+    }
+
+    updateChatHeight(){
+        const windowHeight = parseInt(window.innerHeight);     
+        const topSectionHeight = $('#side_topSection').outerHeight(true);
+
+        const chatHeight = windowHeight - topSectionHeight - 20 + 'px';
+        this.setState({chatHeight})
+    }
+
     updateMode(mode){
         this.setState({mode:mode});
     }
@@ -72,14 +87,17 @@ export default class SideArea extends Component {
     render() {
         return (
             <div className={this.props.className} id={this.props.id}>
-                <TopBar modal={this.props.modal} toggleSplitScreen={this.props.toggleSplitScreen} toggleNotification={this.props.toggleNotification}  splitScreenState={this.props.splitScreenState} notificationState={this.props.notificationState} resetChat={this.props.resetChat}/>
-                <SideControl updateMode={this.updateMode} filterResult={this.filterResult} modal={this.props.modal} socket={this.props.socket} mode={this.state.mode}/>
-                <br />
-                {
-                    this.state.mode == 'chats' ? 
-                    (<Chats chats={this.state.chats} chooseChat={this.props.chooseChat} chosenChat={this.props.chosenChat} deleteChat={this.deleteChat} resetChat={this.props.resetChat} />) :
-                    (<Friends friends={this.state.friends} />)
-                }
+                <div id='side_topSection'>
+                    <TopBar modal={this.props.modal} toggleSplitScreen={this.props.toggleSplitScreen} toggleNotification={this.props.toggleNotification}  splitScreenState={this.props.splitScreenState} notificationState={this.props.notificationState} resetChat={this.props.resetChat}/>
+                    <SideControl updateMode={this.updateMode} filterResult={this.filterResult} modal={this.props.modal} socket={this.props.socket} mode={this.state.mode}/>
+                </div>
+                <div style={{height:this.state.chatHeight,overflowY:'auto',overflowX:'hidden'}}>
+                    {
+                        this.state.mode == 'chats' ? 
+                        (<Chats chats={this.state.chats} chooseChat={this.props.chooseChat} chosenChat={this.props.chosenChat} deleteChat={this.deleteChat} resetChat={this.props.resetChat} />) :
+                        (<Friends friends={this.state.friends} />)
+                    }
+                </div>
             </div>
         )
     }
