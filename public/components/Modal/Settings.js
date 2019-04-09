@@ -18,9 +18,9 @@ export default class Settings extends Component {
         // When animation finished, and modal closed, reset state
         $('#myModal').on('show.bs.modal', (e) => {
             this.setState({
-                mode: false,
-                text:'',
-            })
+                modeN: this.props.notificationState,
+                modeS: this.props.splitScreenState,
+            });
         });
     }
 
