@@ -29,29 +29,41 @@ class SignUp extends Component {
     this.validatePasswordMatch()
     this.validateEmail()
 
-    if (this.state.Username.hasError || this.state.Password.hasError || this.state["Confirm Password"].hasError || this.state.Email.hasError) {
-      return false
+    if (this.validateUsername() && this.validatePassword() && this.validatePasswordMatch() && this.validateEmail()) {
+      return true
     }
-    return true
+    return false
   }
 
   validateUsername() {
     if (this.state.Username.value.length < 3) {
       this.setState({Username: {value: this.state.Username.value, hasError: true, errorMessage: "Username must have a minimum length of 3 characters"}})
+      return false
+    }
+    else {
+      this.setState({Username: {value: this.state.Username.value, hasError: false, errorMessage: "Username must have a minimum length of 3 characters"}})
+      return true
     }
   }
 
   validatePassword() {
-    if (this.state.Username.value.length < 3) {
+    if (this.state.Password.value.length < 3) {
       this.setState({Password: {value: this.state.Password.value, hasError: true, errorMessage: "Password must have a minimum length of 3"}})
+      return false
+    }
+    else {
+      this.setState({Password: {value: this.state.Password.value, hasError: false, errorMessage: "Password must have a minimum length of 3"}})
+      return true
     }
   }
 
   validatePasswordMatch() {
     if (this.state.Password.value !== this.state["Confirm Password"].value) {
       this.setState({"Confirm Password": {value: this.state["Confirm Password"].value, hasError: true}})
+      return false
     } else {
       this.setState({"Confirm Password": {value: this.state["Confirm Password"].value, hasError: false}})
+      return true
     }
   }
 
@@ -59,9 +71,15 @@ class SignUp extends Component {
     var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     if (this.state.Email.value.length < 1) {
       this.setState({Email: {value: this.state.Email.value, hasError: true, errorMessage: "Email address is required"}})
+      return false
     }
     else if (!re.test(String(this.state.Email.value).toLowerCase())) {
       this.setState({Email: {value: this.state.Email.value, hasError: true, errorMessage: "Please enter a valid email address"}})
+      return false
+    }
+    else {
+      this.setState({Email: {value: this.state.Email.value, hasError: false, errorMessage: "Please enter a valid email address"}})
+      return true
     }
   }
 
@@ -107,13 +125,20 @@ class SignUp extends Component {
                       Username: { value: this.state.Username.value, hasError: true, errorMessage: "Please choose a different username"}
                     })
                 }
-                else {
+                else if (data.auth_token != null) {
                   console.log("SUCCESS")
                   alert("Signup Sucessful")
                   console.log(data)
                   this.setState({
                     Success: true
                   })
+                }
+                else {
+                  this.setState({
+                    Email: { value: this.state.Email.value, hasError: true, errorMessage: "An unknown occured. Please try again later."},
+                    Username: { value: this.state.Username.value, hasError: true, errorMessage: "An unknown occured. Please try again later."}
+                  })
+                  console.error(data)
                 }
               })
               .catch((error) => {
@@ -127,10 +152,10 @@ class SignUp extends Component {
       return <Redirect to="/login" />
     }
 
-    const fields = [{name: "Username", hasError: this.state.Username.hasError, placeholder:"Enter username", errorMessage: this.state.Username.errorMessage},
+    const fields = [{name: "Email", hasError: this.state.Email.hasError, placeholder:"Enter email", errorMessage: this.state.Email.errorMessage},
+                    {name: "Username", hasError: this.state.Username.hasError, placeholder:"Enter username", errorMessage: this.state.Username.errorMessage},
                     {name: "Password", hasError: this.state.Password.hasError, placeholder:"Enter password", type: "password", errorMessage: this.state.Password.errorMessage},
-                    {name: "Confirm Password", hasError: this.state["Confirm Password"].hasError, placeholder:"Confirm password", type: "password", errorMessage:"Passwords do not match"},
-                    {name: "Email", hasError: this.state.Email.hasError, placeholder:"Enter username", errorMessage: this.state.Email.errorMessage}];
+                    {name: "Confirm Password", hasError: this.state["Confirm Password"].hasError, placeholder:"Confirm password", type: "password", errorMessage:"Passwords do not match"}];
 
     return (
       <div className="container">

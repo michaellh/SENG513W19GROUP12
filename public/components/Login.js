@@ -62,13 +62,20 @@ class Login extends Component {
                   Password: { value: this.state.Password.value, hasError: true, errorMessage: data.message}
                 })
               }
-              else {
+              else if (data.auth_token != null) {
                 console.log("SUCCESS")
                 alert("Sigin Sucessful")
                 console.log(data)
                 this.setState({
                   Success: true
                 })
+              }
+              else {
+                this.setState({
+                  Email: { value: this.state.Email.value, hasError: true, errorMessage: "An unknown occured. Please try again later."},
+                  Username: { value: this.state.Username.value, hasError: true, errorMessage: "An unknown occured. Please try again later."}
+                })
+                console.error(data)
               }
             })
             .catch((error) => {
