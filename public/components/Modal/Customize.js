@@ -13,6 +13,7 @@ export default class Customize extends Component{
             chosenMyBubbleColour,
             chosenOtherBubbleColour,
             chosenBgColour,
+            chatName:'',
         }
 
         this.setFontSize = this.setFontSize.bind(this);
@@ -23,11 +24,13 @@ export default class Customize extends Component{
         this.handleDeleteChat = this.handleDeleteChat.bind(this);
         this.setMyBubbleColour = this.setMyBubbleColour.bind(this);
         this.setOtherBubbleColour = this.setOtherBubbleColour.bind(this);
+        this.handleChatNameChange = this.handleChatNameChange.bind(this);
  
         // When animation finished, and modal closed, reset state
         $('#myModal').on('show.bs.modal', (e) => {
             const {chosenFontSize,chosenFont,chosenFontColour,chosenMyBubbleColour,chosenOtherBubbleColour, chosenBgColour} = props.getStyle();
             this.setState({chosenFontSize,chosenFont,chosenFontColour,chosenMyBubbleColour,chosenOtherBubbleColour, chosenBgColour});
+            this.setState({chatName:''});
         });
     }
 
@@ -60,6 +63,10 @@ export default class Customize extends Component{
         this.props.socket.emit('deleteChat', {chatID: this.props.chat.id, chatName: this.props.chatName});
     }
 
+    handleChatNameChange(e){
+        this.setState({chatName: e.target.value});
+    }
+
     handleSave(e)  {  
         const style = {
             'fontSize': this.state.chosenFontSize,
@@ -71,9 +78,13 @@ export default class Customize extends Component{
         }
         console.log(style);
         this.props.socket.emit('setStyle',{userID: this.props.userID, chatID:this.props.chat.id, style});
+
+        this.state.chatName && this.props.socket.emit('renameChat', {chat:this.props.chat, name: this.state.chatName});
     }
 
     render() {
+        const isAdmin = this.props.role == 'admin';
+        const isGroup = this.props.chat.group;
         return (
             <div>
                 <div className='modal-body' id='modalBody'>
@@ -81,10 +92,7 @@ export default class Customize extends Component{
                         <div className='form-group col-12'>
                             <label htmlFor='usr'>Chat Name:</label>
                             <div className='input-group'>
-                                <input type='text' className='form-control' placeholder={this.props.chatName}></input>
-                                <div className='input-group-append'>
-                                    <button className='btn btn-outline-primary' onClick={this.handleSaveGroupName}>Save</button>
-                                </div>
+                                <input type='text' className='form-control' onChange={this.handleChatNameChange} value={this.state.chatName} placeholder={this.props.chatName} disabled={isGroup && !isAdmin}></input>
                             </div>
                         </div>
                     </div>
@@ -175,7 +183,9 @@ export default class Customize extends Component{
                     </div>
                 </div>
                 <div className="modal-footer">
-                    <button className="btn btn-danger mr-auto" data-dismiss="modal" onClick={this.handleDeleteChat}>Delete Chat</button>
+                    {(isGroup && isAdmin) || !isGroup  ?
+                        <button className="btn btn-danger mr-auto" data-dismiss="modal" onClick={this.handleDeleteChat}>Delete Chat</button>
+                    : ''}
                     <button className="btn btn-secondary" data-dismiss="modal">Cancel</button>
                     <button className="btn btn-primary" data-dismiss="modal" onClick={this.handleSave}>Save</button>
                 </div>

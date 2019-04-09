@@ -254,10 +254,31 @@ module.exports = {
                         res.value.members.forEach(member => {
                             // console.log(member);
                             renameUserChatTable(chat.id, member.id, name, res.value);
+                            const notification = {
+                                title: `${chat.name}: Chat Has Been Renamed`,
+                                message: `${chat.name} has been renamed to ${name}`,
+                                color: 'yellow',
+                                // delay: 5000,
+                                // autohide: true,
+                            }
+                            notifyUser(member.id, notification);
                         });
                     });
                 }
                 else{
+                    // Notify User
+                    dbClient.collection('users').findOne({_id:mID(socket_userID)}, function(err, res){
+                        let oldName = res.chats.find(({id}) => ''+id == chat.id).name;
+                        const notification = {
+                            title: `${oldName}: Chat Has Been Renamed`,
+                            message: `${oldName} has been renamed to ${name}`,
+                            color: 'yellow',
+                            // delay: 5000,
+                            // autohide: true,
+                        }
+                        notifyUser(socket_userID, notification);
+                    });
+                    // Rename Chat
                     renameUserChatTable(chat.id, socket_userID, name);
                 }
             });
