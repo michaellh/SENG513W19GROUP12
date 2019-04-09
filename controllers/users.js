@@ -11,14 +11,14 @@ module.exports = {
     initRoutes: function (app, dbClient) {
 
         app.post('/register', function (req, res) {
-            dbClient.collection('users').findOne({ email: req.body.email }, function(err, user) {
+            dbClient.collection('users').findOne({$or: [{name: req.body.name}, {email: req.body.email}]}, function(err, user) {
                 if (err) {
                     res.status(404).json(err);
                     return;
                 }
                 if (user)
                 {
-                    res.status(409).json("Error: Please choose a different email address.");
+                    res.status(409).json("Error: An account with that entered username or email already exists.");
                     return;
                 }
                 if (!user) //Ensure user does not already exist
