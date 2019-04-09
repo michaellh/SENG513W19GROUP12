@@ -1,4 +1,7 @@
 const mObjectId = require('mongodb').ObjectId;
+const socketioJwt = require('socketio-jwt');
+const constants = require('./constants');
+
 
 module.exports = {
     initialize: function (io, dbClient) {
@@ -9,21 +12,26 @@ module.exports = {
         // Object Mutable so do not need to return;
         let frontEndID = obj => {obj.id = obj._id; delete obj._id};
 
-        io.on('connect', socket => {
+        io.sockets.on('connect', socketioJwt.authorize({
+            secret: constants.JSON_KEY,
+            timeout: 15000 // 15 seconds to send the authentication message
+          })).on('authenticated', socket => {
             // Checking if user exist and assigning name
-            const cookie = socket.client.request.headers.cookie;
-            const userCookie =  cookie && cookie.split(';').find(cookie => cookie.includes('user='));
+            //const cookie = socket.client.request.headers.cookie;
+            //const userCookie =  cookie && cookie.split(';').find(cookie => cookie.includes('user='));
             // username being used below as the username from the database
-            const socket_username = userCookie && userCookie.split('=')[1];
+            const socket_email = socket.decoded_token.email;
+            let socket_username;
             let socket_userID;
             // console.log(socket_username);
 
-            dbClient.collection('users').findOneAndUpdate({name:socket_username}, {$set:{socketID: socket.id}}, {returnOriginal: false}, (err, res) => {
+            dbClient.collection('users').findOneAndUpdate({email:socket_email}, {$set:{socketID: socket.id}}, {returnOriginal: false}, (err, res) => {
                 let user = res.value;
                 // console.log(res);
                 // console.log(user);
                 if (user){
                     socket_userID = user._id;
+                    socket_username = user.name;
                     console.log(socket_userID);
                     frontEndID(user);
                     // console.log(user.socketID, socket.id);
@@ -32,19 +40,20 @@ module.exports = {
                     // socket.emit('friendlist', user.friends);
                 }else{
                     // Enroll new user
-                    const userObject = {
-                        name: socket_username,
-                        socketID: socket.id,
-                        chats: [],
-                        friends: [],
-                        notifications: [],
-                    }
-                    dbClient.collection('users').insertOne(userObject, (err, res) => {
-                        let user = res.ops[0];
-                        socket_userID = user._id;
-                        frontEndID(user);
-                        socket.emit('userInfo', user);
-                    });
+                    console.log("Error! Invalid email found");
+                    // const userObject = {
+                    //     name: socket_username,
+                    //     socketID: socket.id,
+                    //     chats: [],
+                    //     friends: [],
+                    //     notifications: [],
+                    // }
+                    // dbClient.collection('users').insertOne(userObject, (err, res) => {
+                    //     let user = res.ops[0];
+                    //     socket_userID = user._id;
+                    //     frontEndID(user);
+                    //     socket.emit('userInfo', user);
+                    // });
                     // socket.emit('chatlist', {chats:['Chat1', 'Chat2'], friends: ['Friend1', 'Friend2', 'Friend3']});
                 }
             });
@@ -85,7 +94,7 @@ module.exports = {
 
             socket.on('joinRoom', chatID => {
                 socket.join(chatID);
-                
+
                 dbClient.collection('chats').findOneAndUpdate({_id:mID(chatID)},{$addToSet : {activeMembers: socket_userID}}, {returnOriginal:false}, (err, res) => {
                     const chatInfo = res.value;
                     frontEndID(chatInfo);
@@ -114,7 +123,7 @@ module.exports = {
             }
 
             socket.on('leaveRoom', chatID => {
-                leaveRoom(chatID);                
+                leaveRoom(chatID);
             });
 
             socket.on('resetUnread', chatID => {
@@ -260,7 +269,20 @@ module.exports = {
                 else{
                     renameUserChatTable(chat.id, socket_userID, name);
                 }
-            })
+            });
+
+            // Set Style
+            socket.on('setStyle', ({userID, chatID, style}) => {
+                // Updating User Own Chat table
+                const query = {_id:mID(userID), 'chats.id': mID(chatID)};
+                const update = {$set:{'chats.$.style':style}};
+                dbClient.collection('users').findOneAndUpdate(query, update, {returnOriginal:false}, (err, res) => { 
+                    let user = res.value;
+                    // Updating user chatlist and friends.
+                    socket.emit('chatlist', user.chats);
+                });
+            });
+
 
             // Role Change
             socket.on('roleChange', ({chatID, userID, role}) => {
@@ -273,6 +295,15 @@ module.exports = {
                     delete chatInfo.messages;
                     // Telling everyone in chatroom new chat info
                     io.to(chatID).emit('chatInfoUpdate',chatInfo);
+                    
+                    const notification = {
+                        title: `${chatInfo.name}: Role Updated`,
+                        message: `Your Role has been updated to ${role}`,
+                        color: role == 'admin' ? 'lightgreen' : 'lightpink',
+                        // delay: 5000,
+                        // autohide: true,
+                    }
+                    notifyUser(userID, notification);
                 });
             });
 
@@ -448,6 +479,16 @@ module.exports = {
                             io.to(user.socketID).emit('resetChat', chatID);
                             // Update their chatlist
                             io.to(user.socketID).emit('chatlist', user.chats);
+
+                            // Send Notification
+                            const notification = {
+                                title: `${deletedChat.name}: Deleted`,
+                                message: `The chat '${deletedChat.name}' has been deleted`,
+                                color: 'lightpink',
+                                // delay: 5000,
+                                // autohide: true,
+                            }
+                            notifyUser(user._id, notification);
                         })
                     });
                     // console.log(deletedChat.members);
@@ -498,7 +539,7 @@ module.exports = {
                     io.to(user.socketID).emit('chatlist', user.chats);
                 });
                 // Updating the chat table member list
-                dbClient.collection('chats').findOneAndUpdate({_id:mID(chatID)},{$pull : {members: {id}}}, {returnOriginal:false}, (err, res) => {
+                dbClient.collection('chats').findOneAndUpdate({_id:mID(chatID)},{$pull : {members: {id:mID(id)}}}, {returnOriginal:false}, (err, res) => {
                     // console.log(res);
                     let chatInfo = res.value;
                     frontEndID(chatInfo);
@@ -506,32 +547,45 @@ module.exports = {
                     delete chatInfo.messages;
                     // Telling everyone in chatroom new chat info
                     io.to(chatID).emit('chatInfoUpdate',chatInfo);
+                    // console.log(chatInfo);
+
+                    // Send Notification
+                    const notification = {
+                        title: `${chatInfo.name}: Removed From Chat`,
+                        message: `You have been removed from ${chatInfo.name}`,
+                        color: 'lightpink',
+                        // delay: 5000,
+                        // autohide: true,
+                    }
+                    notifyUser(id, notification);
                 });
             }
 
-            socket.on('removeFromChat', ({chatID, id}) => leaveChat(chatID, id));
+            socket.on('removeFromChat', ({chatID, userID}) => leaveChat(chatID, userID));
+
+            socket.on('deleteChat', chatID => deleteChat(chatID));
 
             socket.on('leaveChat', chat => {
-                if(chat.group){
-                    // Typecasting to string to compare and find
-                    // const {name, role} = chat.members.find(({id}) => `${id}` == `${socket_userID}`);
-                    const {role} = chat.members.find(({id}) => id == socket_userID);
+                // if(chat.group){
+                //     // Typecasting to string to compare and find
+                //     // const {name, role} = chat.members.find(({id}) => `${id}` == `${socket_userID}`);
+                //     const {role} = chat.members.find(({id}) => id == socket_userID);
 
-                    // console.log(name, role);
+                //     // console.log(name, role);
 
-                    if(role == 'admin'){
-                        // Is Admin, Delete Chat
-                        deleteChat(chat.id)
-                    }else{
-                        // Not admin, leave chat?
-                        leaveChat(chat.id, socket_userID);
-                    }
-                }else{
-                    // Single chat
-                    // If only person left, delete the chat.
-                    console.log('left single chat');
+                //     if(role == 'admin'){
+                //         // Is Admin, Delete Chat
+                //         deleteChat(chat.id)
+                //     }else{
+                //         // Not admin, leave chat?
+                //         leaveChat(chat.id, socket_userID);
+                //     }
+                // }else{
+                //     // Single chat
+                //     // If only person left, delete the chat.
+                //     console.log('left single chat');
                     chat.members.length > 1 ? leaveChat(chat.id, socket_userID) : deleteChat(chat.id);
-                }
+                // }
             });
 
             // Leaving all rooms and from active user list of those rooms

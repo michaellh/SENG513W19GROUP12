@@ -24,6 +24,7 @@ export default class MessageUnit extends Component {
 
         this.togglePopover = this.togglePopover.bind(this);
         this.toggleEdit = this.toggleEdit.bind(this);
+
     }
 
     fmtDate(date){
@@ -82,10 +83,22 @@ export default class MessageUnit extends Component {
 
     render() {
         const {searchTerm, isSelf, index} = this.props;
-        const {date, userName, userID, message, reactions} = this.state.message;
+        const {date, userName, userID, message, reactions, type} = this.state.message;
+        const fontObj = this.props.fontObj;
+        const bubbleColours = this.props.bubbleColours;
+        const bubbleColoursConv = {
+            darkGrey: 'alert-dark',
+            White: 'alert-light',
+            Grey: 'alert-secondary',
+            Blue: 'alert-primary',
+            Red: 'alert-danger',
+            Green: 'alert-success',
+            Yellow: 'alert-warning',
+        };
+
         return (
         <div>
-            <div id={`message_${this.props.chatID}_${index}`} className={`alert alert-primary m-2 ${isSelf ? 'alert-primary' : 'alert-dark'}`}>
+            <div id={`message_${this.props.chatID}_${index}`} className={`alert m-2 ${isSelf ? bubbleColoursConv[bubbleColours.myBubbleColour] : bubbleColoursConv[bubbleColours.otherBubbleColour]}`}>
                 <div className='text-dark'>
                     <strong>{userName}&nbsp;&nbsp;</strong><small>{this.fmtDate(date)}</small>
                 </div>
@@ -99,15 +112,19 @@ export default class MessageUnit extends Component {
                         </div>
                     </div>
                     :
-                    <div>
-                        {searchTerm ? <span dangerouslySetInnerHTML={{__html:message}}></span> : message}
+                    <div style={{fontSize: fontObj.fontSize, fontFamily: fontObj.font, color: fontObj.fontColour}}>
+                        {
+                            type == 'GIF' ? 
+                            <img height={message.split(',')[0]} src={message.split(',')[1]}></img>
+                            :
+                            (searchTerm ? <span dangerouslySetInnerHTML={{__html:message}}></span> : message)
+                        }
                     </div> 
                 }
                 { // Show reaction div if there is a reaction
                     reactions ? 
                     <div>
-                        <small> </small>
-                        <small style={{float: isSelf ? 'left' : 'right'}}>
+                        <small style={{float: isSelf ? 'left' : 'right'}} className='mt-1'>
                             {reactions && reactions.like ? 
                                 <span className='badge badge-pill badge-success'>{reactions.like} <i className='fas fa-thumbs-up'></i></span> 
                             : ''} {reactions && reactions.dislike ? 
@@ -122,7 +139,10 @@ export default class MessageUnit extends Component {
                     <div className='btn-group input-group-lg'>
                         <button className='btn btn-outline-primary' onClick={this.handleLike}><i className='fas fa-thumbs-up'></i></button>
                         <button className='btn btn-outline-primary' onClick={this.handleDislike}><i className='fas fa-thumbs-down'></i></button>
-                        <button className={`btn ${this.state.editMode ? 'btn-primary' : 'btn-outline-primary'}`} onClick={this.toggleEdit} ><i className='fas fa-edit'></i></button>
+                        {/* Only addlow edit when message is text */}
+                        {!type ?
+                            <button className={`btn ${this.state.editMode ? 'btn-primary' : 'btn-outline-primary'}`} onClick={this.toggleEdit} ><i className='fas fa-edit'></i></button>
+                        : ''}
                         <button className='btn btn-outline-primary' onClick={this.handleDelete}><i className='fas fa-trash-alt'></i></button>
                     </div>
                 </UncontrolledPopover>

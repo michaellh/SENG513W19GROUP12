@@ -14,21 +14,32 @@ export default class Messages extends Component {
     }
 
     scrollToBottom(){
-        this.endMessageRef.current.scrollIntoView({ behavior: 'smooth' });
+        this.endMessageRef.current.scrollIntoView({ behavior: 'smooth' });       
     }
 
     render() {
+        const bgColourConv = {
+            White: '#ffffff',
+            Black: '#262626',
+            Grey: '#b3b3b3',
+            Red: '#dc3545',
+            Blue:  '#007bff',
+            Green: '#28a745',
+            Purple: '#6f42c1',
+            Yellow: '#ffff99',
+            Orange: '#fd7e14',
+        }
         const messages = this.props.messages.map((message,i) => {
             const isSelf = message.userID == this.props.user.id;
             return (
                 <div key={i} className={`row ${isSelf ? 'justify-content-end' : 'justify-content-start'}`} style={{textAlign: isSelf ? 'right':'left'}}>
-                    <MessageUnit socket={this.props.socket} chatID={this.props.chat.id} searchTerm={this.props.searchTerm} message={message} isSelf={isSelf} index={i} />
+                    <MessageUnit socket={this.props.socket} chatID={this.props.chat.id} searchTerm={this.props.searchTerm} message={message} isSelf={isSelf} index={i} fontObj={this.props.fontObj} bubbleColours={this.props.bubbleColours}/>
                 </div>
             )
         });
 
         return (
-            <div className={this.props.className} id={this.props.id} style={{height:this.props.height}}>
+            <div className={this.props.className} id={this.props.id} style={{height:this.props.height, background:bgColourConv[this.props.bgColour]}}>
                 <div className='col-12'>
                     {messages}
                     <div ref={this.endMessageRef}></div>
