@@ -7,7 +7,7 @@ class Login extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      Username: {hasError: false, value: ""},
+      Email: {hasError: false, value: ""},
       Password: {hasError: false, value: ""},
       Success: false
     };
@@ -24,7 +24,7 @@ class Login extends Component {
       event.preventDefault()
 
       const userInfo = {
-        email: this.state.Username.value,
+        email: this.state.Email.value,
         password: this.state.Password.value
       }
 
@@ -48,13 +48,13 @@ class Login extends Component {
             }).then(data => {
               if (data.message === "Missing credentials") {
                 this.setState({
-                  Username: { value: this.state.Username.value, hasError: true, errorMessage: "Invalid Username"},
+                  Email: { value: this.state.Email.value, hasError: true, errorMessage: "Invalid Email"},
                   Password: { value: this.state.Password.value, hasError: true, errorMessage: "Invalid Password"}
                 })
               }
               else if(data.message === "The specified account does not exist.") {
                 this.setState({
-                  Username: { value: this.state.Username.value, hasError: true, errorMessage: data.message}
+                  Email: { value: this.state.Email.value, hasError: true, errorMessage: data.message}
                 })
               }
               else if (data.message === "Incorrect password") {
@@ -81,7 +81,7 @@ class Login extends Component {
       return <Redirect to="/" />
     }
 
-    const fields = [{name: "Username", hasError: this.state.Username.hasError, placeholder:"Enter username"},
+    const fields = [{name: "Email", hasError: this.state.Email.hasError, placeholder:"Enter email"},
                     {name: "Password", hasError: this.state.Password.hasError, placeholder:"Enter password", type: "password"}]
 
     return (

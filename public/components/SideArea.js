@@ -7,7 +7,7 @@ import Friends from './SideArea/Friends'
 export default class SideArea extends Component {
     constructor(props) {
         super(props)
-        
+
         this.chats = [];
         this.friends = [];
 
@@ -53,13 +53,13 @@ export default class SideArea extends Component {
     updateMode(mode){
         this.setState({mode:mode});
     }
-    
+
     filterResult(searchTerm){
         this.setState({searchTerm});
         let currentMode = this.state.mode;
         let list = currentMode == 'chats' ? this.chats : this.friends;
         let filteredResult = list.filter(d => d.name.includes(searchTerm));
-        
+
         if(currentMode == 'chats'){
             this.setState({chats:filteredResult});
         }
@@ -72,11 +72,11 @@ export default class SideArea extends Component {
     render() {
         return (
             <div className={this.props.className} id={this.props.id}>
-                <TopBar modal={this.props.modal} toggleSplitScreen={this.props.toggleSplitScreen} toggleNotification={this.props.toggleNotification}  splitScreenState={this.props.splitScreenState} notificationState={this.props.notificationState} resetChat={this.props.resetChat}/>
+                <TopBar modal={this.props.modal} toggleSplitScreen={this.props.toggleSplitScreen} toggleNotification={this.props.toggleNotification}  splitScreenState={this.props.splitScreenState} notificationState={this.props.notificationState} resetChat={this.props.resetChat} logout={this.props.logout}/>
                 <SideControl updateMode={this.updateMode} filterResult={this.filterResult} modal={this.props.modal} socket={this.props.socket} mode={this.state.mode}/>
                 <br />
                 {
-                    this.state.mode == 'chats' ? 
+                    this.state.mode == 'chats' ?
                     (<Chats chats={this.state.chats} chooseChat={this.props.chooseChat} chosenChat={this.props.chosenChat} deleteChat={this.deleteChat} resetChat={this.props.resetChat} />) :
                     (<Friends friends={this.state.friends} />)
                 }

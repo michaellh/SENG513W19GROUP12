@@ -6,13 +6,9 @@ var crypto = require('crypto');
 var bcrypt = require('bcrypt');
 var nodemailer = require('nodemailer');
 var sgTransport = require('nodemailer-sendgrid-transport');
-var middleware = require('./middleware')
 
 module.exports = {
     initRoutes: function (app, dbClient) {
-        app.get('/verify-token', middleware.withAuth, function(req, res) {
-          res.sendStatus(200);
-        });
 
         app.post('/register', function (req, res) {
             dbClient.collection('users').findOne({ email: req.body.email }, function(err, user) {
@@ -31,7 +27,7 @@ module.exports = {
                     bcrypt.hash(req.body.password, constants.BCRYPT_SALT_ROUNDS, function(err, hash) {
                         // Enroll new user
                         let userObject = {
-                            name: req.body.socket_username,
+                            name: req.body.name,
                             socketID: req.body.socket_id,
                             email: req.body.email,
                             password: hash,
@@ -86,7 +82,7 @@ module.exports = {
                         expiresIn: constants.USER_TIMEOUT
                     }
                 ); //expire in 30 mins
-                res.cookie('token', token, {httpOnly: true}).status(200).json({
+                res.cookie('token', token).status(200).json({
                       auth_token: token,
                       timeout: constants.USER_TIMEOUT
                 })

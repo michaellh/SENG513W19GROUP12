@@ -1,4 +1,7 @@
 const mObjectId = require('mongodb').ObjectId;
+const socketioJwt = require('socketio-jwt');
+const constants = require('./constants');
+
 
 module.exports = {
     initialize: function (io, dbClient) {
@@ -9,21 +12,26 @@ module.exports = {
         // Object Mutable so do not need to return;
         let frontEndID = obj => {obj.id = obj._id; delete obj._id};
 
-        io.on('connect', socket => {
+        io.sockets.on('connect', socketioJwt.authorize({
+            secret: constants.JSON_KEY,
+            timeout: 15000 // 15 seconds to send the authentication message
+          })).on('authenticated', socket => {
             // Checking if user exist and assigning name
-            const cookie = socket.client.request.headers.cookie;
-            const userCookie =  cookie && cookie.split(';').find(cookie => cookie.includes('user='));
+            //const cookie = socket.client.request.headers.cookie;
+            //const userCookie =  cookie && cookie.split(';').find(cookie => cookie.includes('user='));
             // username being used below as the username from the database
-            const socket_username = userCookie && userCookie.split('=')[1];
+            const socket_email = socket.decoded_token.email;
+            let socket_username;
             let socket_userID;
             // console.log(socket_username);
 
-            dbClient.collection('users').findOneAndUpdate({name:socket_username}, {$set:{socketID: socket.id}}, {returnOriginal: false}, (err, res) => {
+            dbClient.collection('users').findOneAndUpdate({email:socket_email}, {$set:{socketID: socket.id}}, {returnOriginal: false}, (err, res) => {
                 let user = res.value;
                 // console.log(res);
                 // console.log(user);
                 if (user){
                     socket_userID = user._id;
+                    socket_username = user.name;
                     console.log(socket_userID);
                     frontEndID(user);
                     // console.log(user.socketID, socket.id);
@@ -32,19 +40,20 @@ module.exports = {
                     // socket.emit('friendlist', user.friends);
                 }else{
                     // Enroll new user
-                    const userObject = {
-                        name: socket_username,
-                        socketID: socket.id,
-                        chats: [],
-                        friends: [],
-                        notifications: [],
-                    }
-                    dbClient.collection('users').insertOne(userObject, (err, res) => {
-                        let user = res.ops[0];
-                        socket_userID = user._id;
-                        frontEndID(user);
-                        socket.emit('userInfo', user);
-                    });
+                    console.log("Error! Invalid email found");
+                    // const userObject = {
+                    //     name: socket_username,
+                    //     socketID: socket.id,
+                    //     chats: [],
+                    //     friends: [],
+                    //     notifications: [],
+                    // }
+                    // dbClient.collection('users').insertOne(userObject, (err, res) => {
+                    //     let user = res.ops[0];
+                    //     socket_userID = user._id;
+                    //     frontEndID(user);
+                    //     socket.emit('userInfo', user);
+                    // });
                     // socket.emit('chatlist', {chats:['Chat1', 'Chat2'], friends: ['Friend1', 'Friend2', 'Friend3']});
                 }
             });
@@ -85,7 +94,7 @@ module.exports = {
 
             socket.on('joinRoom', chatID => {
                 socket.join(chatID);
-                
+
                 dbClient.collection('chats').findOneAndUpdate({_id:mID(chatID)},{$addToSet : {activeMembers: socket_userID}}, {returnOriginal:false}, (err, res) => {
                     const chatInfo = res.value;
                     frontEndID(chatInfo);
@@ -114,7 +123,7 @@ module.exports = {
             }
 
             socket.on('leaveRoom', chatID => {
-                leaveRoom(chatID);                
+                leaveRoom(chatID);
             });
 
             socket.on('resetUnread', chatID => {
