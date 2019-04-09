@@ -70,8 +70,8 @@ export default class PasswordReset extends Component {
             return <Redirect to="/login" />
         }
       
-        const fields = [{name: "NewPassword", hasError: this.state.NewPassword.hasError, placeholder:"Enter username", type: "password"},
-                        {name: "ConfirmPassword", hasError: this.state.ConfirmPassword.hasError, placeholder:"Enter password", type: "password"}]
+        const fields = [{name: "NewPassword", hasError: this.state.NewPassword.hasError, placeholder:"Enter new password", type: "password"},
+                        {name: "ConfirmPassword", hasError: this.state.ConfirmPassword.hasError, placeholder:"Enter new password again", type: "password"}]
 
         return (
             <div className="container">
