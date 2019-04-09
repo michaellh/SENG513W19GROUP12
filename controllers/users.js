@@ -18,7 +18,14 @@ module.exports = {
                 }
                 if (user)
                 {
-                    res.status(409).json("Error: An account with that entered username or email already exists.");
+                    if (user.name == req.body.name)
+                    {
+                        res.status(409).json("Error: An account with that entered username already exists.");
+                    }
+                    else
+                    {
+                        res.status(409).json("Error: An account with that entered email already exists.");
+                    }
                     return;
                 }
                 if (!user) //Ensure user does not already exist

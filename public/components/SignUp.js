@@ -97,10 +97,15 @@ class SignUp extends Component {
                     return response.json();
                   }
               }).then(data => {
-                if (data === "Error: Please choose a different email address.") {
+                if (data === "Error: An account with that entered email already exists.") {
                   this.setState({
                     Email: { value: this.state.Email.value, hasError: true, errorMessage: "Please choose a different email address"}
                   })
+                }
+                else if (data === "Error: An account with that entered username already exists.") {
+                    this.setState({
+                      Username: { value: this.state.Username.value, hasError: true, errorMessage: "Please choose a different username"}
+                    })
                 }
                 else {
                   console.log("SUCCESS")
