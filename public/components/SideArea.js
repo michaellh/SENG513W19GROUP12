@@ -73,8 +73,8 @@ export default class SideArea extends Component {
         this.setState({searchTerm});
         let currentMode = this.state.mode;
         let list = currentMode == 'chats' ? this.chats : this.friends;
-        let filteredResult = list.filter(d => d.name.includes(searchTerm));
-
+        let filteredResult = currentMode == 'chats' ? list.filter(d => d.name.includes(searchTerm)) : list.filter(d => d.includes(searchTerm));
+	
         if(currentMode == 'chats'){
             this.setState({chats:filteredResult});
         }

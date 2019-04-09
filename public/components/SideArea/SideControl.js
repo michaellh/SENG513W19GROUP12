@@ -1,5 +1,6 @@
 import React from 'react'
 import AddChat from '../Modal/AddChat';
+import AddFriend from '../Modal/AddFriend';
 
 export default function SideControl(props) {
 
@@ -19,10 +20,8 @@ export default function SideControl(props) {
 
     // Add Modal
     let handleAdd = () => {
-        
-        const title = 'Add Chat'
-        const body = <AddChat socket={props.socket}/>;
-
+        const title = props.mode == 'friends' ? 'Add Friend' : 'Add Chat';
+        const body = props.mode == 'friends' ? <AddFriend socket={props.socket}/> : <AddChat socket={props.socket}/>;
         props.modal(title,body);
     }
     

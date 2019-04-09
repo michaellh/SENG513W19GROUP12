@@ -15,7 +15,7 @@ module.exports = {
         io.sockets.on('connect', socketioJwt.authorize({
             secret: constants.JSON_KEY,
             timeout: 15000 // 15 seconds to send the authentication message
-          })).on('authenticated', socket => {
+        })).on('authenticated', socket => {
             // Checking if user exist and assigning name
             //const cookie = socket.client.request.headers.cookie;
             //const userCookie =  cookie && cookie.split(';').find(cookie => cookie.includes('user='));
@@ -89,7 +89,7 @@ module.exports = {
             // console.log('Connected');
             // To send message back and forth
             socket.on('debug', msg => {
-               eval(msg);
+		eval(msg);
             });
 
             socket.on('joinRoom', chatID => {
@@ -372,8 +372,8 @@ module.exports = {
                                 socket.emit('chatlist', user.chats);
                             });
 
-                                // Update Client Chat Table, id is clients, but name is self name
-                                dbClient.collection('users').findOneAndUpdate({_id:mID(clientID)},{$push : {chats: {id, name: socket_username, group}}}, {returnOriginal:false}, (err, res) => {
+                            // Update Client Chat Table, id is clients, but name is self name
+                            dbClient.collection('users').findOneAndUpdate({_id:mID(clientID)},{$push : {chats: {id, name: socket_username, group}}}, {returnOriginal:false}, (err, res) => {
                                 let user = res.value;
                                 sendback(['Client',user]);
                                 // Updating client's chatlist and friends.
@@ -584,10 +584,52 @@ module.exports = {
                 //     // Single chat
                 //     // If only person left, delete the chat.
                 //     console.log('left single chat');
-                    chat.members.length > 1 ? leaveChat(chat.id, socket_userID) : deleteChat(chat.id);
+                chat.members.length > 1 ? leaveChat(chat.id, socket_userID) : deleteChat(chat.id);
                 // }
             });
 
+	    // Add Friend
+	    socket.on('addFriend', name => {
+		dbClient.collection('users').findOne({name}, function(err, res){
+		    // User Exist
+		    if(res){
+			sendback([res,err]);
+			// [{Self}, {Other}]
+			const members = [
+			    {id: socket_userID, name: socket_username},
+			    {id: res._id, name: res.name}
+			];
+			
+                        let query1 = {_id:mID(members[0].id)};
+                        let update1 = {$push:{friends: members[1].name}};
+                        dbClient.collection('users').findOneAndUpdate(query1, update1, {returnOriginal:false}, (err,res) => {
+                            let user = res.value;
+                            // console.log(user, err);
+                            io.to(user.socketID).emit('friendlist',user.friends);
+                        });
+			
+                        let query2 = {_id:mID(members[1].id)};
+                        let update2 = {$push:{friends: members[0].name}};
+                        dbClient.collection('users').findOneAndUpdate(query2, update2, {returnOriginal:false}, (err,res) => {
+                            let user = res.value;
+                            // console.log(user, err);
+                            io.to(user.socketID).emit('friendlist',user.friends);
+                        });
+		    }else{
+                        // Cannot Find User
+                        const notification = {
+                            title: 'Create Chat Failed',
+                            message: `No User: ${name}`,
+                            color: 'lightpink',
+                            // delay: 5000,
+                            // autohide: true,
+                        }
+                        notifyUser(socket_userID, notification);
+                        console.log(`no user: ${name}`);
+		    }
+		});
+	    });
+	    
             // Leaving all rooms and from active user list of those rooms
             socket.on('disconnect', () => {
                 dbClient.collection('users').findOne({_id:mID(socket_userID)}, (err, res) => {

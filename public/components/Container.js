@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import ChatArea from './chatArea';
+import ChatArea from './ChatArea';
 import SideArea from './SideArea';
 import Modal from './Modal';
 import { Redirect } from 'react-router';
