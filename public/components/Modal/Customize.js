@@ -27,7 +27,7 @@ export default class Customize extends Component{
         // When animation finished, and modal closed, reset state
         $('#myModal').on('show.bs.modal', (e) => {
             const {chosenFontSize,chosenFont,chosenFontColour,chosenMyBubbleColour,chosenOtherBubbleColour, chosenBgColour} = props.getStyle();
-            this.setState({chosenFontSize,chosenFont,chosenFontColour,chosenMyBubbleColour,chosenOtherBubbleColour, chosenBgColour})
+            this.setState({chosenFontSize,chosenFont,chosenFontColour,chosenMyBubbleColour,chosenOtherBubbleColour, chosenBgColour});
         });
     }
 
@@ -57,7 +57,7 @@ export default class Customize extends Component{
     }
 
     handleDeleteChat(e) {
-        this.props.socket.emit('deleteChat', this.props.chat.id);
+        this.props.socket.emit('deleteChat', {chatID: this.props.chat.id, chatName: this.props.chatName});
     }
 
     handleSave(e)  {  
