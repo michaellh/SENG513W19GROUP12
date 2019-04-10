@@ -7,10 +7,11 @@ import Dropzone from 'react-dropzone';
 export default class Controls extends Component {
     constructor(props) {
         super(props)
-        
+	
         this.state = {
             text:'',
-	    uploading:false
+	    uploading:false,
+	    width: 0
         }
         this.style = {
             //   position: 'absolute',
@@ -24,6 +25,21 @@ export default class Controls extends Component {
         this.handleEmojiClick = this.handleEmojiClick.bind(this);
         this.handleGifClick = this.handleGifClick.bind(this);
 	this.onDrop = this.onDrop.bind(this);
+	this.updateWindowDimensions = this.updateWindowDimensions.bind(this);
+    }
+
+
+    componentDidMount() {
+	this.updateWindowDimensions();
+	window.addEventListener('resize', this.updateWindowDimensions);
+    }
+
+    componentWillUnmount() {
+	window.removeEventListener('resize', this.updateWindowDimensions);
+    }
+
+    updateWindowDimensions() {
+	this.setState({ width: window.innerWidth });
     }
 
     componentDidUpdate(){
@@ -83,43 +99,51 @@ export default class Controls extends Component {
 			}
 			reader.readAsDataURL(file);
 		    } else {
-			console.log('File was not an image');
+			this.props.onMessage(`${file.name},${file.type},${res}`, 'FILE');
+			this.setState({uploading:false});
+			console.log('File was not an image, sending link to arbitrary file.');
 		    }
+		} else {
+		    this.setState({uploading:false});
+		    console.log('File upload failed', http.status);
 		}
 	    };
 	    http.send(formData);
 	});
     }
-    
+
+    // Note that wrapping the <input> in the <Dropzone> messes with the width so we need to manually resize it.
     render() {
         const deadChat = !this.props.chat.group && this.props.chat.members.length <= 1;
         return (
-	    <Dropzone onDrop={this.onDrop}>
-	 	{({getRootProps, getInputProps}) => (
-		    <div {...getRootProps({className: `${this.props.className} mt-2 dropzone`})} id={this.props.id} style={this.style}>
-			<div className='col-12'>
-			<form onSubmit={this.handleSubmit}>
-			    <div className='input-group'>
-				<div className='input-group-prepend'>
-				    <span id={`control_${this.props.chat.id}_emojiPicker`} className='btn btn-outline-primary' onClick={this.handleClick} style={{fontSize:23}}><i className='fas fa-smile'></i></span>
-				    <span id={`control_${this.props.chat.id}_GifPicker`} className='btn btn-outline-primary' onClick={this.handleClick}>GIF</span>
-				</div>
-			<input {...getInputProps} ref={this.textInput} type="text" className='form-control' onChange={this.handleTextChange} value={this.state.text} placeholder={this.state.uploading ? "Uploading file..." : (deadChat ? "Other user has left" : "Type a message...")} disabled={deadChat || this.state.uploading}/>
-				<div className='input-group-append'>
-				    <button type='submit' className='btn btn-primary btn-lg'><i className='fas fa-paper-plane'></i></button>
-				</div>
-				<UncontrolledPopover trigger='legacy' placement='top' target={`control_${this.props.chat.id}_emojiPicker`}>
-				    <EmojiPicker onEmojiClick={this.handleEmojiClick}/>
-				</UncontrolledPopover>
-				<UncontrolledPopover trigger='legacy' placement='top' target={`control_${this.props.chat.id}_GifPicker`}>
-				    <Picker onSelected={this.handleGifClick} />
-				</UncontrolledPopover>
-			    </div>
-			</form>
-			</div>
-		    </div>
-	        )}
-            </Dropzone>
+	    <div className={`${this.props.className} mt-2`} id={this.props.id} style={this.style}>
+	       <div className='col-12'>
+		   <form onSubmit={this.handleSubmit}>
+		       <div className='input-group'>
+			   <div className='input-group-prepend'>
+			       <span id={`control_${this.props.chat.id}_emojiPicker`} className='btn btn-outline-primary' onClick={this.handleClick} style={{fontSize:23}}><i className='fas fa-smile'></i></span>
+			       <span id={`control_${this.props.chat.id}_GifPicker`} className='btn btn-outline-primary' onClick={this.handleClick}>GIF</span>
+			   </div>
+		           <Dropzone onDrop={this.onDrop}>
+			       {({getRootProps, getInputProps}) => (
+				   <span {...getRootProps({className: 'dropzone'})}>
+				       <input {...getInputProps} ref={this.textInput} type="text" className='form-control' onChange={this.handleTextChange} value={this.state.text} placeholder={this.state.uploading ? "Uploading file..." : (deadChat ? "Other user has left" : "Type a message or drop a file...")} disabled={deadChat || this.state.uploading} style={{width: (this.state.width*this.state.width*0.0002) + (this.state.width*0.35)}}/>
+				   </span>
+			       )}
+			   </Dropzone>
+			   <div className='input-group-append'>
+			       <button type='submit' className='btn btn-primary btn-lg'><i className='fas fa-paper-plane'></i></button>
+			   </div>
+			   <UncontrolledPopover trigger='legacy' placement='top' target={`control_${this.props.chat.id}_emojiPicker`}>
+			       <EmojiPicker onEmojiClick={this.handleEmojiClick}/>
+			   </UncontrolledPopover>
+			   <UncontrolledPopover trigger='legacy' placement='top' target={`control_${this.props.chat.id}_GifPicker`}>
+			       <Picker onSelected={this.handleGifClick} />
+			   </UncontrolledPopover>
+		       </div>
+		   </form>
+	       </div>
+	   </div>
 	)
     }
 }

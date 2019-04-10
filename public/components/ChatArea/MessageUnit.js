@@ -11,6 +11,7 @@ export default class MessageUnit extends Component {
             popoverOpen : false,
             editMode : false,
             editMessage : props.message.message,
+	    file: null
         }
 
         this.endMessageRef = React.createRef();
@@ -24,6 +25,8 @@ export default class MessageUnit extends Component {
 
         this.togglePopover = this.togglePopover.bind(this);
         this.toggleEdit = this.toggleEdit.bind(this);
+
+	this.getDownload = this.getDownload.bind(this);
 
     }
 
@@ -81,6 +84,30 @@ export default class MessageUnit extends Component {
         this.setState({editMode: !this.state.editMode});
     }
 
+    getDownload(message){
+	console.log(message);
+	const [name, type, url] = message.split(',');
+	var xhr = new XMLHttpRequest();
+	xhr.open('GET', 'https://cors-anywhere.herokuapp.com/' + url, true);
+
+	xhr.onreadystatechange = () => {
+	    if(xhr.readyState == 4 && xhr.status == 200) {
+		console.log(xhr.responseText);
+		let blob = new Blob([xhr.responseText], {type: type});
+		let reader = new FileReader;
+
+		reader.onload = () => {
+		    this.setState({file: reader.result});
+		};
+
+		reader.readAsDataURL(blob);
+	    }
+	};
+
+	xhr.send();
+	return name;
+    }
+
     render() {
         const {searchTerm, isSelf, index} = this.props;
         const {date, userName, userID, message, reactions, type} = this.state.message;
@@ -116,8 +143,11 @@ export default class MessageUnit extends Component {
                         {
                             type == 'GIF' ? 
                             <img height={message.split(',')[0]} src={message.split(',')[1]}></img>
-                            :
-                            (searchTerm ? <span dangerouslySetInnerHTML={{__html:message}}></span> : message)
+                            :(
+				type == 'FILE' ?
+				    (this.state.file ? <span>Download file: <a href={this.state.file} download={message.split(',')[0]}>{message.split(',')[0]}</a></span> : <span>Preparing file: <i>{this.getDownload(message)}...</i></span>)
+				:
+				(searchTerm ? <span dangerouslySetInnerHTML={{__html:message}}></span> : message))
                         }
                     </div> 
                 }
