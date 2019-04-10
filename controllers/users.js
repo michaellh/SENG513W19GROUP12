@@ -101,6 +101,92 @@ module.exports = {
         })(req,res);
     });
 
+    app.post('/account-settings', function(req, res) {
+        dbClient.collection('users').findOne({$or: [{name: req.body.name}, {email: req.body.email}]}, function(err, user) {
+            if (err) {
+                res.status(404).json(err);
+                return;
+            }
+            // Determine if the user object exists
+            if (!user)
+            {
+                res.json("Error: No user with that username or e-mail exists!");
+                return;
+            }
+            else {
+                // Check the request body for the form input data
+                if((req.body.newName !== "") && (req.body.newName !== user.name)) {
+                    dbClient.collection('users').findOne({name: req.body.newName}, function(err, userExist) {
+                        if (err) {
+                            res.status(404).json(err);
+                            return;
+                        }
+                        if(!userExist) {
+                            // The username doesn't exist so we can replace it
+                            user.name = req.body.newName;
+                            dbClient.collection('users').replaceOne({ name: req.body.name }, user);
+                        }
+                        else {
+                            res.status(409).json("Error: An account with that username already exists.");
+                        }
+                        return;
+                    });
+                } 
+                if((req.body.newEmail !== "") && (req.body.newEmail !== user.email)) {
+                    dbClient.collection('users').findOne({email: req.body.newEmail}, function(err, userExist) {
+                        if (err) {
+                            res.status(404).json(err);
+                            return;
+                        }
+                        if(!userExist) {
+                            // The new email doesn't exist in the DB so we can use it
+                            user.email = req.body.newEmail;
+                            dbClient.collection('users').replaceOne({ email: req.body.email }, user);                 
+                        }
+                        else {
+                            res.status(409).json("Error: An account with that email already exists.");  
+                        }
+                        return;
+                    });
+                }
+                // If either the username and/or email was changed, generate a new token for page reloads
+                if((req.body.newPassword !== "") || (req.body.newEmail !== "")) {
+                    let userName = user.name;
+                    let userEmail = user.email;
+                    if(newUsername !== "") {
+                        userName = req.body.newName;
+                    }
+                    if(newEmail !== "") {
+                        userEmail = req.body.newEmail;
+                    }
+                    let token = jwt.sign({
+                        email: userEmail,
+                        name: userName },
+                        constants.JSON_KEY,
+                        {
+                            expiresIn: constants.USER_TIMEOUT
+                        }
+                    ); //expire in 30 mins
+                    res.status(200).json({
+                        auth_token: token,
+                        timeout: constants.USER_TIMEOUT
+                    });
+                }
+                // If the password is changed then the new password will need to be hashed
+                if(req.body.newPassword !== "") {
+                    bcrypt.hash(req.body.newPassword, constants.BCRYPT_SALT_ROUNDS, function(err, hash) {
+                        user.password = hash;
+                        if(req.body.newEmail !== "") {
+                            user.email = req.body.newEmail;
+                        }
+                        dbClient.collection('users').replaceOne({ email: user.email }, user);
+                    });
+                }
+                res.status(200).json("ok");
+            }
+        });
+    });
+
     app.post('/forgot', function(req, res, next) {
         dbClient.collection('users').findOne({ email: req.body.email }, function(err, user) {
             if (err) {

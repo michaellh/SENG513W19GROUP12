@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import AccountSettings from './AccountSettings';
 
 export default class Settings extends Component {
     constructor(props) {
@@ -10,6 +11,7 @@ export default class Settings extends Component {
         }
 
         console.log(this.state);
+        this.handleClickAccountSettings = this.handleClickAccountSettings.bind(this);
         this.handleClickNotifcations = this.handleClickNotifcations.bind(this);
         this.handleClickScreen = this.handleClickScreen.bind(this)
         this.handleSubmit = this.handleSubmit.bind(this);
@@ -22,6 +24,16 @@ export default class Settings extends Component {
                 modeS: this.props.splitScreenState,
             });
         });
+    }
+
+    handleClickAccountSettings(e) {
+        e.preventDefault();
+        //console.log("account settings clicked");
+
+        const title = <span><i className='fas fas fa-cog'></i> Account Settings</span>
+        const body = <AccountSettings socket={this.props.socket} user={this.props.user}/>;
+
+        this.props.modal(title, body);
     }
 
     handleClickNotifcations(e) {
@@ -51,7 +63,7 @@ export default class Settings extends Component {
         return (
                 <form style={{margin:0,padding:0}}>
                     <div className="modal-body text-center" id='modalBody'>
-                        <button className='btn btn-primary btn-block'>Account Settings</button>
+                        <button className='btn btn-primary btn-block' onClick={this.handleClickAccountSettings}>Account Settings</button>
                         {
                             this.state.modeN?
                             <button className='btn btn-secondary btn-block' onClick={this.handleClickNotifcations}>Notifications: <b>On</b></button>
