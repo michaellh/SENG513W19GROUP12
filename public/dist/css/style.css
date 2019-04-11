@@ -1,3 +1,53 @@
+/* body {
+  font-family: 'Varela Round', sans-serif;
+}*/
+
+@media only screen and (max-width: 768px) {
+  .login-form {
+    width: 70%;
+    margin: 0 auto;
+    padding: 30px 0;
+  }
+}
+
+@media only screen and (min-width: 768px) {
+  .login-form {
+    width: 50%;
+    margin: 0 auto;
+    padding: 30px 0;
+  }
+
+  .login-form form {
+    border-radius: 1px;
+    margin-bottom: 15px;
+    background: #fff;
+    border: 1px solid #f3f3f3;
+    box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
+    padding: 30px;
+  }
+}
+
+ .login-form .logo {
+  margin: 0 auto 5px;
+  text-align: center;
+}
+
+.login-form .logo img {
+  width: 10em;
+  height: 10em;
+}
+
+
+.login-form .title {
+  text-align: center;
+  font-size: 300%;
+}
+
+.login-form .sub-title {
+  text-align: center;
+  font-size: 22px;
+  margin-bottom: 20px;
+}
 /* Defaulting to 0 margin for custom setting below */
 * {
     margin: 0px;
