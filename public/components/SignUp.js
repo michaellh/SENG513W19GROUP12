@@ -2,6 +2,8 @@ import React, {Component} from 'react';
 import FormEditor from './Forms/FormEditor';
 import { Redirect } from 'react-router';
 import { Link } from 'react-router-dom';
+import logo from '../resources/logo.png';
+import '../css/Login.css';
 
 class SignUp extends Component {
   constructor(props) {
@@ -159,18 +161,22 @@ class SignUp extends Component {
 
     return (
       <div className="container">
-        <h1 style={{"textAlign" : "center"}}>NetChatter</h1>
-        <form onSubmit={this.handleSubmit}>
-          <FormEditor fields={fields} onChange={this.handleFieldChange}/>
-          <div className="row" style={{flex:1}}>
-            <div className="col-md-6">
-              <button className="btn btn-primary btn-lg" style={{"width" : "100%"}} type="submit">Sign Up</button>
+        <div className="login-form">
+          <form onSubmit={this.handleSubmit}>
+            <div className="logo"><img src={logo} alt="Logo" /></div>
+            <h1 className="title">NetChatter</h1>
+            <h4 className="sub-title">Sign Up</h4>
+            <FormEditor fields={fields} onChange={this.handleFieldChange}/>
+            <div className="row" style={{flex:1}}>
+              <div className="col-md-6">
+                <button className="btn btn-primary btn-lg" style={{"width" : "100%"}} type="submit">Sign Up</button>
+              </div>
+              <div className="col-md-6">
+                <Link to="/login"><button className="btn btn-outline-primary btn-lg" style={{"width" : "100%"}} type="button">Back to Login</button></Link>
+              </div>
             </div>
-            <div className="col-md-6">
-              <Link to="/login"><button className="btn btn-outline-primary btn-lg" style={{"width" : "100%"}} type="button">Back to Login</button></Link>
-            </div>
-          </div>
-        </form>
+          </form>
+        </div>
       </div>
     )
   }
