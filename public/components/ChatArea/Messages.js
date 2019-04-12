@@ -38,8 +38,18 @@ export default class Messages extends Component {
             )
         });
 
+        let style = {
+            height:this.props.height,
+        }
+        if (this.props.bgColour != 'image' && this.props.bgColour != 'imageURL'){
+            style.background = bgColourConv[this.props.bgColour];
+        }else{
+            style.backgroundImage = `url(${this.props.bgImage})`;
+            style.backgroundRepeat = 'no-repeat';
+            style.backgroundSize = '100% 100%';
+        }
         return (
-            <div className={this.props.className} id={this.props.id} style={{height:this.props.height, background:bgColourConv[this.props.bgColour]}}>
+            <div className={this.props.className} id={this.props.id} style={style}>
                 <div className='col-12'>
                     {messages}
                     <div ref={this.endMessageRef}></div>

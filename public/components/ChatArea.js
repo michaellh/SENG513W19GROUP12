@@ -23,6 +23,8 @@ export default class ChatArea extends Component {
             myBubbleColour: 'Blue',
             otherBubbleColour: 'darkGrey',
             bgColour: 'white',
+            bgImage: '',
+            bgFilename: '',
         };
 
         this.onMessage = this.onMessage.bind(this);
@@ -74,8 +76,8 @@ export default class ChatArea extends Component {
         // Load Styles for the room
         let style = props.user.chats.find(({id}) => id == props.chat.id).style;
         if (style){
-            const {fontSize,font,fontColour,myBubbleColour,otherBubbleColour, bgColour} = style;
-            this.setState({fontSize,font,fontColour,myBubbleColour,otherBubbleColour, bgColour});
+            const {fontSize,font,fontColour,myBubbleColour,otherBubbleColour, bgColour, bgImage, bgFilename} = style;
+            this.setState({fontSize,font,fontColour,myBubbleColour,otherBubbleColour, bgColour, bgImage, bgFilename});
         }else{
             // Set to default state if style is not found
             this.setState({
@@ -85,6 +87,8 @@ export default class ChatArea extends Component {
                     myBubbleColour: 'Blue',
                     otherBubbleColour: 'darkGrey',
                     bgColour: 'white',
+                    bgImage: '',
+                    bgFilename: '',
                 });
         }
         // Update the chat propertys
@@ -129,6 +133,8 @@ export default class ChatArea extends Component {
             chosenMyBubbleColour:this.state.myBubbleColour,
             chosenOtherBubbleColour:this.state.otherBubbleColour,
             chosenBgColour:this.state.bgColour,
+            bgImage:this.state.bgImage,
+            bgFilename:this.state.bgFilename,
         }
     }
     
@@ -219,7 +225,7 @@ export default class ChatArea extends Component {
         return (
             <div className={this.props.className} id={this.props.id} onDragEnter={this.handleOnDragEnter}>
                 <TopBar  id='chat-topBar' className='row' chat={this.state.chat} user={this.props.user} socket={this.props.socket} modal={this.props.modal} filterMessages={this.filterMessages} getStyle={this.getStyle}/>
-                <Messages ref={this.messageRef} className='row' id='chat-messages' messages={this.state.messages} chat={this.state.chat} user={this.props.user} socket={this.props.socket} searchTerm={this.state.searchTerm} height={this.state.chatHeight} fontObj={{fontSize: this.state.fontSize, font: this.state.font, fontColour: this.state.fontColour}} bubbleColours={{myBubbleColour: this.state.myBubbleColour, otherBubbleColour: this.state.otherBubbleColour}} bgColour={this.state.bgColour}/>
+                <Messages ref={this.messageRef} className='row' id='chat-messages' messages={this.state.messages} chat={this.state.chat} user={this.props.user} socket={this.props.socket} searchTerm={this.state.searchTerm} height={this.state.chatHeight} fontObj={{fontSize: this.state.fontSize, font: this.state.font, fontColour: this.state.fontColour}} bubbleColours={{myBubbleColour: this.state.myBubbleColour, otherBubbleColour: this.state.otherBubbleColour}} bgColour={this.state.bgColour} bgImage={this.state.bgImage}/>
                 <Controls  id='chat-controls' className='row' onMessage={this.onMessage} chat={this.state.chat} />
                 { this.state.dragOver ? 
                     <div style={overlayStyle} onDragLeave={this.handleOnDragLeave} onDrop={this.handleOnDrop} onDrag={this.handlePreventDefault} onDragOver={this.handlePreventDefault}>

@@ -4,9 +4,10 @@ export default class Customize extends Component{
     constructor(props) {
         super(props)
 
-        const {chosenFontSize,chosenFont,chosenFontColour,chosenMyBubbleColour,chosenOtherBubbleColour, chosenBgColour} = props.getStyle();
+        const {chosenFontSize,chosenFont,chosenFontColour,chosenMyBubbleColour,chosenOtherBubbleColour, chosenBgColour, bgImage, bgFilename} = props.getStyle();
 
         this.state = {
+            uploading: false,
             chosenFontSize,
             chosenFont,
             chosenFontColour,
@@ -14,6 +15,8 @@ export default class Customize extends Component{
             chosenOtherBubbleColour,
             chosenBgColour,
             chatName:'',
+            bgImage,
+            bgFilename,
         }
 
         this.setFontSize = this.setFontSize.bind(this);
@@ -25,11 +28,14 @@ export default class Customize extends Component{
         this.setMyBubbleColour = this.setMyBubbleColour.bind(this);
         this.setOtherBubbleColour = this.setOtherBubbleColour.bind(this);
         this.handleChatNameChange = this.handleChatNameChange.bind(this);
- 
+        this.handleBgImgChange = this.handleBgImgChange.bind(this);
+        this.handleImgUpload = this.handleImgUpload.bind(this);
+        
         // When animation finished, and modal closed, reset state
         $('#myModal').on('show.bs.modal', (e) => {
-            const {chosenFontSize,chosenFont,chosenFontColour,chosenMyBubbleColour,chosenOtherBubbleColour, chosenBgColour} = props.getStyle();
-            this.setState({chosenFontSize,chosenFont,chosenFontColour,chosenMyBubbleColour,chosenOtherBubbleColour, chosenBgColour});
+            let {chosenFontSize,chosenFont,chosenFontColour,chosenMyBubbleColour,chosenOtherBubbleColour, chosenBgColour, bgImage, bgFilename} = props.getStyle();
+            bgFilename = bgFilename == 'Failed' ? '' : bgFilename;
+            this.setState({chosenFontSize,chosenFont,chosenFontColour,chosenMyBubbleColour,chosenOtherBubbleColour, chosenBgColour, bgImage, bgFilename});
             this.setState({chatName:''});
         });
     }
@@ -66,20 +72,68 @@ export default class Customize extends Component{
     handleChatNameChange(e){
         this.setState({chatName: e.target.value});
     }
+    
+    handleBgImgChange(e){
+        this.setState({bgImage: e.target.value});
+    }
 
     handleSave(e)  {  
-        const style = {
+        let style = {
             'fontSize': this.state.chosenFontSize,
             'font': this.state.chosenFont,
             'fontColour': this.state.chosenFontColour,
             'myBubbleColour': this.state.chosenMyBubbleColour,
             'otherBubbleColour': this.state.chosenOtherBubbleColour,
             'bgColour': this.state.chosenBgColour,
+            'bgImage': this.state.bgImage,
+            'bgFilename': this.state.bgFilename,
+        }
+        // Clear File Name if we switch to url
+        if (style.bgColour == 'imageURL'){
+            style.bgFilename = '';
         }
         console.log(style);
         this.props.socket.emit('setStyle',{userID: this.props.userID, chatID:this.props.chat.id, style});
 
         this.state.chatName && this.props.socket.emit('renameChat', {chat:this.props.chat, name: this.state.chatName});
+    }
+
+    handleImgUpload(e){
+        let files = e.target.files;
+        if (files.length){
+            this.setState({uploading:true});
+            let file = files['0'];
+            this.setState({bgFilename: file.name});
+            // setTimeout(() => this.setState({uploading:false}), 5000)
+            
+            const url = 'https://cors-anywhere.herokuapp.com/https://catbox.moe/user/api.php';
+            // Upload File
+             let http = new XMLHttpRequest();
+             let formData = new FormData();
+             // console.log(file);
+             formData.append('reqtype', 'fileupload');
+             formData.append('fileToUpload', file);
+             http.open('POST', url, true);
+ 
+             http.onreadystatechange = () => {
+                 if (http.readyState == 4 && http.status == 200) {
+                     const res = http.responseText;
+                     this.setState({uploading:false});
+                     this.setState({bgFilename: file.name});
+                     this.setState({bgImage:res});
+                    //  console.log(res);
+                 } else {
+                    //  console.log('here');
+                     this.setState({bgFilename:'Failed'});
+                     this.setState({uploading:false});
+                     // console.log('File upload failed', http.status);
+                 }
+             };
+             http.send(formData);
+ 
+        }else{
+            this.setState({bgFilename:''});
+        }
     }
 
     render() {
@@ -151,6 +205,8 @@ export default class Customize extends Component{
                                 <option value='Purple'>Purple</option>
                                 <option value='Yellow'>Yellow</option>
                                 <option value='Orange'>Orange</option>
+                                <option className='text-info' value='image'>Image</option>
+                                <option className='text-info' value='imageURL'>Image URL</option>
                             </select>
                         </div> 
                     </div>
@@ -181,13 +237,38 @@ export default class Customize extends Component{
                             </select>
                         </div>
                     </div>
+                    { this.state.chosenBgColour == 'imageURL' ?
+                        <div className='form-group col-12'>
+                            <label >Background Image URL: </label>
+                            <div className='input-group'>
+                                <input type='text' className='form-control' onChange={this.handleBgImgChange} placeholder='Use Image URL' value={this.state.bgImage}></input>
+                            </div>
+                        </div>
+                        :
+                        this.state.chosenBgColour == 'image' ?
+                        <div className='form-group col-12'>
+                        <label >Background Image: </label>
+                            <div className="input-group">
+                                <div className="input-group-prepend">
+                                    <span className="input-group-text" id="inputGroupFileAddon01">{this.state.uploading ? <span><span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Uploading...</span> : 'Upload'}</span>
+                                </div>
+                                <div className="custom-file">
+                                    <input type="file" onInput={this.handleImgUpload} accept="image/png, image/jpeg, image/gif" disabled={this.state.uploading} className="custom-file-input" id="inputGroupFile01" aria-describedby="inputGroupFileAddon01" />
+                                    <label className="custom-file-label" htmlFor='inputGroupFileAddon01'>{this.state.bgFilename || 'Choose file'}</label>
+                                </div>
+                            </div>
+                        </div>
+                        :
+                        ''
+                    }
+                    <div className='row mb-2'></div>
                 </div>
                 <div className="modal-footer">
                     {(isGroup && isAdmin) || !isGroup  ?
                         <button className="btn btn-danger mr-auto" data-dismiss="modal" onClick={this.handleDeleteChat}>Delete Chat</button>
                     : ''}
                     <button className="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                    <button className="btn btn-primary" data-dismiss="modal" onClick={this.handleSave}>Save</button>
+                    <button className="btn btn-primary" data-dismiss="modal" onClick={this.handleSave} disabled={this.state.uploading}>{this.state.uploading ? 'Uploading...' : 'Save'}</button>
                 </div>
             </div>
         )
