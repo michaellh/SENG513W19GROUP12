@@ -6,17 +6,19 @@ export default class ManageUser extends Component{
         
         this.state ={
             isAdmin : props.role == 'admin',
+            members: props.chat.members,
         }
 
         this.changesMade = {};
 
         this.handleOnChange = this.handleOnChange.bind(this);
-        this.handleSave - this.handleSave.bind(this);
+        this.handleSave = this.handleSave.bind(this);
 
     }
 
     componentWillReceiveProps(props){
         this.setState({isAdmin : props.role == 'admin'});
+        this.setState({members: props.chat.members});
     }
     
     handleOnChange(userID, e) {
@@ -28,17 +30,17 @@ export default class ManageUser extends Component{
         Object.keys(this.changesMade).forEach(userID => {
             if(this.changesMade[userID] == 'remove'){
                 // console.log('removed');
-                this.props.socket.emit('removeFromChat', {chatID,userID});
+                this.props.socket.emit('removeFromChat', {chatID, chatName:this.props.chatName, userID});
             }else{
                 // console.log('Emit', changesMade[userID]);
-                this.props.socket.emit('roleChange', {chatID, userID, role:changesMade[userID]});
+                this.props.socket.emit('roleChange', {chatID, userID, role:this.changesMade[userID]});
             }
         });
         // changesMade.forEach(change => console.log(change));
     }
     
     render(){
-        const members = this.props.chat.members.map((d,i) => {
+        const members = this.state.members.map((d,i) => {
             return (
                 <div key={i} className='row'>
                     <div className='col-5'>

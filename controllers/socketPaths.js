@@ -263,10 +263,31 @@ module.exports = {
                         res.value.members.forEach(member => {
                             // console.log(member);
                             renameUserChatTable(chat.id, member.id, name, res.value);
+                            const notification = {
+                                title: `${chat.name}: Chat Has Been Renamed`,
+                                message: `${chat.name} has been renamed to ${name}`,
+                                color: 'yellow',
+                                // delay: 5000,
+                                // autohide: true,
+                            }
+                            notifyUser(member.id, notification);
                         });
                     });
                 }
                 else{
+                    // Notify User
+                    dbClient.collection('users').findOne({_id:mID(socket_userID)}, function(err, res){
+                        let oldName = res.chats.find(({id}) => ''+id == chat.id).name;
+                        const notification = {
+                            title: `${oldName}: Chat Has Been Renamed`,
+                            message: `${oldName} has been renamed to ${name}`,
+                            color: 'yellow',
+                            // delay: 5000,
+                            // autohide: true,
+                        }
+                        notifyUser(socket_userID, notification);
+                    });
+                    // Rename Chat
                     renameUserChatTable(chat.id, socket_userID, name);
                 }
             });
@@ -334,6 +355,15 @@ module.exports = {
                         sendback(user);
                         // Updating user chatlist and friends.
                         socket.emit('chatlist', user.chats);
+                        
+                        const notification = {
+                            title: `${name}: Group Chat Created`,
+                            message: `New chat ${name} has been created`,
+                            color: 'lightgreen',
+                            // delay: 5000,
+                            // autohide: true,
+                        }
+                        notifyUser(user._id, notification);
                     });
                     // dbClient.collection('users').findOne({_id:mID(socket_userID)}, (err, res) => {
                     //     console.log(res, err);
@@ -346,40 +376,71 @@ module.exports = {
                 // Find user in DB, res is null if not found
                 dbClient.collection('users').findOne({name}, (err, res) => {
                     if(res){
-                        // Found Users id, and name
-                        const {_id:clientID, name:clientName} = res;
-                        let chatObj = {
-                            name : 'OneOnOne',
-                            group : false,
-                            messages : [],
-                            members : [
-                                // Self
-                                {id : socket_userID, name: socket_username},
-                                // res user
-                                {id : clientID, name: clientName},
-                            ]
-                        };
-                        // Adding to chats table
-                        dbClient.collection('chats').insertOne(chatObj, (err,res) => {
-                            // Getting group condition, and id back from result
-                            const {_id:id, group} = res.ops[0];
+                        // Checking not equal to self
+                        if(''+res._id != socket_userID){
+                            // Found Users id, and name
+                            const {_id:clientID, name:clientName} = res;
+                            let chatObj = {
+                                name : 'OneOnOne',
+                                group : false,
+                                messages : [],
+                                members : [
+                                    // Self
+                                    {id : socket_userID, name: socket_username},
+                                    // res user
+                                    {id : clientID, name: clientName},
+                                ]
+                            };
+                            // Adding to chats table
+                            dbClient.collection('chats').insertOne(chatObj, (err,res) => {
+                                // Getting group condition, and id back from result
+                                const {_id:id, group} = res.ops[0];
 
-                            // Update Self Chat Table
-                            dbClient.collection('users').findOneAndUpdate({_id:mID(socket_userID)},{$push : {chats: {id, name: clientName, group}}}, {returnOriginal:false}, (err, res) => {
-                                let user = res.value;
-                                sendback(['Self',user]);
-                                // Updating user chatlist and friends.
-                                socket.emit('chatlist', user.chats);
-                            });
+                                // Update Self Chat Table
+                                dbClient.collection('users').findOneAndUpdate({_id:mID(socket_userID)},{$push : {chats: {id, name: clientName, group}}}, {returnOriginal:false}, (err, res) => {
+                                    let user = res.value;
+                                    sendback(['Self',user]);
+                                    // Updating user chatlist and friends.
+                                    socket.emit('chatlist', user.chats);
+                                    const notification = {
+                                        title: `New Chat Created`,
+                                        message: `New chat has been created with ${clientName}`,
+                                        color: 'lightgreen',
+                                        // delay: 5000,
+                                        // autohide: true,
+                                    }
+                                    notifyUser(user._id, notification);
+                                });
 
-                            // Update Client Chat Table, id is clients, but name is self name
-                            dbClient.collection('users').findOneAndUpdate({_id:mID(clientID)},{$push : {chats: {id, name: socket_username, group}}}, {returnOriginal:false}, (err, res) => {
-                                let user = res.value;
-                                sendback(['Client',user]);
-                                // Updating client's chatlist and friends.
-                                io.to(user.socketID).emit('chatlist', user.chats);
+                                // Update Client Chat Table, id is clients, but name is self name
+                                dbClient.collection('users').findOneAndUpdate({_id:mID(clientID)},{$push : {chats: {id, name: socket_username, group}}}, {returnOriginal:false}, (err, res) => {
+                                    let user = res.value;
+                                    sendback(['Client',user]);
+                                    // Updating client's chatlist and friends.
+                                    io.to(user.socketID).emit('chatlist', user.chats);
+
+                                    const notification = {
+                                        title: `New Chat Created`,
+                                        message: `${socket_username} has created a new chat with you`,
+                                        color: 'lightgreen',
+                                        // delay: 5000,
+                                        // autohide: true,
+                                    }
+                                    notifyUser(user._id, notification);
+                                });
                             });
-                        });
+                        }else{
+                            // Cannot create chat with self
+                            const notification = {
+                                title: 'Create Chat Failed',
+                                message: `Cannot create chat with self`,
+                                color: 'lightpink',
+                                // delay: 5000,
+                                // autohide: true,
+                            }
+                            notifyUser(socket_userID, notification);
+                            console.log(`no user: ${name}`);
+                        }
                     }else{
                         // Cannot Find User
                         const notification = {
@@ -400,49 +461,62 @@ module.exports = {
                 dbClient.collection('users').findOne({name}, function(err, res){
                     // User Exist
                     if(res){
-                        sendback([res,err]);
-                        const {_id:id, socketID, name} = res;
-                        // Update Chat member with new user
-                        dbClient.collection('chats').findOneAndUpdate({_id:mID(chatID)},{$push : {members: {id, name, role:'member'}}}, {returnOriginal:false}, (err, res) => {
-                            let chat = res.value;
-                            // Check chat exist, and is group chat
-                            if(chat && chat.group){
-                                // console.log(chat);
-                                // sendback(chat);
-
-                                // Update user's chatlist with new chat, Could be moved out to to improve performance
-                                // Setting up query parameters
-                                const query = {_id:mID(id)};
-                                const update = {$push:{chats:{id:chat._id, name: chat.name, group: chat.group}}};
-                                // Add new chat to user Chatlist
-                                dbClient.collection('users').findOneAndUpdate(query, update, {returnOriginal:false}, (err, res) => {
-                                    const user = res.value;
-                                    // Update their chatlist
-                                    io.to(user.socketID).emit('chatlist', user.chats);
-                                    // Send them a notification
-                                    const notification = {
-                                        title: `${chat.name}: Welcome`,
-                                        message: `You have been added to chat ${chat.name}`,
-                                        color: 'lightgreen',
-                                        // delay: 5000,
-                                        // autohide: true,
-                                    }
-                                    notifyUser(user._id, notification);
-                                });
-
-                                // Telling Everyone else to update chat Info
-                                let chatInfo = chat;
-                                frontEndID(chatInfo);
-                                // Removing extra unecessary stuff;
-                                delete chatInfo.messages;
-                                // Telling everyone in chatroom new chat info
-                                io.to(chatID).emit('chatInfoUpdate',chatInfo);
+                        if(''+res._id != socket_userID){
+                            sendback([res,err]);
+                            const {_id:id, socketID, name} = res;
+                            // Update Chat member with new user
+                            dbClient.collection('chats').findOneAndUpdate({_id:mID(chatID)},{$push : {members: {id, name, role:'member'}}}, {returnOriginal:false}, (err, res) => {
+                                let chat = res.value;
+                                // Check chat exist, and is group chat
+                                if(chat && chat.group){
+                                    // console.log(chat);
+                                    // sendback(chat);
+    
+                                    // Update user's chatlist with new chat, Could be moved out to to improve performance
+                                    // Setting up query parameters
+                                    const query = {_id:mID(id)};
+                                    const update = {$push:{chats:{id:chat._id, name: chat.name, group: chat.group}}};
+                                    // Add new chat to user Chatlist
+                                    dbClient.collection('users').findOneAndUpdate(query, update, {returnOriginal:false}, (err, res) => {
+                                        const user = res.value;
+                                        // Update their chatlist
+                                        io.to(user.socketID).emit('chatlist', user.chats);
+                                        // Send them a notification
+                                        const notification = {
+                                            title: `${chat.name}: Welcome`,
+                                            message: `You have been added to chat ${chat.name}`,
+                                            color: 'lightgreen',
+                                            // delay: 5000,
+                                            // autohide: true,
+                                        }
+                                        notifyUser(user._id, notification);
+                                    });
+    
+                                    // Telling Everyone else to update chat Info
+                                    let chatInfo = chat;
+                                    frontEndID(chatInfo);
+                                    // Removing extra unecessary stuff;
+                                    delete chatInfo.messages;
+                                    // Telling everyone in chatroom new chat info
+                                    io.to(chatID).emit('chatInfoUpdate',chatInfo);
+                                }
+                                // chat does not exist
+                                else{
+                                    console.log('chat not found')
+                                }
+                            });
+                        }else{  
+                             // Cannot Add self to Group Chat
+                            const notification = {
+                                title: 'Cannot Add User',
+                                message: `Cannot add yourself to group chat`,
+                                color: 'lightpink',
+                                // delay: 5000,
+                                // autohide: true,
                             }
-                            // chat does not exist
-                            else{
-                                console.log('chat not found')
-                            }
-                        });
+                            notifyUser(socket_userID, notification);
+                            console.log('Cannot Add Self');
+                        }
                     }
                     // user not found
                     else{
@@ -461,7 +535,7 @@ module.exports = {
             });
 
             // Defining function outside as being used more than once
-            function deleteChat(chatID){
+            function deleteChat(chatID, chatName){
                 // Find the Chat and delete it
                 dbClient.collection('chats').findOneAndDelete({_id:mID(chatID)}, (err, res) => {
                     let deletedChat = res.value;
@@ -479,11 +553,11 @@ module.exports = {
                             io.to(user.socketID).emit('resetChat', chatID);
                             // Update their chatlist
                             io.to(user.socketID).emit('chatlist', user.chats);
-
+                            
                             // Send Notification
                             const notification = {
-                                title: `${deletedChat.name}: Deleted`,
-                                message: `The chat '${deletedChat.name}' has been deleted`,
+                                title: `${chatName}: Deleted`,
+                                message: `The chat '${chatName}' has been deleted`,
                                 color: 'lightpink',
                                 // delay: 5000,
                                 // autohide: true,
@@ -519,7 +593,7 @@ module.exports = {
             // });
 
             // Leave Chat Function
-            function leaveChat(chatID,id){
+            function leaveChat(chatID, chatName, id){
                 // Updating the user Chat Table
                 dbClient.collection('users').findOneAndUpdate({_id:mID(id)},{$pull : {chats: {id : mID(chatID)}}}, {returnOriginal:false}, (err, res) => {
                     // console.log('Removed from User', res.value.chats);
@@ -537,6 +611,16 @@ module.exports = {
                     io.to(user.socketID).emit('resetChat', chatID);
                     // Sending message only to that person that was removed
                     io.to(user.socketID).emit('chatlist', user.chats);
+
+                    // Send Notification
+                    const notification = {
+                        title: `${chatName}: Removed From Chat`,
+                        message: `You have been removed from ${chatName}`,
+                        color: 'lightpink',
+                        // delay: 5000,
+                        // autohide: true,
+                    }
+                    notifyUser(id, notification);
                 });
                 // Updating the chat table member list
                 dbClient.collection('chats').findOneAndUpdate({_id:mID(chatID)},{$pull : {members: {id:mID(id)}}}, {returnOriginal:false}, (err, res) => {
@@ -548,24 +632,14 @@ module.exports = {
                     // Telling everyone in chatroom new chat info
                     io.to(chatID).emit('chatInfoUpdate',chatInfo);
                     // console.log(chatInfo);
-
-                    // Send Notification
-                    const notification = {
-                        title: `${chatInfo.name}: Removed From Chat`,
-                        message: `You have been removed from ${chatInfo.name}`,
-                        color: 'lightpink',
-                        // delay: 5000,
-                        // autohide: true,
-                    }
-                    notifyUser(id, notification);
                 });
             }
 
-            socket.on('removeFromChat', ({chatID, userID}) => leaveChat(chatID, userID));
+            socket.on('removeFromChat', ({chatID, chatName, userID}) => leaveChat(chatID, chatName, userID));
 
-            socket.on('deleteChat', chatID => deleteChat(chatID));
+            socket.on('deleteChat', ({chatID, chatName}) => deleteChat(chatID, chatName));
 
-            socket.on('leaveChat', chat => {
+            socket.on('leaveChat', ({chat, chatName}) => {
                 // if(chat.group){
                 //     // Typecasting to string to compare and find
                 //     // const {name, role} = chat.members.find(({id}) => `${id}` == `${socket_userID}`);
@@ -584,7 +658,7 @@ module.exports = {
                 //     // Single chat
                 //     // If only person left, delete the chat.
                 //     console.log('left single chat');
-                chat.members.length > 1 ? leaveChat(chat.id, socket_userID) : deleteChat(chat.id);
+                chat.members.length > 1 ? leaveChat(chat.id, chatName, socket_userID) : deleteChat(chat.id, chat.name);
                 // }
             });
 

@@ -165,15 +165,17 @@ export default class MessageUnit extends Component {
                     :
                     ''
                 }
-                <UncontrolledPopover trigger='click' isOpen={this.state.popoverOpen} toggle={this.togglePopover} placement="right" target={`message_${this.props.chatID}_${this.props.index}`}>
+                <UncontrolledPopover trigger='legacy' isOpen={this.state.popoverOpen} toggle={this.togglePopover} placement="right" target={`message_${this.props.chatID}_${this.props.index}`}>
                     <div className='btn-group input-group-lg'>
                         <button className='btn btn-outline-primary' onClick={this.handleLike}><i className='fas fa-thumbs-up'></i></button>
                         <button className='btn btn-outline-primary' onClick={this.handleDislike}><i className='fas fa-thumbs-down'></i></button>
                         {/* Only addlow edit when message is text */}
-                        {!type ?
+                        {!type && isSelf ?
                             <button className={`btn ${this.state.editMode ? 'btn-primary' : 'btn-outline-primary'}`} onClick={this.toggleEdit} ><i className='fas fa-edit'></i></button>
                         : ''}
-                        <button className='btn btn-outline-primary' onClick={this.handleDelete}><i className='fas fa-trash-alt'></i></button>
+                        {isSelf ?
+                            <button className='btn btn-outline-primary' onClick={this.handleDelete}><i className='fas fa-trash-alt'></i></button>
+                        : ''}
                     </div>
                 </UncontrolledPopover>
             </div>
