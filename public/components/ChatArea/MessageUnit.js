@@ -85,27 +85,27 @@ export default class MessageUnit extends Component {
     }
 
     getDownload(message){
-	console.log(message);
-	const [name, type, url] = message.split(',');
-	var xhr = new XMLHttpRequest();
-	xhr.open('GET', 'https://cors-anywhere.herokuapp.com/' + url, true);
+        // console.log(message);
+        const [name, type, url] = message.split(',');
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', 'https://cors-anywhere.herokuapp.com/' + url, true);
 
-	xhr.onreadystatechange = () => {
-	    if(xhr.readyState == 4 && xhr.status == 200) {
-		console.log(xhr.responseText);
-		let blob = new Blob([xhr.responseText], {type: type});
-		let reader = new FileReader;
+        xhr.onreadystatechange = () => {
+            if(xhr.readyState == 4 && xhr.status == 200) {
+            // console.log(xhr.responseText);
+            let blob = new Blob([xhr.responseText], {type: type});
+            let reader = new FileReader;
 
-		reader.onload = () => {
-		    this.setState({file: reader.result});
-		};
+            reader.onload = () => {
+                this.setState({file: reader.result});
+            };
 
-		reader.readAsDataURL(blob);
-	    }
-	};
+            reader.readAsDataURL(blob);
+            }
+        };
 
-	xhr.send();
-	return name;
+        xhr.send();
+        return name;
     }
 
     render() {
@@ -142,12 +142,12 @@ export default class MessageUnit extends Component {
                     <div style={{fontSize: fontObj.fontSize, fontFamily: fontObj.font, color: fontObj.fontColour}}>
                         {
                             type == 'GIF' ? 
-                            <img height={message.split(',')[0]} src={message.split(',')[1]}></img>
+                            <img height={message.split(',')[0]} style={{maxWidth: document.querySelector('#chat-messages').clientWidth - 100}} src={message.split(',')[1]}></img>
                             :(
-				type == 'FILE' ?
-				    (this.state.file ? <span>Download file: <a href={this.state.file} download={message.split(',')[0]}>{message.split(',')[0]}</a></span> : <span>Preparing file: <i>{this.getDownload(message)}...</i></span>)
-				:
-				(searchTerm ? <span dangerouslySetInnerHTML={{__html:message}}></span> : message))
+                            type == 'FILE' ?
+                                (this.state.file ? <span><i class="fas fa-file-download"></i> <a href={this.state.file} download={message.split(',')[0]}>{message.split(',')[0]}</a></span> : <span>Preparing file: <i>{this.getDownload(message)}...</i></span>)
+                            :
+                            (searchTerm ? <span dangerouslySetInnerHTML={{__html:message}}></span> : message))
                         }
                     </div> 
                 }
