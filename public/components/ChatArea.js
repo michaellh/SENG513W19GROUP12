@@ -92,6 +92,28 @@ export default class ChatArea extends Component {
     componentDidMount(){
         this.updateChatHeight();
         window.addEventListener('resize', this.updateChatHeight);
+
+         // Load Styles for the room
+         let style = this.props.user.chats.find(({id}) => id == this.props.chat.id).style;
+         if (style){
+             const {fontSize,font,fontColour,myBubbleColour,otherBubbleColour, bgColour, bgImage, bgFilename} = style;
+             this.setState({fontSize,font,fontColour,myBubbleColour,otherBubbleColour, bgColour, bgImage, bgFilename});
+         }else{
+             // Set to default state if style is not found
+             this.setState({
+                     fontSize: 14,
+                     font: 'Helvetica',
+                     fontColour: 'black',
+                     myBubbleColour: 'Blue',
+                     otherBubbleColour: 'darkGrey',
+                     bgColour: 'white',
+                     bgImage: '',
+                     bgFilename: '',
+                 });
+         }
+         // Update the chat propertys
+         this.setState({chat:this.props.chat});
+         setTimeout(() => {this.scrollToBottom();}, 200); 
     }
 
     updateChatHeight(){
