@@ -11,6 +11,7 @@ export default class MessageUnit extends Component {
             popoverOpen : false,
             editMode : false,
             editMessage : props.message.message,
+            leaveCount : props.leaveCount,
         }
 
         this.endMessageRef = React.createRef();
@@ -32,7 +33,7 @@ export default class MessageUnit extends Component {
         return `${date.toLocaleDateString()} ${time}`;
     }        
     
-    componentWillReceiveProps({message, searchTerm}){
+    componentWillReceiveProps({message, searchTerm, leaveCount}){
         const msg = {...message};
         // Highlighting Text
         if(searchTerm){
@@ -40,6 +41,12 @@ export default class MessageUnit extends Component {
         }
         this.setState({message:msg});
         this.setState({reactions: message.reactions});
+
+        if(leaveCount != this.state.leaveCount){
+            console.log('closePopover');
+            this.setState({popoverOpen:false});
+            this.setState({leaveCount});
+        }
     }
 
     handleLike(){
