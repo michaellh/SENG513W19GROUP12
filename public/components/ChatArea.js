@@ -115,7 +115,10 @@ export default class ChatArea extends Component {
 
     filterMessages(searchTerm){
         this.setState({searchTerm});
-        let messages = this.messages.filter(d => d.message.includes(searchTerm))
+        let messages = this.messages;
+        if(searchTerm != ''){
+            messages = this.messages.filter(d => !d.type && d.message.includes(searchTerm))
+        }
         this.setState({messages});
     }
 
