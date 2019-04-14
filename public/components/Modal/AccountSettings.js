@@ -267,9 +267,9 @@ export default class AccountSettings extends Component {
     } 
     
     render() {
-        const fields = [{name: "New Username", hasError: this.state["New Username"].hasError, placeholder:"Enter username", errorMessage: this.state["New Username"].errorMessage},
-                        {name: "Confirm Username", hasError: this.state["Confirm Username"].hasError, placeholder:"Confirm your username", errorMessage: "Usernames do not match"},
-                        {name: "New Email", hasError: this.state["New Email"].hasError, placeholder:"Enter email", errorMessage: this.state["New Email"].errorMessage},
+        const fields = [{name: "New Username", hasError: this.state["New Username"].hasError, placeholder:"Current username: " + this.props.user.name, errorMessage: this.state["New Username"].errorMessage},
+                        {name: "Confirm Username", hasError: this.state["Confirm Username"].hasError, placeholder:"Confirm your new username", errorMessage: "Usernames do not match"},
+                        {name: "New Email", hasError: this.state["New Email"].hasError, placeholder:"Current email: " + this.props.user.email, errorMessage: this.state["New Email"].errorMessage},
                         {name: "Confirm Email", hasError: this.state["Confirm Email"].hasError, placeholder:"Confirm your email", errorMessage: "Emails do not match"},
                         {name: "New Password", hasError: this.state["New Password"].hasError, placeholder:"Enter password", type: "password", errorMessage: this.state["New Password"].errorMessage},
                         {name: "Confirm Password", hasError: this.state["Confirm Password"].hasError, placeholder:"Confirm your password", type: "password", errorMessage: "Passwords do not match"}];

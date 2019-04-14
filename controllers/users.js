@@ -128,7 +128,7 @@ module.exports = {
                             res.status(200).json("ok");
                         }
                         else {
-                            res.status(409).json("An account with that username already exists.");
+                            res.status(409).json("No change: An account with that username already exists.");
                         }
                     });
                 }
@@ -166,7 +166,7 @@ module.exports = {
                             res.status(200).json("ok");
                         }
                         else {
-                            res.status(409).json("An account with that email already exists."); 
+                            res.status(409).json("No change: An account with that email already exists."); 
                         }
                     });
                 }
