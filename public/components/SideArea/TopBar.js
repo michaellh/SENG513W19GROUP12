@@ -13,8 +13,8 @@ export default function TopBar(props) {
 
   return (
     <div className='row m-2'>
-        <img src={logo} style={{"width" : "50px"}} alt="Logo"></img>
-        <h5 className='col text-center mt-2'> LOGO </h5>
+        <img src={logo} style={{"width" : "50px", "height" : "50px", float:'left'}} alt="Logo"></img>
+        <h5 className='col text-center mt-2'> NetChatter </h5>
         <div className='' style={{float:"right"}}>
             <button className='btn btn-light btn-lg'  onClick={handleSettings}><i className='fas fa-cog'></i></button>
         </div>
