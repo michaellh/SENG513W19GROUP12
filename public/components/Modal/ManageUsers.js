@@ -29,14 +29,11 @@ export default class ManageUser extends Component{
         const chatID = this.props.chat.id;
         Object.keys(this.changesMade).forEach(userID => {
             if(this.changesMade[userID] == 'remove'){
-                // console.log('removed');
                 this.props.socket.emit('removeFromChat', {chatID, chatName:this.props.chatName, userID});
             }else{
-                // console.log('Emit', changesMade[userID]);
                 this.props.socket.emit('roleChange', {chatID, userID, role:this.changesMade[userID]});
             }
         });
-        // changesMade.forEach(change => console.log(change));
     }
     
     render(){

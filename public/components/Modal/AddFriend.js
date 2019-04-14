@@ -20,7 +20,6 @@ export default class AddFriend extends Component {
 
     handleClick(e) {
         e.preventDefault();
-        console.log(e.target.value);
         this.setState({mode: e.target.value, text:''});
     }
 

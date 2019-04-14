@@ -3,7 +3,6 @@ import React, { Component } from 'react'
 export default function LeaveChat(props) {
 
     let handleClick = (e) => {
-        //props.socket.emit('leaveChat', props.chat.id);
         props.socket.emit('leaveChat', {chat:props.chat, chatName:props.chatName});
     }
     

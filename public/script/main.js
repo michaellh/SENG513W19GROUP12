@@ -21,13 +21,6 @@ const routing = (
   </Router>
 )
 
-// import './socket-calls.js'
-// import './socket.io.js'
 import '../css/main.css'
-// import 'bootstrap/dist/css/bootstrap.min.css';
-
-//let name = 'userAlex';
-//while(!(name = prompt("Please enter your name")));
-//document.cookie = `user=${name}`;
 
 ReactDOM.render(routing, document.getElementById('container'));

@@ -10,11 +10,9 @@ export default class Settings extends Component {
             modeS: this.props.splitScreenState,
         }
 
-        console.log(this.state);
         this.handleClickAccountSettings = this.handleClickAccountSettings.bind(this);
         this.handleClickNotifcations = this.handleClickNotifcations.bind(this);
         this.handleClickScreen = this.handleClickScreen.bind(this)
-        this.handleSubmit = this.handleSubmit.bind(this);
         this.handleLogout = this.handleLogout.bind(this);
 
         // When animation finished, and modal closed, reset state
@@ -37,25 +35,19 @@ export default class Settings extends Component {
 
     handleClickNotifcations(e) {
         e.preventDefault();
-        // console.log(e.target.value);
         this.setState({modeN: !this.state.modeN});
         this.props.toggleNotification(!this.state.modeN);
     }
 
     handleClickScreen(e) {
         e.preventDefault();
-        // console.log(e.target.value);
         this.setState({modeS: !this.state.modeS});
         this.props.toggleSplitScreen(!this.state.modeS);
         this.state.modeS && this.props.resetChat(2);
     }
 
     handleLogout() {
-        //this.props.logout();
         document.cookie = `token=""`;
-    }
-
-    handleSubmit() {
     }
 
     render() {
@@ -77,9 +69,6 @@ export default class Settings extends Component {
                         }
                         <button className='btn btn-danger btn-block' onClick={this.handleLogout}>Log Out</button>
                     </div>
-                    {/* <div className="modal-footer">
-                        <button type="submit" className="btn btn-primary" data-dismiss="modal" onClick={this.handleSubmit}>Okay</button>
-                    </div> */}
                 </form>
         )
     }

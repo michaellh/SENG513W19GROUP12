@@ -6,12 +6,10 @@ export default function SideControl(props) {
 
     let friendMode = () => {
         props.updateMode('friends');
-        console.log(props.mode);
     }
 
     let chatMode = () => {
         props.updateMode('chats')
-        console.log(props.mode);
     }
 
     let handleSearch = (e) => {

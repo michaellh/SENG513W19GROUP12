@@ -3,7 +3,6 @@ import ChatArea from './ChatArea';
 import SideArea from './SideArea';
 import Modal from './Modal';
 import { Redirect } from 'react-router';
-import { Link } from 'react-router-dom'
 import Toast from './Toast';
 
 function getCookie(cname) {
@@ -58,7 +57,6 @@ export default class Container extends Component {
                 .on('authenticated', () => {
                   this.socket.on('userInfo', user => {
                       this.setState({user});
-                      //console.log(user);
                   });
 
                   this.socket.on('chatInfo', chat => {
@@ -73,7 +71,6 @@ export default class Container extends Component {
                       }else{
                           this.setState({chat});
                       }
-                      //console.log(chat);
                   });
 
                   this.socket.on('chatInfoUpdate', chat => {
@@ -87,35 +84,26 @@ export default class Container extends Component {
                   });
 
                   this.socket.on('notification', notifications => {
-                      // console.log('gotNotification');
                       let user = {...this.state.user};
                       user.notifications = notifications;
                       this.setState({user});
                   });
 
                   this.socket.on('resetChat', chatID => {
-                      console.log('resetChatGot')
                       // Only reset chat if we are on it
                       if (this.state.chat && this.state.chat.id == chatID){
-                          console.log('actual reset Chat')
                           this.resetChat(1);
                       }
                       if (this.state.chat2 && this.state.chat2.id == chatID){
-                          console.log('actual reset Chat')
                           this.resetChat(2);
                       }
                   });
                 })
                 .on('unauthorized', (msg) => {
-                  console.log("unauthorized: " + JSON.stringify(msg.data));
                   this.setState({ redirect: true });
                   throw new Error(msg.data.type);
                 })
             });
-            // Debuging function
-            this.socket.on('debug', message => console.log('DEBUG', message));
-            this.socket.emit('debug', 'sendback("Hello")');
-            // this.socket.emit('joinRoom', this.state.chatName);
         }
     }
 
@@ -128,7 +116,6 @@ export default class Container extends Component {
     }
 
     chooseChat(chat){
-        // console.log(chat);
         if (this.state.splitScreen){
             // If both chats are occupied, we don't choose chats
             if (!this.state.chat || !this.state.chat2){
@@ -154,9 +141,6 @@ export default class Container extends Component {
             this.socket.emit('resetUnread', chat.id);
             this.setState({switchRoom:true});
         }
-        // console.log(this.state.chat);
-        // this.setState({chat: chat});
-        // console.log(chat);
     }
 
     toggleSplitScreen(splitScreen){
@@ -165,7 +149,6 @@ export default class Container extends Component {
 
     toggleNotification(notification){
         this.setState({notification});
-        // notification && this.setState({user:this.state.user});
     }
 
     resetChat(num){
@@ -188,21 +171,6 @@ export default class Container extends Component {
         document.cookie = `token=""`;
         this.setState({redirect:true});
     }
-    // componentDidMount() {
-    //   fetch('/verify-token')
-    //     .then(res => {
-    //       if (res.status === 200) {
-    //         this.setState({ loading: false });
-    //       } else {
-    //         const error = new Error(res.error);
-    //         throw error;
-    //       }
-    //     })
-    //     .catch(err => {
-    //       console.error(err);
-    //       this.setState({ redirect: true, loading: false });
-    //     });
-    // }
 
     render() {
         if (this.state.loading) {
@@ -256,13 +224,6 @@ export default class Container extends Component {
                         )
 
                     }
-                    {/* {
-                        this.state.chat ?
-                        <ChatArea className='col-10' id='chat-area' chat={this.state.chat} socket={this.socket} user={this.state.user} modal={this.openModal} switchRoom={this.state.switchRoom} updateSwitchRoom={this.updateSwitchRoom} />
-                        :
-                        <h1 className='col-10 text-center align-self-center'>Open a chat...</h1>
-                    } */}
-
                     <Modal modal={this.state.modal} />
                     {this.state.notification ? <Toast user={this.state.user} socket={this.socket} /> : ''}
                 </div>

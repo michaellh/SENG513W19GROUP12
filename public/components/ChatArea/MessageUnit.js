@@ -46,7 +46,6 @@ export default class MessageUnit extends Component {
         this.setState({reactions: message.reactions});
 
         if(leaveCount != this.state.leaveCount){
-            console.log('closePopover');
             this.setState({popoverOpen:false});
             this.setState({leaveCount});
         }
@@ -73,7 +72,6 @@ export default class MessageUnit extends Component {
         const {date, userID} = this.state.message;
         // Message to be edited to
         let message = this.state.editMessage;
-        // let message = 'boo';
         this.props.socket.emit('messageEdit', {chatID : this.props.chatID, userID, date, message})
         this.toggleEdit();
     }
@@ -92,14 +90,12 @@ export default class MessageUnit extends Component {
     }
 
     getDownload(message){
-        // console.log(message);
         const [name, type, url] = message.split(',');
         var xhr = new XMLHttpRequest();
         xhr.open('GET', 'https://cors-anywhere.herokuapp.com/' + url, true);
 
         xhr.onreadystatechange = () => {
             if(xhr.readyState == 4 && xhr.status == 200) {
-            // console.log(xhr.responseText);
             let blob = new Blob([xhr.responseText], {type: type});
             let reader = new FileReader;
 

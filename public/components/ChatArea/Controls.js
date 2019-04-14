@@ -10,10 +10,6 @@ export default class Controls extends Component {
         this.state = {
             text:'',
         }
-        this.style = {
-            //   position: 'absolute',
-            //   bottom:'0',
-        }
 
         this.handleSubmit = this.handleSubmit.bind(this);
         this.textInput = React.createRef();
@@ -22,14 +18,8 @@ export default class Controls extends Component {
         this.handleEmojiClick = this.handleEmojiClick.bind(this);
         this.handleGifClick = this.handleGifClick.bind(this);
 	}
-	
-    componentDidUpdate(){
-        // this.textInput.current.focus();
-    }
 
     handleGifClick(gif){
-        // console.log(gif);
-        // this.props.onMessage(gif.downsized_large.url, 'GIF');
         this.props.onMessage(`${gif.downsized_medium.height},${gif.downsized_medium.url}`, 'GIF');
     }
 

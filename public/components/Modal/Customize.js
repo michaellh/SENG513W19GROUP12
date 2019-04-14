@@ -41,7 +41,6 @@ export default class Customize extends Component{
     }
 
     setFontSize(e){
-        //console.log(e.target.value);
         this.setState({chosenFontSize: e.target.value});
     }
 
@@ -92,7 +91,6 @@ export default class Customize extends Component{
         if (style.bgColour == 'imageURL'){
             style.bgFilename = '';
         }
-        console.log(style);
         this.props.socket.emit('setStyle',{userID: this.props.userID, chatID:this.props.chat.id, style});
 
         this.state.chatName && this.props.socket.emit('renameChat', {chat:this.props.chat, name: this.state.chatName});
@@ -104,13 +102,11 @@ export default class Customize extends Component{
             this.setState({uploading:true});
             let file = files['0'];
             this.setState({bgFilename: file.name});
-            // setTimeout(() => this.setState({uploading:false}), 5000)
             
             const url = 'https://cors-anywhere.herokuapp.com/https://catbox.moe/user/api.php';
             // Upload File
              let http = new XMLHttpRequest();
              let formData = new FormData();
-             // console.log(file);
              formData.append('reqtype', 'fileupload');
              formData.append('fileToUpload', file);
              http.open('POST', url, true);
@@ -121,12 +117,9 @@ export default class Customize extends Component{
                      this.setState({uploading:false});
                      this.setState({bgFilename: file.name});
                      this.setState({bgImage:res});
-                    //  console.log(res);
                  } else {
-                    //  console.log('here');
                      this.setState({bgFilename:'Failed'});
                      this.setState({uploading:false});
-                     // console.log('File upload failed', http.status);
                  }
              };
              http.send(formData);
@@ -154,7 +147,6 @@ export default class Customize extends Component{
                         <div className='col-5 form-group'>
                             <label htmlFor='sel1'>Font Size:</label>
                             <select className='form-control' id='sel1' onChange={this.setFontSize} value={this.state.chosenFontSize}>
-                                {/*<option value="" selected disabled hidden>{this.state.chosenFontSize}</option>*/}
                                 <option value='12'>12</option>
                                 <option value='14'>14</option>
                                 <option value='16'>16</option>

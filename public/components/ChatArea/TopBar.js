@@ -19,10 +19,7 @@ export default function TopBar(props) {
 	    props.modal(title,body);
   	}
   
-  	let handleLeaveChat = () => {
-		// console.log(props.chat.id);
-		
-		
+  	let handleLeaveChat = () => {		
 		const title = <span><i className='fas fa-trash-alt'></i>  Leave {chatName}?</span>
 		const body = <LeaveChat socket={props.socket} chat={props.chat} chatName={chatName}/>;
 
@@ -30,8 +27,6 @@ export default function TopBar(props) {
   	}
 
   	let handleCustomize = () => {
-		// console.log(props.chat.id);
-		
 		const title = <span><i className='fas fas fa-tools'></i>  Customize</span>
 		const body = <Customize socket={props.socket} userID={props.user.id} role={role} chat={props.chat} chatName={chatName} getStyle={props.getStyle}/>;
 
@@ -39,8 +34,6 @@ export default function TopBar(props) {
   	}
 
 	let handleManageUsers = () => {
-		// console.log(props.chat.id);
-		
 		const title = <span><i className='fas fas fa-user-cog'></i>  Manage Users</span>
 		const body = <ManageUsers socket={props.socket} chat={props.chat} chatName={chatName} role={role} userID={props.user.id}/>;
 

@@ -3,11 +3,9 @@ import React from 'react'
 export default function Chats(props) {
 
     const chosenChatIDs = props.chosenChat.map(d => d && d.id);
-    // console.log(props);
     const style = {border:'none'};
 
     let handleOnClick = (chat) => {
-	console.log(props.chosenChat);
         if (chat.id == chosenChatIDs[0]){
             props.resetChat(1);
         }
@@ -21,7 +19,6 @@ export default function Chats(props) {
 
     const groupChats = props.chats.filter(chat => chat.group).map((d,i) => {
         return (
-            //${d.group ? 'alert-info' : 'alert-secondary' }
             <li key={i} className={`list-group-item ${chosenChatIDs.includes(d.id) ? 'list-group-item-action active' : 'list-group-item-action' } `} 
                 onClick={() => {handleOnClick(d)}}
                 >
@@ -33,7 +30,6 @@ export default function Chats(props) {
 
     const singleChats = props.chats.filter(chat => !chat.group).map((d,i) => {
         return (
-            //${d.group ? 'alert-info' : 'alert-secondary' }
             <li key={i} className={`list-group-item ${chosenChatIDs.includes(d.id) ? 'list-group-item-action active' : 'list-group-item-action' } `} 
                 onClick={() => {handleOnClick(d)}}
                 >

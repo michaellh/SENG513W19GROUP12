@@ -42,18 +42,15 @@ export default class ChatArea extends Component {
         this.props.socket.emit('reqHistory', this.props.chat.id);
 
         props.socket.on('message', ({chatID, message}) => {
-            // console.log(message);
             if (chatID == this.state.chat.id){
                 message.date = new Date(message.date);
+                this.messages.push(message);
                 this.setState({messages : [...this.state.messages, message]});
-                // console.log(this.state.chat.name + 'Got Here');
                 this.scrollToBottom();
             }
         });
 
         props.socket.on('loadHistory', ({chatID, messages}) => {
-            // console.log(messages);
-            console.log(this.state.chatID, chatID);
             if (this.state.chat.id == chatID){
                 messages.forEach(d => d.date = new Date(d.date));
                 this.messages = messages;
@@ -134,7 +131,6 @@ export default class ChatArea extends Component {
     onMessage(message, type = null){
         const {id:userID, name:userName} =this.props.user;
         this.props.socket.emit('message', {chat : this.props.chat, msg : {userID, userName, message, type}});
-        // this.setState({messages : [...this.state.messages, message]});
     }
 
     scrollToBottom(){
@@ -167,19 +163,15 @@ export default class ChatArea extends Component {
         e.preventDefault();
         this.setState({uploading:true});
         let fileList = e.dataTransfer.files;
-        // console.log('eDropped');
         // Upload files to catbox.moe. Files are stored for 30 days with size limit of 100MB.
         // Images can then be retrieved and displayed exactly like Giphy GIFs.
-        // console.log(e.dataTransfer.items, e.dataTransfer.files);
         const exts = ['jpg', 'jpeg', 'png', 'gif'];
         const url = 'https://cors-anywhere.herokuapp.com/https://catbox.moe/user/api.php';
         Object.keys(fileList).forEach(fileIndex => {
             let file = fileList[fileIndex];
-            // console.log(file);
             // Upload File
             let http = new XMLHttpRequest();
             let formData = new FormData();
-            // console.log(file);
             formData.append('reqtype', 'fileupload');
             formData.append('fileToUpload', file);
             http.open('POST', url, true);
@@ -192,23 +184,21 @@ export default class ChatArea extends Component {
                     reader.onload = () => {
                         let image = new Image();
                         image.onload = () => {
-                        this.onMessage(`${Math.min(image.height, 720)},${res}`, 'GIF');
-                        this.setState({uploading:false});
-                        this.setState({dragOver:false});
+                            this.onMessage(`${Math.min(image.height, 720)},${res}`, 'GIF');
+                            this.setState({uploading:false});
+                            this.setState({dragOver:false});
                         }
                         image.src = reader.result;
                     }
                     reader.readAsDataURL(file);
                     } else {
-                    this.onMessage(`${file.name},${file.type},${res}`, 'FILE');
-                    this.setState({uploading:false});
-                    this.setState({dragOver:false});
-                    // console.log('File was not an image, sending link to arbitrary file.');
+                        this.onMessage(`${file.name},${file.type},${res}`, 'FILE');
+                        this.setState({uploading:false});
+                        this.setState({dragOver:false});
                     }
                 } else {
                     this.setState({uploading:false});
                     this.setState({dragOver:false});
-                    // console.log('File upload failed', http.status);
                 }
             };
             http.send(formData);
@@ -216,14 +206,10 @@ export default class ChatArea extends Component {
     }
 
     handleOnDragEnter(e){
-        console.log('dragEnter');
-        // e.preventDefault();
         this.setState({dragOver:true});
     }
 
     handleOnDragLeave(e){
-        console.log('dragLeave');
-        // e.preventDefault();
         this.setState({dragOver:false});
     }
 

@@ -22,7 +22,6 @@ export default class SideArea extends Component {
         this.updateMode = this.updateMode.bind(this);
         this.filterResult = this.filterResult.bind(this);
         this.updateChatHeight = this.updateChatHeight.bind(this);
-        // console.log(this.props);
 
         props.socket.on('chatlist', chats => {
             // Updating the user object

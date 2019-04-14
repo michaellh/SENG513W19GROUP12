@@ -16,58 +16,31 @@ module.exports = {
             secret: constants.JSON_KEY,
             timeout: 15000 // 15 seconds to send the authentication message
         })).on('authenticated', socket => {
-            // Checking if user exist and assigning name
-            //const cookie = socket.client.request.headers.cookie;
-            //const userCookie =  cookie && cookie.split(';').find(cookie => cookie.includes('user='));
-            // username being used below as the username from the database
             const socket_email = socket.decoded_token.email;
             let socket_username;
             let socket_userID;
-            // console.log(socket_username);
 
             dbClient.collection('users').findOneAndUpdate({email:socket_email}, {$set:{socketID: socket.id}}, {returnOriginal: false}, (err, res) => {
                 let user = res.value;
-                // console.log(res);
-                // console.log(user);
                 if (user){
+                    // Send User Info If found
                     socket_userID = user._id;
                     socket_username = user.name;
-                    console.log(socket_userID);
                     frontEndID(user);
-                    // console.log(user.socketID, socket.id);
                     socket.emit('userInfo', user);
-                    // socket.emit('chatlist', user.chats);
-                    // socket.emit('friendlist', user.friends);
                 }else{
-                    // Enroll new user
                     console.log("Error! Invalid email found");
-                    // const userObject = {
-                    //     name: socket_username,
-                    //     socketID: socket.id,
-                    //     chats: [],
-                    //     friends: [],
-                    //     notifications: [],
-                    // }
-                    // dbClient.collection('users').insertOne(userObject, (err, res) => {
-                    //     let user = res.ops[0];
-                    //     socket_userID = user._id;
-                    //     frontEndID(user);
-                    //     socket.emit('userInfo', user);
-                    // });
-                    // socket.emit('chatlist', {chats:['Chat1', 'Chat2'], friends: ['Friend1', 'Friend2', 'Friend3']});
                 }
             });
-
+            
+            //
+            // Notification Section
+            //
             function notifyUser(userID, notification){
+                // Formating Notification with Date
                 notification = {time: new Date(), ...notification};
-                // dbClient.collection('users').findOneAndUpdate({_id:mID(userID)}, (err, res) => {
-                //     const user = res;
-                //     io.to(user.socketID).emit('notification', notification);
-                // });
                 dbClient.collection('users').findOneAndUpdate({_id:mID(userID)},{$push : {notifications: notification}}, {returnOriginal:false}, (err, res) => {
                     const user = res.value;
-                    // console.log('Send Message to ', res);
-                    // console.log(socket.id);
                     io.to(user.socketID).emit('notification', user.notifications);
                 });
             }
@@ -77,21 +50,13 @@ module.exports = {
             socket.on('removeNotification', time => {
                 dbClient.collection('users').findOneAndUpdate({_id:mID(socket_userID)},{$pull : {notifications: {time : new Date(time)}}}, {returnOriginal:false}, (err, res) => {
                     const user = res.value;
-                    // console.log('Send Message to ', res);
-                    // console.log(socket.id);
                     io.to(user.socketID).emit('notification', user.notifications);
                 });
             });
 
-            let sendback = (message) => {
-                socket.emit('debug', message);
-            }
-            // console.log('Connected');
-            // To send message back and forth
-            socket.on('debug', msg => {
-		eval(msg);
-            });
-
+            //
+            //Room Section
+            //
             socket.on('joinRoom', chatID => {
                 socket.join(chatID);
 
@@ -101,7 +66,6 @@ module.exports = {
                     // Removing extra unecessary stuff;
                     delete chatInfo.messages;
                     io.to(chatID).emit('chatInfoUpdate',chatInfo);
-                    // console.log(chatInfo);
                 });
             });
 
@@ -126,44 +90,23 @@ module.exports = {
                 leaveRoom(chatID);
             });
 
-            socket.on('resetUnread', chatID => {
-                dbClient.collection('users').findOneAndUpdate({_id:mID(socket_userID), 'chats.id':mID(chatID)}, {$set : {'chats.$.unread': 0}}, {returnOriginal:false}, (err, res) => {
-                    let user = res.value;
-                    // console.log("resetUnread", res.value);
-                    socket.emit('chatlist', user.chats);
-                });
-            });
-
-            // Get Chat Info
-            socket.on('reqChatInfo', chatID => {
-                dbClient.collection('chats').findOne({_id:mID(chatID)}, (err, res) => {
-                    let chatInfo = res;
-                    // Formating id for front end
-                    frontEndID(chatInfo);
-                    // Removing extra unecessary stuff;
-                    delete chatInfo.messages;
-                    socket.emit('chatInfo', chatInfo);
-                });
-            })
-
+            // 
+            // Message Section
+            // 
             socket.on('message', msg => {
                 let message = {date: new Date(), ...msg.msg};
-                // dbClient.collection('chats').update({_id:mID(msg.chat.id)}, {$push : {messages: message}});
                 // Update the unread field of all inactive members of the chat
                 dbClient.collection('chats').findOneAndUpdate({_id:mID(msg.chat.id)}, {$push : {messages: message}}, {returnOriginal:false}, (err, res) => {
                     let chat = res.value;
                     let members = chat.members;
                     let activeMembers = chat.activeMembers.map(d => ''+d);
-                    // console.log(members, activeMembers);
                     let inactiveMembers = members.filter(d => !activeMembers.includes(''+d.id));
-
-                    // console.log(inactiveMembers);
+                    // Update Unread for inactive members
                     inactiveMembers.forEach(members => {
                         let query = {_id:mID(members.id),'chats.id':mID(msg.chat.id)};
                         let update = {$inc:{'chats.$.unread':1}};
                         dbClient.collection('users').findOneAndUpdate(query, update, {returnOriginal:false}, (err,res) => {
                             let user = res.value;
-                            // console.log(user, err);
                             io.to(user.socketID).emit('chatlist',user.chats);
                         });
                     });
@@ -178,7 +121,6 @@ module.exports = {
                 reactions = reactions ? reactions : {like:0, dislike:0};
                 // Incrementing that reaction
                 reactions[incReaction]++;
-                console.log('messageReacted');
                 // Updating messages that match the date, userid of the chat
                 const query = {_id:mID(chatID), messages: {$elemMatch:{date: new Date(date),userID}}};
                 const update = {$set:{'messages.$.reactions':reactions}};
@@ -194,7 +136,6 @@ module.exports = {
                 if (userID == socket_userID){
                     // Updating messages that match the date, userid of the chat
                     const query = {_id:mID(chatID)};
-                    // const update = {$pull: {messages: {$elemMatch:{date: new Date(date),userID}}}};
                     const update = {$pull: {messages: {userID ,date: new Date(date)}}};
                     dbClient.collection('chats').findOneAndUpdate(query, update, {returnOriginal:false}, (err, res) => {
                         // If success, emit history of chat again so the message on client updates
@@ -202,7 +143,7 @@ module.exports = {
                     });
                 }
                 else{
-                    // Cannot delete other messages
+                    // Cannot delete other messages, Should Not reach here
                     // Should not be able to anyway, Delete should only show for own messages
                     console.log('tried deleteing other message');
                 }
@@ -221,28 +162,49 @@ module.exports = {
                     });
                 }
                 else{
-                    // Cannot Edit other messages
+                    // Cannot Edit other messages, Should Not reach here
                     // Should not be able to anyway, Edit should only show for own messages
-                    console.log('tried Editing other message');
+                    console.log('tried editing other message');
                 }
             });
 
+            // Reseting unread messages to 0 when visiting chat
+            socket.on('resetUnread', chatID => {
+                dbClient.collection('users').findOneAndUpdate({_id:mID(socket_userID), 'chats.id':mID(chatID)}, {$set : {'chats.$.unread': 0}}, {returnOriginal:false}, (err, res) => {
+                    let user = res.value;
+                    socket.emit('chatlist', user.chats);
+                });
+            });
+
+
+            
             //
-            // chat renames
+            // Chat Area Section
             //
+
+            // Get Chat Info
+            socket.on('reqChatInfo', chatID => {
+                dbClient.collection('chats').findOne({_id:mID(chatID)}, (err, res) => {
+                    let chatInfo = res;
+                    // Formating id for front end
+                    frontEndID(chatInfo);
+                    // Removing extra unecessary stuff;
+                    delete chatInfo.messages;
+                    socket.emit('chatInfo', chatInfo);
+                });
+            })
+
             // Function to rename chat table of user
             function renameUserChatTable(chatID, userID, chatName, chat){
                 // Updating User Own Chat table
                 const query = {_id:mID(userID), 'chats.id': mID(chatID)};
                 const update = {$set:{'chats.$.name':chatName}};
                 dbClient.collection('users').findOneAndUpdate(query, update, {returnOriginal:false}, (err, res) => {
-                    // console.log(res.value);
                     let user = res.value;
                     // If success, emit chatlist to user.
                     io.to(user.socketID).emit('chatlist', user.chats);
                     // Tell them to update chat Info
                     dbClient.collection('chats').findOne({_id:mID(chatID)}, (err, res) => {
-                        // console.log(res);
                         let chatInfo = res;
                         frontEndID(chatInfo);
                         // Removing extra unecessary stuff;
@@ -253,7 +215,6 @@ module.exports = {
             }
             // Rename chat
             socket.on('renameChat', ({chat,name}) => {
-                console.log(chat, name);
                 if (chat.group){
                     // Updating Chats table name
                     const query = {_id:mID(chat.id)};
@@ -261,14 +222,11 @@ module.exports = {
                     dbClient.collection('chats').findOneAndUpdate(query, update, {returnOriginal:false}, (err, res) => {
                         // For each member of the group, also update their individual chat tables
                         res.value.members.forEach(member => {
-                            // console.log(member);
                             renameUserChatTable(chat.id, member.id, name, res.value);
                             const notification = {
                                 title: `${chat.name}: Chat Has Been Renamed`,
                                 message: `${chat.name} has been renamed to ${name}`,
                                 color: 'yellow',
-                                // delay: 5000,
-                                // autohide: true,
                             }
                             notifyUser(member.id, notification);
                         });
@@ -282,8 +240,6 @@ module.exports = {
                             title: `${oldName}: Chat Has Been Renamed`,
                             message: `${oldName} has been renamed to ${name}`,
                             color: 'yellow',
-                            // delay: 5000,
-                            // autohide: true,
                         }
                         notifyUser(socket_userID, notification);
                     });
@@ -308,9 +264,7 @@ module.exports = {
             // Role Change
             socket.on('roleChange', ({chatID, userID, role}) => {
                 dbClient.collection('chats').findOneAndUpdate({_id:mID(chatID), 'members.id':mID(userID)}, {$set:{'members.$.role':role}}, {returnOriginal:false}, (err,res) => {
-                    // console.log(res);
                     let chatInfo = res.value
-                    // console.log(chatInfo);
                     frontEndID(chatInfo);
                     // Removing extra unecessary stuff;
                     delete chatInfo.messages;
@@ -321,20 +275,19 @@ module.exports = {
                         title: `${chatInfo.name}: Role Updated`,
                         message: `Your Role has been updated to ${role}`,
                         color: role == 'admin' ? 'lightgreen' : 'lightpink',
-                        // delay: 5000,
-                        // autohide: true,
                     }
                     notifyUser(userID, notification);
                 });
             });
 
+            // Chat Request History
             socket.on('reqHistory', chatID => {
                 dbClient.collection('chats').findOne({_id:mID(chatID)}, (err, res) => {
-                    // console.log(res);
                     socket.emit('loadHistory', {chatID, messages: res.messages});
                 });
             });
 
+            // Create Group Chat
             socket.on('createGroupChat', name => {
                 let groupChatObj = {
                     name,
@@ -347,12 +300,9 @@ module.exports = {
                 // Adding to Chats Table
                 dbClient.collection('chats').insertOne(groupChatObj, (err,res) => {
                     const {_id:id, name, group} = res.ops[0];
-                    sendback(['chatID',id]);
                     // Adding Chats name and ID to user table
                     dbClient.collection('users').findOneAndUpdate({_id:mID(socket_userID)},{$push : {chats: {id,name, group}}}, {returnOriginal:false}, (err, res) => {
-                        // console.log(res, err);
                         let user = res.value;
-                        sendback(user);
                         // Updating user chatlist and friends.
                         socket.emit('chatlist', user.chats);
                         
@@ -360,14 +310,9 @@ module.exports = {
                             title: `${name}: Group Chat Created`,
                             message: `New chat ${name} has been created`,
                             color: 'lightgreen',
-                            // delay: 5000,
-                            // autohide: true,
                         }
                         notifyUser(user._id, notification);
                     });
-                    // dbClient.collection('users').findOne({_id:mID(socket_userID)}, (err, res) => {
-                    //     console.log(res, err);
-                    // });
                 });
             });
 
@@ -399,15 +344,12 @@ module.exports = {
                                 // Update Self Chat Table
                                 dbClient.collection('users').findOneAndUpdate({_id:mID(socket_userID)},{$push : {chats: {id, name: clientName, group}}}, {returnOriginal:false}, (err, res) => {
                                     let user = res.value;
-                                    sendback(['Self',user]);
                                     // Updating user chatlist and friends.
                                     socket.emit('chatlist', user.chats);
                                     const notification = {
                                         title: `New Chat Created`,
                                         message: `New chat has been created with ${clientName}`,
                                         color: 'lightgreen',
-                                        // delay: 5000,
-                                        // autohide: true,
                                     }
                                     notifyUser(user._id, notification);
                                 });
@@ -415,7 +357,6 @@ module.exports = {
                                 // Update Client Chat Table, id is clients, but name is self name
                                 dbClient.collection('users').findOneAndUpdate({_id:mID(clientID)},{$push : {chats: {id, name: socket_username, group}}}, {returnOriginal:false}, (err, res) => {
                                     let user = res.value;
-                                    sendback(['Client',user]);
                                     // Updating client's chatlist and friends.
                                     io.to(user.socketID).emit('chatlist', user.chats);
 
@@ -423,8 +364,6 @@ module.exports = {
                                         title: `New Chat Created`,
                                         message: `${socket_username} has created a new chat with you`,
                                         color: 'lightgreen',
-                                        // delay: 5000,
-                                        // autohide: true,
                                     }
                                     notifyUser(user._id, notification);
                                 });
@@ -435,11 +374,8 @@ module.exports = {
                                 title: 'Create Chat Failed',
                                 message: `Cannot create chat with self`,
                                 color: 'lightpink',
-                                // delay: 5000,
-                                // autohide: true,
                             }
                             notifyUser(socket_userID, notification);
-                            console.log(`no user: ${name}`);
                         }
                     }else{
                         // Cannot Find User
@@ -447,11 +383,8 @@ module.exports = {
                             title: 'Create Chat Failed',
                             message: `No User: ${name}`,
                             color: 'lightpink',
-                            // delay: 5000,
-                            // autohide: true,
                         }
                         notifyUser(socket_userID, notification);
-                        console.log(`no user: ${name}`);
                     }
                 });
             });
@@ -462,16 +395,12 @@ module.exports = {
                     // User Exist
                     if(res){
                         if(''+res._id != socket_userID){
-                            sendback([res,err]);
                             const {_id:id, socketID, name} = res;
                             // Update Chat member with new user
                             dbClient.collection('chats').findOneAndUpdate({_id:mID(chatID)},{$push : {members: {id, name, role:'member'}}}, {returnOriginal:false}, (err, res) => {
                                 let chat = res.value;
                                 // Check chat exist, and is group chat
-                                if(chat && chat.group){
-                                    // console.log(chat);
-                                    // sendback(chat);
-    
+                                if(chat && chat.group){    
                                     // Update user's chatlist with new chat, Could be moved out to to improve performance
                                     // Setting up query parameters
                                     const query = {_id:mID(id)};
@@ -486,8 +415,6 @@ module.exports = {
                                             title: `${chat.name}: Welcome`,
                                             message: `You have been added to chat ${chat.name}`,
                                             color: 'lightgreen',
-                                            // delay: 5000,
-                                            // autohide: true,
                                         }
                                         notifyUser(user._id, notification);
                                     });
@@ -502,6 +429,8 @@ module.exports = {
                                 }
                                 // chat does not exist
                                 else{
+                                    // Chat should exist, and chat should be group to have access to this function
+                                    // Should not reach here
                                     console.log('chat not found')
                                 }
                             });
@@ -511,11 +440,8 @@ module.exports = {
                                 title: 'Cannot Add User',
                                 message: `Cannot add yourself to group chat`,
                                 color: 'lightpink',
-                                // delay: 5000,
-                                // autohide: true,
                             }
                             notifyUser(socket_userID, notification);
-                            console.log('Cannot Add Self');
                         }
                     }
                     // user not found
@@ -525,11 +451,8 @@ module.exports = {
                             title: 'Cannot Add User',
                             message: `No User: ${name}`,
                             color: 'lightpink',
-                            // delay: 5000,
-                            // autohide: true,
                         }
                         notifyUser(socket_userID, notification);
-                        console.log('no user');
                     }
                 });
             });
@@ -539,8 +462,6 @@ module.exports = {
                 // Find the Chat and delete it
                 dbClient.collection('chats').findOneAndDelete({_id:mID(chatID)}, (err, res) => {
                     let deletedChat = res.value;
-                    // deletedChat.value.members
-                    sendback(['DeletedChat', deletedChat]);
                     // For each deleted member
                     deletedChat.members.forEach(({id, name}) => {
                         // Setting up query parameters
@@ -559,54 +480,18 @@ module.exports = {
                                 title: `${chatName}: Deleted`,
                                 message: `The chat '${chatName}' has been deleted`,
                                 color: 'lightpink',
-                                // delay: 5000,
-                                // autohide: true,
                             }
                             notifyUser(user._id, notification);
                         })
                     });
-                    // console.log(deletedChat.members);
                 });
             }
-
-            // socket.on('deleteChat', chat => {
-            //     if(chat.group){
-            //         console.log('Group Chat Delete attempted');
-            //         dbClient.collection('chats').findOne({_id:mID(chat.id)}, (err, res) => {
-            //             let currentChat = res;
-            //             // console.log(currentChat);
-            //             // sendback(currentChat.members);
-            //             // Typecasting to string to compare and find
-            //             const {name, role} = currentChat.members.find(({id}) => `${id}` == `${socket_userID}`);
-
-            //             if(role == 'admin'){
-            //                 deleteChat(currentChat._id);
-            //             }else{
-            //                 // Not admin, leave chat?
-            //                 console.log('notAdmin');
-            //             }
-            //         });
-            //     }else{
-            //         // Single chat delete
-            //         deleteChat(chat.id);
-            //     }
-            // });
 
             // Leave Chat Function
             function leaveChat(chatID, chatName, id){
                 // Updating the user Chat Table
                 dbClient.collection('users').findOneAndUpdate({_id:mID(id)},{$pull : {chats: {id : mID(chatID)}}}, {returnOriginal:false}, (err, res) => {
-                    // console.log('Removed from User', res.value.chats);
                     let user = res.value;
-                    // Let the chat know that this user has left
-                    // Optional Server Left Message
-                    // const message = {
-                    //     date: new Date(),
-                    //     userID: 1, //Just arbirary assignment of userID 1 for server
-                    //     userName: 'Server',
-                    //     message: `${user.name} has left the chat`,
-                    // }
-                    // io.to(chatID).emit('message', message);
                     // Tell user to reset chat
                     io.to(user.socketID).emit('resetChat', chatID);
                     // Sending message only to that person that was removed
@@ -617,21 +502,17 @@ module.exports = {
                         title: `${chatName}: Removed From Chat`,
                         message: `You have been removed from ${chatName}`,
                         color: 'lightpink',
-                        // delay: 5000,
-                        // autohide: true,
                     }
                     notifyUser(id, notification);
                 });
                 // Updating the chat table member list
                 dbClient.collection('chats').findOneAndUpdate({_id:mID(chatID)},{$pull : {members: {id:mID(id)}}}, {returnOriginal:false}, (err, res) => {
-                    // console.log(res);
                     let chatInfo = res.value;
                     frontEndID(chatInfo);
                     // Removing extra unecessary stuff;
                     delete chatInfo.messages;
                     // Telling everyone in chatroom new chat info
                     io.to(chatID).emit('chatInfoUpdate',chatInfo);
-                    // console.log(chatInfo);
                 });
             }
 
@@ -640,71 +521,44 @@ module.exports = {
             socket.on('deleteChat', ({chatID, chatName}) => deleteChat(chatID, chatName));
 
             socket.on('leaveChat', ({chat, chatName}) => {
-                // if(chat.group){
-                //     // Typecasting to string to compare and find
-                //     // const {name, role} = chat.members.find(({id}) => `${id}` == `${socket_userID}`);
-                //     const {role} = chat.members.find(({id}) => id == socket_userID);
-
-                //     // console.log(name, role);
-
-                //     if(role == 'admin'){
-                //         // Is Admin, Delete Chat
-                //         deleteChat(chat.id)
-                //     }else{
-                //         // Not admin, leave chat?
-                //         leaveChat(chat.id, socket_userID);
-                //     }
-                // }else{
-                //     // Single chat
-                //     // If only person left, delete the chat.
-                //     console.log('left single chat');
                 chat.members.length > 1 ? leaveChat(chat.id, chatName, socket_userID) : deleteChat(chat.id, chat.name);
-                // }
             });
 
-	    // Add Friend
-	    socket.on('addFriend', name => {
-		dbClient.collection('users').findOne({name}, function(err, res){
-		    // User Exist
-		    if(res){
-			sendback([res,err]);
-			// [{Self}, {Other}]
-			const members = [
-			    {id: socket_userID, name: socket_username},
-			    {id: res._id, name: res.name}
-			];
-			
+            // Add Friend
+            socket.on('addFriend', name => {
+                dbClient.collection('users').findOne({name}, function(err, res){
+                    // User Exist
+                    if(res){
+                        const members = [
+                            {id: socket_userID, name: socket_username},
+                            {id: res._id, name: res.name}
+                        ];
                         let query1 = {_id:mID(members[0].id)};
                         let update1 = {$push:{friends: members[1].name}};
                         dbClient.collection('users').findOneAndUpdate(query1, update1, {returnOriginal:false}, (err,res) => {
                             let user = res.value;
-                            // console.log(user, err);
                             io.to(user.socketID).emit('friendlist',user.friends);
                         });
-			
+            
                         let query2 = {_id:mID(members[1].id)};
                         let update2 = {$push:{friends: members[0].name}};
                         dbClient.collection('users').findOneAndUpdate(query2, update2, {returnOriginal:false}, (err,res) => {
                             let user = res.value;
-                            // console.log(user, err);
                             io.to(user.socketID).emit('friendlist',user.friends);
                         });
-		    }else{
+                    }else{
                         // Cannot Find User
                         const notification = {
                             title: 'Create Chat Failed',
                             message: `No User: ${name}`,
                             color: 'lightpink',
-                            // delay: 5000,
-                            // autohide: true,
                         }
                         notifyUser(socket_userID, notification);
-                        console.log(`no user: ${name}`);
-		    }
-		});
-	    });
-	    
-            // Leaving all rooms and from active user list of those rooms
+                    }
+                });
+            });
+            
+                // Leaving all rooms and from active user list of those rooms
             socket.on('disconnect', () => {
                 dbClient.collection('users').findOne({_id:mID(socket_userID)}, (err, res) => {
                     let user = res;

@@ -21,7 +21,6 @@ export default class AddChat extends Component {
 
     handleClick(e) {
         e.preventDefault();
-        console.log(e.target.value);
         this.setState({mode: e.target.value, text:''});
     }
 
@@ -31,18 +30,11 @@ export default class AddChat extends Component {
 
     handleSubmit() {
         if(this.state.mode == 'single'){
-            console.log('Single', this.state.text);
             this.props.socket.emit('createSingleChat', this.state.text);
         }
         else{
             this.props.socket.emit('createGroupChat', this.state.text);
         }
-        // Reseting State
-        // this.setState({
-        //     mode : false,
-        //     text:'',
-        // })
-        // this.props.socket.emit('addChat', '')
     }
     
     render() {
