@@ -65,9 +65,7 @@ class Login extends Component {
                 })
               }
               else if (data.auth_token != null) {
-                console.log("SUCCESS")
                 alert("Sigin Sucessful")
-                console.log(data)
                 this.setState({
                   Success: true
                 })

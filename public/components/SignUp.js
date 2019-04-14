@@ -128,9 +128,7 @@ class SignUp extends Component {
                     })
                 }
                 else if (data.auth_token != null) {
-                  console.log("SUCCESS")
                   alert("Signup Sucessful")
-                  console.log(data)
                   this.setState({
                     Success: true
                   })
