@@ -154,10 +154,10 @@ export default class Container extends Component {
     render() {
         return (
             <div className='container-fluid h-100'>
-                <div className='row h-100'>
-                    <div className='col-md-3 col-lg-2' id='side-area' style={{padding:0,margin:0}}>
-                        <nav className='navbar navbar-expand-md'>
-                            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggler" aria-controls="navbarToggler" aria-expanded="false" aria-label="Toggle navigation">
+                <div className='row'>
+                    <div className='col-md-3 col-lg-2' id='side-area'>
+                        <nav className='navbar navbar-expand-md' style={{padding:0,margin:0}}>
+                            <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggler" aria-controls="navbarToggler" aria-expanded="false" aria-label="Toggle navigation">
                                 <i className='fas fa-bars'></i>
                             </button>
                             <div class="collapse navbar-collapse" id="navbarToggler">
