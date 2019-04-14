@@ -46,7 +46,8 @@ module.exports = {
         new HtmlWebPackPlugin({
             hash: true,
             filename: "./index.html",  //target html
-            template: "./index.html" //source html
+            template: "./index.html", //source html
+            favicon: './resources/logo.ico'
         }),
         new ExtractTextPlugin({ filename: 'css/style.css' })
     ]
