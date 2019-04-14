@@ -11,6 +11,8 @@ export default class ChatArea extends Component {
         this.messages = [];
         
         this.state = {
+            dragOver: false,
+            uploading: false,
             chat: props.chat,
             messages:[],
             searchTerm:'',
@@ -21,6 +23,8 @@ export default class ChatArea extends Component {
             myBubbleColour: 'Blue',
             otherBubbleColour: 'darkGrey',
             bgColour: 'white',
+            bgImage: '',
+            bgFilename: '',
         };
 
         this.onMessage = this.onMessage.bind(this);
@@ -28,6 +32,10 @@ export default class ChatArea extends Component {
         this.updateChatHeight = this.updateChatHeight.bind(this);
         this.scrollToBottom = this.scrollToBottom.bind(this);
         this.getStyle = this.getStyle.bind(this);
+        this.handleOnDragEnter = this.handleOnDragEnter.bind(this);
+        this.handleOnDragLeave = this.handleOnDragLeave.bind(this);
+        this.handleOnDrop = this.handleOnDrop.bind(this);
+        this.handlePreventDefault = this.handlePreventDefault.bind(this);
 
         this.messageRef = React.createRef();
 
@@ -68,8 +76,8 @@ export default class ChatArea extends Component {
         // Load Styles for the room
         let style = props.user.chats.find(({id}) => id == props.chat.id).style;
         if (style){
-            const {fontSize,font,fontColour,myBubbleColour,otherBubbleColour, bgColour} = style;
-            this.setState({fontSize,font,fontColour,myBubbleColour,otherBubbleColour, bgColour});
+            const {fontSize,font,fontColour,myBubbleColour,otherBubbleColour, bgColour, bgImage, bgFilename} = style;
+            this.setState({fontSize,font,fontColour,myBubbleColour,otherBubbleColour, bgColour, bgImage, bgFilename});
         }else{
             // Set to default state if style is not found
             this.setState({
@@ -79,6 +87,8 @@ export default class ChatArea extends Component {
                     myBubbleColour: 'Blue',
                     otherBubbleColour: 'darkGrey',
                     bgColour: 'white',
+                    bgImage: '',
+                    bgFilename: '',
                 });
         }
         // Update the chat propertys
@@ -123,15 +133,115 @@ export default class ChatArea extends Component {
             chosenMyBubbleColour:this.state.myBubbleColour,
             chosenOtherBubbleColour:this.state.otherBubbleColour,
             chosenBgColour:this.state.bgColour,
+            bgImage:this.state.bgImage,
+            bgFilename:this.state.bgFilename,
         }
+    }
+    
+    handleOnDrop(e){
+        e.preventDefault();
+        this.setState({uploading:true});
+        let fileList = e.dataTransfer.files;
+        // console.log('eDropped');
+        // Upload files to catbox.moe. Files are stored for 30 days with size limit of 100MB.
+        // Images can then be retrieved and displayed exactly like Giphy GIFs.
+        // console.log(e.dataTransfer.items, e.dataTransfer.files);
+        const exts = ['jpg', 'jpeg', 'png', 'gif'];
+        const url = 'https://cors-anywhere.herokuapp.com/https://catbox.moe/user/api.php';
+        Object.keys(fileList).forEach(fileIndex => {
+            let file = fileList[fileIndex];
+            // console.log(file);
+            // Upload File
+            let http = new XMLHttpRequest();
+            let formData = new FormData();
+            // console.log(file);
+            formData.append('reqtype', 'fileupload');
+            formData.append('fileToUpload', file);
+            http.open('POST', url, true);
+
+            http.onreadystatechange = () => {
+                if (http.readyState == 4 && http.status == 200) {
+                    const res = http.responseText;
+                    if (exts.some((ext) => file.type.endsWith(ext))) {
+                    let reader = new FileReader();
+                    reader.onload = () => {
+                        let image = new Image();
+                        image.onload = () => {
+                        this.onMessage(`${Math.min(image.height, 720)},${res}`, 'GIF');
+                        this.setState({uploading:false});
+                        this.setState({dragOver:false});
+                        }
+                        image.src = reader.result;
+                    }
+                    reader.readAsDataURL(file);
+                    } else {
+                    this.onMessage(`${file.name},${file.type},${res}`, 'FILE');
+                    this.setState({uploading:false});
+                    this.setState({dragOver:false});
+                    // console.log('File was not an image, sending link to arbitrary file.');
+                    }
+                } else {
+                    this.setState({uploading:false});
+                    this.setState({dragOver:false});
+                    // console.log('File upload failed', http.status);
+                }
+            };
+            http.send(formData);
+        });
+    }
+
+    handleOnDragEnter(e){
+        console.log('dragEnter');
+        // e.preventDefault();
+        this.setState({dragOver:true});
+    }
+
+    handleOnDragLeave(e){
+        console.log('dragLeave');
+        // e.preventDefault();
+        this.setState({dragOver:false});
+    }
+
+    handlePreventDefault(e){
+        e.preventDefault();
     }
 
     render() {
+        let overlayStyle = {
+            width: '100%',
+            height: '100%',
+            position: 'absolute',
+            left: 0,
+            right: 0,
+            top: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(173,216,230,0.5)',
+            display:'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            border: '20px dashed lightblue',
+            borderRadius: '5%',
+        }
         return (
-            <div className={this.props.className} id={this.props.id}>
+            <div className={this.props.className} id={this.props.id} onDragEnter={this.handleOnDragEnter}>
                 <TopBar  id='chat-topBar' className='row' chat={this.state.chat} user={this.props.user} socket={this.props.socket} modal={this.props.modal} filterMessages={this.filterMessages} getStyle={this.getStyle}/>
-                <Messages ref={this.messageRef} className='row' id='chat-messages' messages={this.state.messages} chat={this.state.chat} user={this.props.user} socket={this.props.socket} searchTerm={this.state.searchTerm} height={this.state.chatHeight} fontObj={{fontSize: this.state.fontSize, font: this.state.font, fontColour: this.state.fontColour}} bubbleColours={{myBubbleColour: this.state.myBubbleColour, otherBubbleColour: this.state.otherBubbleColour}} bgColour={this.state.bgColour}/>
+                <Messages ref={this.messageRef} className='row' id='chat-messages' messages={this.state.messages} chat={this.state.chat} user={this.props.user} socket={this.props.socket} searchTerm={this.state.searchTerm} height={this.state.chatHeight} fontObj={{fontSize: this.state.fontSize, font: this.state.font, fontColour: this.state.fontColour}} bubbleColours={{myBubbleColour: this.state.myBubbleColour, otherBubbleColour: this.state.otherBubbleColour}} bgColour={this.state.bgColour} bgImage={this.state.bgImage}/>
                 <Controls  id='chat-controls' className='row' onMessage={this.onMessage} chat={this.state.chat} />
+                { this.state.dragOver ? 
+                    <div style={overlayStyle} onDragLeave={this.handleOnDragLeave} onDrop={this.handleOnDrop} onDrag={this.handlePreventDefault} onDragOver={this.handlePreventDefault}>
+                        {this.state.uploading ?
+                            <div>
+                                <div className="spinner-border text-info" role="status">
+                                    <span class="sr-only">Loading...</span>
+                                </div>
+                                <h1 className='text-info' style={{display:'inline'}}> Uploading...</h1>
+                            </div>
+                        :
+                            <h1 className='text-info' style={{pointerEvents:'none'}}><i class="fas fa-upload"></i> Drop File To Upload</h1>
+                        }
+                        
+                    </div>
+                :''}
             </div>
         )
     }

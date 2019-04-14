@@ -1,5 +1,6 @@
 import React from 'react'
 import Settings from '../Modal/Settings';
+import logo from '../../resources/logo.png'
 
 export default function TopBar(props) {
 
@@ -13,7 +14,7 @@ export default function TopBar(props) {
   return (
     <div className='row mb-2 mt-2'>
         <div className='col-3'>
-            <h2>LOGO</h2>
+            <img src={logo} style={{"width" : "50px"}} alt="Logo"></img>
         </div>
         <div className='col-6'>
             <h2>NetChatter</h2>

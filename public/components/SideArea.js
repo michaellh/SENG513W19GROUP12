@@ -95,7 +95,7 @@ export default class SideArea extends Component {
                     {
                         this.state.mode == 'chats' ? 
                         (<Chats chats={this.state.chats} chooseChat={this.props.chooseChat} chosenChat={this.props.chosenChat} deleteChat={this.deleteChat} resetChat={this.props.resetChat} />) :
-                        (<Friends friends={this.state.friends} />)
+                        (<Friends friends={this.state.friends} chats={this.state.chats} chooseChat={this.props.chooseChat} chosenChat={this.props.chosenChat} deleteChat={this.deleteChat} resetChat={this.props.resetChat} socket={this.props.socket} />)
                     }
                 </div>
             </div>

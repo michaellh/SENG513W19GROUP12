@@ -11,6 +11,7 @@ export default class MessageUnit extends Component {
             popoverOpen : false,
             editMode : false,
             editMessage : props.message.message,
+	    file: null
         }
 
         this.endMessageRef = React.createRef();
@@ -24,6 +25,8 @@ export default class MessageUnit extends Component {
 
         this.togglePopover = this.togglePopover.bind(this);
         this.toggleEdit = this.toggleEdit.bind(this);
+
+	this.getDownload = this.getDownload.bind(this);
 
     }
 
@@ -81,6 +84,30 @@ export default class MessageUnit extends Component {
         this.setState({editMode: !this.state.editMode});
     }
 
+    getDownload(message){
+        // console.log(message);
+        const [name, type, url] = message.split(',');
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', 'https://cors-anywhere.herokuapp.com/' + url, true);
+
+        xhr.onreadystatechange = () => {
+            if(xhr.readyState == 4 && xhr.status == 200) {
+            // console.log(xhr.responseText);
+            let blob = new Blob([xhr.responseText], {type: type});
+            let reader = new FileReader;
+
+            reader.onload = () => {
+                this.setState({file: reader.result});
+            };
+
+            reader.readAsDataURL(blob);
+            }
+        };
+
+        xhr.send();
+        return name;
+    }
+
     render() {
         const {searchTerm, isSelf, index} = this.props;
         const {date, userName, userID, message, reactions, type} = this.state.message;
@@ -115,9 +142,12 @@ export default class MessageUnit extends Component {
                     <div style={{fontSize: fontObj.fontSize, fontFamily: fontObj.font, color: fontObj.fontColour}}>
                         {
                             type == 'GIF' ? 
-                            <img height={message.split(',')[0]} src={message.split(',')[1]}></img>
+                            <img height={message.split(',')[0]} style={{maxWidth: document.querySelector('#chat-messages').clientWidth - 100}} src={message.split(',')[1]}></img>
+                            :(
+                            type == 'FILE' ?
+                                (this.state.file ? <span><i class="fas fa-file-download"></i> <a href={this.state.file} download={message.split(',')[0]}>{message.split(',')[0]}</a></span> : <span>Preparing file: <i>{this.getDownload(message)}...</i></span>)
                             :
-                            (searchTerm ? <span dangerouslySetInnerHTML={{__html:message}}></span> : message)
+                            (searchTerm ? <span dangerouslySetInnerHTML={{__html:message}}></span> : message))
                         }
                     </div> 
                 }
@@ -135,15 +165,17 @@ export default class MessageUnit extends Component {
                     :
                     ''
                 }
-                <UncontrolledPopover trigger='click' isOpen={this.state.popoverOpen} toggle={this.togglePopover} placement="right" target={`message_${this.props.chatID}_${this.props.index}`}>
+                <UncontrolledPopover trigger='legacy' isOpen={this.state.popoverOpen} toggle={this.togglePopover} placement="right" target={`message_${this.props.chatID}_${this.props.index}`}>
                     <div className='btn-group input-group-lg'>
                         <button className='btn btn-outline-primary' onClick={this.handleLike}><i className='fas fa-thumbs-up'></i></button>
                         <button className='btn btn-outline-primary' onClick={this.handleDislike}><i className='fas fa-thumbs-down'></i></button>
                         {/* Only addlow edit when message is text */}
-                        {!type ?
+                        {!type && isSelf ?
                             <button className={`btn ${this.state.editMode ? 'btn-primary' : 'btn-outline-primary'}`} onClick={this.toggleEdit} ><i className='fas fa-edit'></i></button>
                         : ''}
-                        <button className='btn btn-outline-primary' onClick={this.handleDelete}><i className='fas fa-trash-alt'></i></button>
+                        {isSelf ?
+                            <button className='btn btn-outline-primary' onClick={this.handleDelete}><i className='fas fa-trash-alt'></i></button>
+                        : ''}
                     </div>
                 </UncontrolledPopover>
             </div>

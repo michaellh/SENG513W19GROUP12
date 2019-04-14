@@ -7,6 +7,7 @@ export default function Chats(props) {
     const style = {border:'none'};
 
     let handleOnClick = (chat) => {
+	console.log(props.chosenChat);
         if (chat.id == chosenChatIDs[0]){
             props.resetChat(1);
         }
