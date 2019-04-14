@@ -214,7 +214,7 @@ export default class Container extends Component {
         return (
             <div className='container-fluid h-100'>
                 <div className='row'>
-                    <div className='col-md-3 col-lg-2' id='side-area'>
+                    <div className='col-md-3 col-xl-2' id='side-area'>
                         <nav className='navbar navbar-expand-md' style={{padding:0,margin:0}}>
                             <span class="navbar-brand d-md-none">NetChatter</span>
                             <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggler" aria-controls="navbarToggler" aria-expanded="false" aria-label="Toggle navigation">
@@ -230,7 +230,7 @@ export default class Container extends Component {
                     </div>
                     {this.state.splitScreen ? 
                         (
-                            <div className='col-md-9 col-lg-10'>
+                            <div className='col-md-9 col-xl-10'>
                                 <div className='row  h-100'>
                                     {
                                         this.state.chat ?
@@ -250,9 +250,9 @@ export default class Container extends Component {
                         :
                         (
                             this.state.chat ?
-                            <ChatArea split={1} className='col-md-9 col-lg-10' id='chat-area' chat={this.state.chat} socket={this.socket} user={this.state.user} modal={this.openModal} switchRoom={this.state.switchRoom} updateSwitchRoom={this.updateSwitchRoom} />
+                            <ChatArea split={1} className='col-md-9 col-xl-10' id='chat-area' chat={this.state.chat} socket={this.socket} user={this.state.user} modal={this.openModal} switchRoom={this.state.switchRoom} updateSwitchRoom={this.updateSwitchRoom} />
                             :
-                            <h1 className='col-md-9 col-lg-10 text-center align-self-center'>Open a chat...</h1>
+                            <h1 className='col-md-9 col-xl-10 text-center align-self-center'>Open a chat...</h1>
                         )
 
                     }
