@@ -28,7 +28,6 @@ export default class Settings extends Component {
 
     handleClickAccountSettings(e) {
         e.preventDefault();
-        //console.log("account settings clicked");
 
         const title = <span><i className='fas fas fa-cog'></i> Account Settings</span>
         const body = <AccountSettings socket={this.props.socket} user={this.props.user}/>;

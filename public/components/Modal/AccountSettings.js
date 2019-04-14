@@ -1,25 +1,30 @@
 import React, { Component } from 'react'
+import FormEditor from '../Forms/FormEditor';
 
 export default class AccountSettings extends Component {
     constructor(props) {
         super(props)
         
         this.state = {
-            NewUsername:"",
-            Confirmusername:"",
-            NewEmail:"",
-            ConfirmEmail:"",
-            NewPassword:"",
-            ConfirmPassword:""
+            "New Username": {hasError: false, value: ""},
+            "Confirm Username": {hasError: false, value: ""},
+            "New Email": {hasError: false, value: ""},
+            "Confirm Email": {hasError: false, value: ""},
+            "New Password": {hasError: false, value: ""},
+            "Confirm Password": {hasError: false, value: ""},
+            makeToken: false,
+            changes: false
         }
 
-        this.handleNewUsername = this.handleNewUsername.bind(this);
-        this.handleConfirmUsername = this.handleConfirmUsername.bind(this);
-        this.handleNewEmail = this.handleNewEmail.bind(this);
-        this.handleConfirmEmail = this.handleConfirmEmail.bind(this);
-        this.handleNewPassword = this.handleNewPassword.bind(this);
-        this.handleConfirmPassword = this.handleConfirmPassword.bind(this);
+        this.handleFieldChange = this.handleFieldChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
+        this.validateFields = this.validateFields.bind(this);
+        this.validateUsername = this.validateUsername.bind(this);
+        this.validateUsernameMatch = this.validateUsernameMatch.bind(this);
+        this.validateEmail = this.validateEmail.bind(this);
+        this.validateEmailMatch = this.validateEmailMatch.bind(this);
+        this.validatePassword = this.validatePassword.bind(this);
+        this.validatePasswordMatch = this.validatePasswordMatch.bind(this);
 
         // When animation finished, and modal closed, reset state
         $('#myModal').on('show.bs.modal', (e) => {
@@ -27,65 +32,120 @@ export default class AccountSettings extends Component {
         });
     }
 
-    handleNewUsername(e) {
-        this.setState({NewUsername: e.target.value});
+    validateFields() {
+        this.validateUsername()
+        this.validateUsernameMatch();
+        this.validateEmail()
+        this.validateEmailMatch();
+        this.validatePassword()
+        this.validatePasswordMatch()
+    
+        if (this.validateUsername() && this.validateUsernameMatch() &&
+            this.validateEmail() && this.validateEmailMatch() &&
+            this.validatePassword() && this.validatePasswordMatch()) {
+          return true
+        }
+        return false
+    }
+    
+    validateUsername() {
+        if (this.state["New Username"].value === "") {
+            this.setState({"New Username": {value: this.state["New Username"].value, hasError: false, errorMessage: "Username must have a minimum length of 3 characters"}})
+            return true  
+        }
+        else if (this.state["New Username"].value.length < 3) {
+          this.setState({"New Username": {value: this.state["New Username"].value, hasError: true, errorMessage: "Username must have a minimum length of 3 characters"}})
+          return false
+        }
+        else {
+            this.setState({"New Username": {value: this.state["New Username"].value, hasError: false, errorMessage: "Username must have a minimum length of 3 characters"}})
+            return true
+        }
     }
 
-    handleConfirmUsername(e) {
-        this.setState({Confirmusername: e.target.value});
+    validateUsernameMatch() {
+        if (this.state["New Username"].value !== this.state["Confirm Username"].value) {
+          this.setState({"Confirm Username": {value: this.state["Confirm Username"].value, hasError: true}})
+          return false
+        } else {
+          this.setState({"Confirm Username": {value: this.state["Confirm Username"].value, hasError: false}})
+          return true
+        }
     }
 
-    handleNewEmail(e) {
-        this.setState({NewEmail: e.target.value});
+    validateEmail() {
+        var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        if (this.state["New Email"].value === "") {
+            this.setState({["New Email"]: {value: this.state["New Email"].value, hasError: false, errorMessage: ""}})
+            return true
+        }
+        else if (this.state["New Email"].value.length < 1) {
+          this.setState({["New Email"]: {value: this.state["New Email"].value, hasError: true, errorMessage: "Email address is required"}})
+          return false
+        }
+        else if (!re.test(String(this.state["New Email"].value).toLowerCase())) {
+          this.setState({["New Email"]: {value: this.state["New Email"].value, hasError: true, errorMessage: "Please enter a valid email address"}})
+          return false
+        }
+        else {
+          this.setState({["New Email"]: {value: this.state["New Email"].value, hasError: false, errorMessage: "Please enter a valid email address"}})
+          return true
+        }
     }
 
-    handleConfirmEmail(e) {
-        this.setState({ConfirmEmail: e.target.value});
+    validateEmailMatch() {
+        if (this.state["New Email"].value !== this.state["Confirm Email"].value) {
+          this.setState({"Confirm Email": {value: this.state["Confirm Email"].value, hasError: true}})
+          return false
+        } else {
+          this.setState({"Confirm Email": {value: this.state["Confirm Email"].value, hasError: false}})
+          return true
+        }
+    }
+    
+    validatePassword() {
+        if (this.state["New Password"].value === "") {
+            this.setState({["New Password"]: {value: this.state["New Password"].value, hasError: false, errorMessage: ""}})
+            return true
+        }
+        else if (this.state["New Password"].value.length < 3) {
+          this.setState({["New Password"]: {value: this.state["New Password"].value, hasError: true, errorMessage: "Password must have a minimum length of 3"}})
+          return false
+        }
+        else {
+          this.setState({["New Password"]: {value: this.state["New Password"].value, hasError: false, errorMessage: "Password must have a minimum length of 3"}})
+          return true
+        }
+    }
+    
+    validatePasswordMatch() {
+        if (this.state["New Password"].value !== this.state["Confirm Password"].value) {
+          this.setState({"Confirm Password": {value: this.state["Confirm Password"].value, hasError: true}})
+          return false
+        } else {
+          this.setState({"Confirm Password": {value: this.state["Confirm Password"].value, hasError: false}})
+          return true
+        }
     }
 
-    handleNewPassword(e) {
-        this.setState({NewPassword: e.target.value});
-    }
-
-    handleConfirmPassword(e) {
-        this.setState({ConfirmPassword: e.target.value});
+    handleFieldChange(fieldId, val) {
+        this.setState({ [fieldId]: { value : val, hasError: false }});
     }
 
     handleSubmit(e) {
         e.preventDefault();
-        
-        // let consolePrintInputs = {
-        //     "New Username: " : this.state.NewUsername,
-        //     "New Email: " : this.state.NewEmail,
-        //     "Confirm Email: " : this.state.ConfirmEmail,
-        //     "New Password: " : this.state.NewPassword,
-        //     "Confirm Password: " : this.state.ConfirmPassword
-        // }
-        // console.log(consolePrintInputs);
 
-        var makeToken = false;
-
-        // Verify that the emails and passwords match
-        if((this.state.NewUsername !== this.state.Confirmusername) || 
-            (this.state.NewUsername === this.props.user.name)) {
-            console.log("The username entered is invalid!");
-        }
-        else if((this.state.NewEmail !== this.state.ConfirmEmail) || 
-            (this.state.NewEmail === this.props.user.email)) {
-            console.log("The email entered is invalid!");
-        }
-        else if(this.state.NewPassword !== this.state.ConfirmPassword) {
-            console.log("The passwords don't match!");
-        }
-        else {
+        if (this.validateFields()) {
             let accountSettingsBody = {
                 name : this.props.user.name,
                 email : this.props.user.email,
-                newName : this.state.NewUsername,
-                newEmail : this.state.NewEmail,
-                newPassword : this.state.NewPassword
+                newName : this.state["New Username"].value,
+                newEmail : this.state["New Email"].value,
+                newPassword : this.state["New Password"].value
             }
 
+            // Nest fetches since the password and token API calls are 
+            // dependent on username and email changes
             fetch("/account-settings/username", {
                 method: "POST",
                 headers: new Headers({
@@ -106,14 +166,18 @@ export default class AccountSettings extends Component {
             })
             .then(resData => {
                 if(!((resData === "ok") || (resData === "no"))) {
-                    console.log("username error: " + resData);
-                    // Display error and return to exit function
+                    this.setState({
+                        "New Username": { value: this.state["New Username"].value, hasError: true, errorMessage: resData}
+                    });
                     return;
                 }
                 if(resData === "ok") {
-                    makeToken = true;
+                    // Notify react to render a changes notification
+                    this.setState({changes : true});
+                    this.setState({makeToken : true});
+                    accountSettingsBody.name = accountSettingsBody.newName;
                 }
-                
+               
                 fetch("/account-settings/email", {
                     method: "POST",
                     headers: new Headers({
@@ -134,13 +198,17 @@ export default class AccountSettings extends Component {
                 })
                 .then(resData => {
                     if(!((resData === "ok") || (resData === "no"))) {
-                        console.log("email error: " + resData);
-                        // Display error
+                        this.setState({
+                            "New Email": { value: this.state["New Email"].value, hasError: true, errorMessage: resData}
+                        });
                         return;
                     }
                     if(resData === "ok") {
-                        makeToken = true;
+                        this.setState({changes : true});
+                        this.setState({makeToken : true});
+                        accountSettingsBody.email = accountSettingsBody.newEmail;
                     }
+
                     fetch("/account-settings/password", {
                         method: "POST",
                         headers: new Headers({
@@ -160,8 +228,11 @@ export default class AccountSettings extends Component {
                         }
                     })
                     .then(resData => {
-                        console.log("makeToken: " + makeToken);
-                        if(makeToken) {
+                        if(resData === "ok") {
+                            this.setState({changes : true});
+                        }
+                        console.log("makeToken: " + this.state.makeToken);
+                        if(this.state.makeToken) {
                             fetch("/account-settings/token", {
                                 method: "POST",
                                 headers: new Headers({
@@ -177,12 +248,7 @@ export default class AccountSettings extends Component {
                                     throw new Error(res.status);
                                 }
                                 else {
-                                    return res.json();
-                                }
-                            })
-                            .then(resData => {
-                                console.log("token data: " + resData);
-                                if(resData) {
+                                    // Reload the page so the user updates their token
                                     window.location.reload();
                                 }
                             })
@@ -194,7 +260,6 @@ export default class AccountSettings extends Component {
                     .catch((error) => {
                         console.error(error);
                     });   
-        
                 })
                 .catch((error) => {
                     console.error(error);
@@ -204,30 +269,29 @@ export default class AccountSettings extends Component {
                 console.error(error);
             });
         }
-    }
-    
+    } 
     
     render() {
+        const fields = [{name: "New Username", hasError: this.state["New Username"].hasError, placeholder:"Enter username", errorMessage: this.state["New Username"].errorMessage},
+                        {name: "Confirm Username", hasError: this.state["Confirm Username"].hasError, placeholder:"Confirm your username", errorMessage: "Usernames do not match"},
+                        {name: "New Email", hasError: this.state["New Email"].hasError, placeholder:"Enter email", errorMessage: this.state["New Email"].errorMessage},
+                        {name: "Confirm Email", hasError: this.state["Confirm Email"].hasError, placeholder:"Confirm your email", errorMessage: "Emails do not match"},
+                        {name: "New Password", hasError: this.state["New Password"].hasError, placeholder:"Enter password", type: "password", errorMessage: this.state["New Password"].errorMessage},
+                        {name: "Confirm Password", hasError: this.state["Confirm Password"].hasError, placeholder:"Confirm your password", type: "password", errorMessage: "Passwords do not match"}];
+
         return (
             <form style={{margin:0,padding:0}}>
                 <div className="modal-body" id='modalBody'>
-                    <div>
-                        <h6>New Username:</h6>
-                        <input type='text' className='form-control' autoFocus={true} onChange={this.handleNewUsername} value={this.state.text}></input>
-                        <h6>Confirm Username:</h6>
-                        <input type='text' className='form-control' autoFocus={true} onChange={this.handleConfirmUsername} value={this.state.text}></input>
-                        <h6>New Email:</h6>
-                        <input type='text' className='form-control' autoFocus={true} onChange={this.handleNewEmail} value={this.state.text}></input>
-                        <h6>Confirm Email:</h6>
-                        <input type='text' className='form-control' autoFocus={true} onChange={this.handleConfirmEmail} value={this.state.text}></input>
-                        <h6>New Password:</h6>
-                        <input type='text' className='form-control' autoFocus={true} onChange={this.handleNewPassword} value={this.state.text}></input>
-                        <h6>Confirm Password:</h6>
-                        <input type='text' className='form-control' autoFocus={true} onChange={this.handleConfirmPassword} value={this.state.text}></input>
-                    </div> 
+                    <FormEditor fields={fields} onChange={this.handleFieldChange}/>
                 </div>
                 <div className="modal-footer">
-                    <button type="button" className="btn btn-primary" data-dismiss="modal">Close</button>
+                    {
+                        this.state.changes?
+                        <p>Changes applied</p>
+                        :
+                        <p>No changes applied</p>
+                    }
+                    <button type="button" className="btn btn-outline-primary" data-dismiss="modal">Close</button>
                     <button type="button" className="btn btn-primary" onClick={this.handleSubmit}>Save</button>
                 </div>
             </form>
