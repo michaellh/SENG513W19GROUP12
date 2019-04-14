@@ -157,10 +157,11 @@ export default class Container extends Component {
                 <div className='row'>
                     <div className='col-md-3 col-lg-2' id='side-area'>
                         <nav className='navbar navbar-expand-md' style={{padding:0,margin:0}}>
+                            <span class="navbar-brand d-md-none">NetChatter</span>
                             <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggler" aria-controls="navbarToggler" aria-expanded="false" aria-label="Toggle navigation">
                                 <i className='fas fa-bars'></i>
                             </button>
-                            <div class="collapse navbar-collapse" id="navbarToggler">
+                            <div className="collapse navbar-collapse" id="navbarToggler">
                             <SideArea className='' id='' updateUser={this.updateUser} user={this.state.user} socket={this.socket} modal={this.openModal} 
                                 chooseChat={this.chooseChat} chosenChat={[this.state.chat,this.state.chat2]} resetChat={this.resetChat} 
                                 toggleSplitScreen={this.toggleSplitScreen} toggleNotification={this.toggleNotification} 
