@@ -11,7 +11,11 @@ html, body {
 }
 
 #container {
+    
+}
 
+#chat-messages {
+    overflow-y: auto;
 }
 
 #side-area {
@@ -19,13 +23,16 @@ html, body {
 }
 
 #chat-area {
-    border: #d9d9d9 0.5px;
+    border: solid #d9d9d9 0.5px;
+    /* padding-bottom: 10px; */
+}
+
+#chat-controls {
     padding-bottom: 10px;
 }
 
-#messages {
+#chat-messages {
     border: solid #d9d9d9 0.5px;
 }
-
 
 /*# sourceMappingURL=style.css.map*/
