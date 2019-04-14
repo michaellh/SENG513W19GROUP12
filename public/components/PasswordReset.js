@@ -25,7 +25,7 @@ export default class PasswordReset extends Component {
         e.preventDefault();
         
         // Error-handle if the passwords don't match
-        if(this.state["NewPassword"].value !== this.state["Confirm Password"].value) {
+        if(this.state["New Password"].value !== this.state["Confirm Password"].value) {
             alert("The passwords don't match!");
         }
         else {
