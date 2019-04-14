@@ -59,7 +59,7 @@ export default class Controls extends Component {
 	       <div className='col-12'>
 		   <form onSubmit={this.handleSubmit}>
 		       <div className='input-group'>
-			   <div className='input-group-prepend'>
+			   <div className='input-group-prepend d-none d-md-block'>
 			       <span id={`control_${this.props.chat.id}_emojiPicker`} className='btn btn-outline-primary' onClick={this.handleClick} style={{fontSize:23}}><i className='fas fa-smile'></i></span>
 			       <span id={`control_${this.props.chat.id}_GifPicker`} className='btn btn-outline-primary' onClick={this.handleClick}>GIF</span>
 			   </div>

@@ -71,9 +71,9 @@ export default class Settings extends Component {
                         }
                         {
                             this.state.modeS?
-                            <button className='btn btn-secondary btn-block' onClick={this.handleClickScreen}>Screen: <b>Split</b></button>
+                            <button className='btn btn-secondary btn-block d-none d-md-block' onClick={this.handleClickScreen}>Screen: <b>Split</b></button>
                             :
-                            <button className='btn btn-secondary btn-block' onClick={this.handleClickScreen}>Screen: <b>Single</b></button>
+                            <button className='btn btn-secondary btn-block d-none d-md-block' onClick={this.handleClickScreen}>Screen: <b>Single</b></button>
                         }
                         <button className='btn btn-danger btn-block' onClick={this.handleLogout}>Log Out</button>
                     </div>

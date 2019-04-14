@@ -12,15 +12,11 @@ export default function TopBar(props) {
     }
 
   return (
-    <div className='row mb-2 mt-2'>
-        <div className='col-3'>
-            <img src={logo} style={{"width" : "50px"}} alt="Logo"></img>
-        </div>
-        <div className='col-6'>
-            <h2>NetChatter</h2>
-        </div>
-        <div className='col-3'>
-            <button className='btn btn-outline-light text-dark btn-lg'  onClick={handleSettings}><i className='fas fa-cog'></i></button>
+    <div className='row m-2'>
+        <img src={logo} style={{"width" : "50px"}} alt="Logo"></img>
+        <h5 className='col text-center mt-2'> LOGO </h5>
+        <div className='' style={{float:"right"}}>
+            <button className='btn btn-light btn-lg'  onClick={handleSettings}><i className='fas fa-cog'></i></button>
         </div>
     </div>
   )

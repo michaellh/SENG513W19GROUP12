@@ -53,7 +53,7 @@ export default function TopBar(props) {
 				props.chat.group?
 				<div className='row'>
 					<h4 className='col text-center'>{chatName}</h4>
-					<div className='btn-group input-group-lg' style={{float:"right"}}>
+					<div className='btn-group input-group-lg d-none d-md-block' style={{float:"right"}}>
 						<button className='btn btn-outline-primary' id={`chatAreaSearch_${props.chat.id}`}><i className='fas fa-search'></i></button>
 						<button className='btn btn-outline-primary' onClick={handleManageUsers}><i className='fas fa-user-cog'></i></button>
 						<button className='btn btn-outline-primary' onClick={handleAddUser}><i className='fas fa-user-plus'></i></button>
@@ -67,7 +67,7 @@ export default function TopBar(props) {
 				:
 				<div className='row'>
 					<h4 className='col text-center'>{chatName}</h4>
-					<div className='btn-group input-group-lg' style={{float:"right"}}>
+					<div className='btn-group input-group-lg d-none d-md-block' style={{float:"right"}}>
 						<button className='btn btn-outline-primary' id={`chatAreaSearch_${props.chat.id}`}><i className='fas fa-search'></i></button>
 						<button className='btn btn-outline-primary' onClick={handleCustomize}><i className='fas fa-tools'></i></button>
 						<button className='btn btn-outline-primary' onClick={handleLeaveChat}><i className='fas fa-sign-out-alt'></i></button>

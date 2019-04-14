@@ -6,15 +6,21 @@ export default class Messages extends Component {
         super(props)
         
         this.state = {
-            
+            leaveCount: 0,
         }
 
         this.endMessageRef = React.createRef();
+        this.messageRef = React.createRef();
         this.scrollToBottom = this.scrollToBottom.bind(this);
+        this.onMouseLeave = this.onMouseLeave.bind(this);
     }
 
     scrollToBottom(){
         this.endMessageRef.current.scrollIntoView({ behavior: 'smooth' });       
+    }
+
+    onMouseLeave(){
+        this.setState({leaveCount: this.state.leaveCount + 1});
     }
 
     render() {
@@ -33,7 +39,7 @@ export default class Messages extends Component {
             const isSelf = message.userID == this.props.user.id;
             return (
                 <div key={i} className={`row ${isSelf ? 'justify-content-end' : 'justify-content-start'}`} style={{textAlign: isSelf ? 'right':'left'}}>
-                    <MessageUnit socket={this.props.socket} chatID={this.props.chat.id} searchTerm={this.props.searchTerm} message={message} isSelf={isSelf} index={i} fontObj={this.props.fontObj} bubbleColours={this.props.bubbleColours}/>
+                    <MessageUnit leaveCount={this.state.leaveCount} socket={this.props.socket} chatID={this.props.chat.id} searchTerm={this.props.searchTerm} message={message} isSelf={isSelf} index={i} fontObj={this.props.fontObj} bubbleColours={this.props.bubbleColours}/>
                 </div>
             )
         });
@@ -49,7 +55,7 @@ export default class Messages extends Component {
             style.backgroundSize = '100% 100%';
         }
         return (
-            <div className={this.props.className} id={this.props.id} style={style}>
+            <div onMouseLeave={this.onMouseLeave} className={this.props.className} id={this.props.id} style={style}>
                 <div className='col-12'>
                     {messages}
                     <div ref={this.endMessageRef}></div>
