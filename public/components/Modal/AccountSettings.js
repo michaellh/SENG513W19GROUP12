@@ -26,7 +26,6 @@ export default class AccountSettings extends Component {
         this.validatePassword = this.validatePassword.bind(this);
         this.validatePasswordMatch = this.validatePasswordMatch.bind(this);
 
-        // When animation finished, and modal closed, reset state
         $('#myModal').on('show.bs.modal', (e) => {
             this.setState({mode : false});
         });
@@ -144,8 +143,6 @@ export default class AccountSettings extends Component {
                 newPassword : this.state["New Password"].value
             }
 
-            // Nest fetches since the password and token API calls are 
-            // dependent on username and email changes
             fetch("/account-settings/username", {
                 method: "POST",
                 headers: new Headers({
@@ -169,10 +166,8 @@ export default class AccountSettings extends Component {
                     this.setState({
                         "New Username": { value: this.state["New Username"].value, hasError: true, errorMessage: resData}
                     });
-                    return;
                 }
                 if(resData === "ok") {
-                    // Notify react to render a changes notification
                     this.setState({changes : true});
                     this.setState({makeToken : true});
                     accountSettingsBody.name = accountSettingsBody.newName;
@@ -201,7 +196,6 @@ export default class AccountSettings extends Component {
                         this.setState({
                             "New Email": { value: this.state["New Email"].value, hasError: true, errorMessage: resData}
                         });
-                        return;
                     }
                     if(resData === "ok") {
                         this.setState({changes : true});
@@ -231,7 +225,7 @@ export default class AccountSettings extends Component {
                         if(resData === "ok") {
                             this.setState({changes : true});
                         }
-                        console.log("makeToken: " + this.state.makeToken);
+
                         if(this.state.makeToken) {
                             fetch("/account-settings/token", {
                                 method: "POST",
@@ -248,8 +242,9 @@ export default class AccountSettings extends Component {
                                     throw new Error(res.status);
                                 }
                                 else {
-                                    // Reload the page so the user updates their token
-                                    window.location.reload();
+                                    setTimeout(function() {
+                                        window.location.reload();
+                                    }, 2000)
                                 }
                             })
                             .catch((error) => {
