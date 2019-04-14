@@ -9,8 +9,8 @@ export default class PasswordReset extends Component {
         super(props)
         
         this.state = {
-            NewPassword: {hasError: false, value: ""},
-            ConfirmPassword: {hasError: false, value: ""}
+            "New Password": {hasError: false, value: ""},
+            "Confirm Password": {hasError: false, value: ""}
         };
 
         this.handleFieldChange = this.handleFieldChange.bind(this);
@@ -25,7 +25,7 @@ export default class PasswordReset extends Component {
         e.preventDefault();
         
         // Error-handle if the passwords don't match
-        if(this.state.NewPassword.value !== this.state.ConfirmPassword.value) {
+        if(this.state["NewPassword"].value !== this.state["Confirm Password"].value) {
             alert("The passwords don't match!");
         }
         else {
@@ -35,7 +35,7 @@ export default class PasswordReset extends Component {
                 headers: new Headers({
                     "Content-Type": "application/x-www-form-urlencoded",
                 }),
-                body: "password=" + this.state.NewPassword.value
+                body: "password=" + this.state["New Password"].value
             })
             .then(res => {
                 if (!res.ok) {
@@ -70,8 +70,8 @@ export default class PasswordReset extends Component {
             return <Redirect to="/login" />
         }
       
-        const fields = [{name: "NewPassword", hasError: this.state.NewPassword.hasError, placeholder:"Enter new password", type: "password"},
-                        {name: "ConfirmPassword", hasError: this.state.ConfirmPassword.hasError, placeholder:"Enter new password again", type: "password"}]
+        const fields = [{name: "New Password", hasError: this.state["New Password"].hasError, placeholder:"Enter new password", type: "password"},
+                        {name: "Confirm Password", hasError: this.state["Confirm Password"].hasError, placeholder:"Enter new password again", type: "password"}]
 
         return (
             <div className="container">
