@@ -63,12 +63,16 @@ export default class AccountSettings extends Component {
         // }
         // console.log(consolePrintInputs);
 
+        var makeToken = false;
+
         // Verify that the emails and passwords match
-        if(this.state.NewUsername !== this.state.Confirmusername) {
-            console.log("The usernames don't match!");
+        if((this.state.NewUsername !== this.state.Confirmusername) || 
+            (this.state.NewUsername === this.props.user.name)) {
+            console.log("The username entered is invalid!");
         }
-        else if(this.state.NewEmail !== this.state.ConfirmEmail) {
-            console.log("The emails don't match!");
+        else if((this.state.NewEmail !== this.state.ConfirmEmail) || 
+            (this.state.NewEmail === this.props.user.email)) {
+            console.log("The email entered is invalid!");
         }
         else if(this.state.NewPassword !== this.state.ConfirmPassword) {
             console.log("The passwords don't match!");
@@ -81,11 +85,9 @@ export default class AccountSettings extends Component {
                 newEmail : this.state.NewEmail,
                 newPassword : this.state.NewPassword
             }
-    
-            // Make the fetch call to /account-settings here
-            fetch("/account-settings", {
+
+            fetch("/account-settings/username", {
                 method: "POST",
-                mode: 'no-cors',
                 headers: new Headers({
                     "Content-Type": "application/x-www-form-urlencoded",
                 }),
@@ -103,17 +105,107 @@ export default class AccountSettings extends Component {
                 }
             })
             .then(resData => {
-                console.log(resData);
-                // If the request went well, refresh the page for a new token
-                if(resData === "ok") {
-                    window.location.reload();
+                if(!((resData === "ok") || (resData === "no"))) {
+                    console.log("username error: " + resData);
+                    // Display error and return to exit function
+                    return;
                 }
+                if(resData === "ok") {
+                    makeToken = true;
+                }
+                
+                fetch("/account-settings/email", {
+                    method: "POST",
+                    headers: new Headers({
+                        "Content-Type": "application/x-www-form-urlencoded",
+                    }),
+                    body: $.param(accountSettingsBody)
+                })
+                .then(res => {
+                    if (!res.ok) {
+                        if ((res.status === 404) || (res.status === 409)) {
+                          return res.json();
+                        }
+                        throw new Error(res.status);
+                    }
+                    else {
+                        return res.json();
+                    }
+                })
+                .then(resData => {
+                    if(!((resData === "ok") || (resData === "no"))) {
+                        console.log("email error: " + resData);
+                        // Display error
+                        return;
+                    }
+                    if(resData === "ok") {
+                        makeToken = true;
+                    }
+                    fetch("/account-settings/password", {
+                        method: "POST",
+                        headers: new Headers({
+                            "Content-Type": "application/x-www-form-urlencoded",
+                        }),
+                        body: $.param(accountSettingsBody)
+                    })
+                    .then(res => {
+                        if (!res.ok) {
+                            if (res.status === 404) {
+                              return res.json();
+                            }
+                            throw new Error(res.status);
+                        }
+                        else {
+                            return res.json();
+                        }
+                    })
+                    .then(resData => {
+                        console.log("makeToken: " + makeToken);
+                        if(makeToken) {
+                            fetch("/account-settings/token", {
+                                method: "POST",
+                                headers: new Headers({
+                                    "Content-Type": "application/x-www-form-urlencoded",
+                                }),
+                                body: $.param(accountSettingsBody)
+                            })
+                            .then(res => {
+                                if (!res.ok) {
+                                    if (res.status === 404) {
+                                      return res.json();
+                                    }
+                                    throw new Error(res.status);
+                                }
+                                else {
+                                    return res.json();
+                                }
+                            })
+                            .then(resData => {
+                                console.log("token data: " + resData);
+                                if(resData) {
+                                    window.location.reload();
+                                }
+                            })
+                            .catch((error) => {
+                                console.error(error);
+                            });  
+                        } 
+                    })
+                    .catch((error) => {
+                        console.error(error);
+                    });   
+        
+                })
+                .catch((error) => {
+                    console.error(error);
+                });
             })
             .catch((error) => {
                 console.error(error);
             });
         }
     }
+    
     
     render() {
         return (
@@ -135,7 +227,8 @@ export default class AccountSettings extends Component {
                     </div> 
                 </div>
                 <div className="modal-footer">
-                    <button type="submit" className="btn btn-primary" data-dismiss="modal" onClick={this.handleSubmit}>Save</button>
+                    <button type="button" className="btn btn-primary" data-dismiss="modal">Close</button>
+                    <button type="button" className="btn btn-primary" onClick={this.handleSubmit}>Save</button>
                 </div>
             </form>
         )

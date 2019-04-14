@@ -101,6 +101,147 @@ module.exports = {
         })(req,res);
     });
 
+    app.post('/account-settings/username', function(req,res) {
+        dbClient.collection('users').findOne({$or: [{name: req.body.name}, {email: req.body.email}]}, function(err, user) {
+            if (err) {
+                res.status(404).json(err);
+                return;
+            }
+            // Determine if the user object exists
+            if (!user)
+            {
+                res.json("Error: No user with that username or e-mail exists!");
+                return;
+            }
+            else {
+                // Check the request body for the form input data
+                if(req.body.newName !== "") {
+                    dbClient.collection('users').findOne({name: req.body.newName}, function(err, userExist) {
+                        if (err) {
+                            res.status(404).json(err);
+                            return;
+                        }
+                        if(!userExist) {
+                            // The username doesn't exist so we can replace it
+                            user.name = req.body.newName;
+                            dbClient.collection('users').replaceOne({ name: req.body.name }, user);
+                            res.status(200).json("ok");
+                        }
+                        else {
+                            res.status(409).json("Error: An account with that username already exists.");
+                        }
+                    });
+                }
+                else {
+                    res.json("no");
+                }
+            }
+        });
+    });
+
+    app.post('/account-settings/email', function(req,res) {
+        dbClient.collection('users').findOne({ email: req.body.email }, function(err, user) {
+            if (err) {
+                res.status(404).json(err);
+                return;
+            }
+            // Determine if the user object exists
+            if (!user)
+            {
+                res.json("Error: No user with that username or e-mail exists!");
+                return;
+            }
+            else {
+                // Check the request body for the form input data
+                if(req.body.newEmail !== "") {
+                    dbClient.collection('users').findOne({email: req.body.newEmail}, function(err, userExist) {
+                        if (err) {
+                            res.status(404).json(err);
+                            return;
+                        }
+                        if(!userExist) {
+                            // The new email doesn't exist in the DB so we can use it
+                            user.email = req.body.newEmail;
+                            dbClient.collection('users').replaceOne({ email: req.body.email }, user);
+                            res.status(200).json("ok");
+                        }
+                        else {
+                            res.status(409).json("Error: An account with that email already exists."); 
+                        }
+                    });
+                }
+                else {
+                    res.json("no");
+                }
+            }
+        });
+    });
+    // the req.body.name or email may have been changed by now
+    // so the user could've been 'deleted' and these params no longer exist
+    app.post('/account-settings/password', function(req,res) {
+        dbClient.collection('users').findOne({$or: [{name: req.body.name}, {email: req.body.email}]}, function(err, user) {
+            if (err) {
+                res.status(404).json(err);
+                return;
+            }
+            // Determine if the user object exists
+            if (!user)
+            {
+                res.json("Error: No user with that username or e-mail exists!");
+                return;
+            }
+            else {
+                // Check the request body for the form input data
+                if((req.body.newPassword !== "")) {
+                    // If the password is changed then the new password will need to be hashed
+                    bcrypt.hash(req.body.newPassword, constants.BCRYPT_SALT_ROUNDS, function(err, hash) {
+                        user.password = hash;
+                        if(req.body.newEmail !== "") {
+                            user.email = req.body.newEmail;
+                        }
+                        dbClient.collection('users').replaceOne({ email: user.email }, user);
+                        res.status(200).json("ok")
+                    });
+                }
+                else {
+                    res.json("no");
+                }
+            }
+        });
+    });
+
+    app.post('/account-settings/token', function(req,res) {
+        // Even though the email or username is already taken,
+        // the code still reaches here and just checks the param strings
+        // and since they aren't empty we make a new token with the existing
+        // user and giving us their token
+        if((req.body.newName !== "") || (req.body.newEmail !== "")) {
+            let userName = req.body.name;
+            let userEmail = req.body.email;
+            if(req.body.newName !== "") {
+                userName = req.body.newName;
+            }
+            if(req.body.newEmail !== "") {
+                userEmail = req.body.newEmail;
+            }
+            let token = jwt.sign({
+                email: userEmail,
+                name: userName },
+                constants.JSON_KEY,
+                {
+                    expiresIn: constants.USER_TIMEOUT
+                }
+            ); //expire in 30 mins 
+            res.cookie('token', token).status(200).json({
+                auth_token: token,
+                timeout: constants.USER_TIMEOUT
+            })
+        }
+        else {
+            res.status(200).json("no");
+        }
+    });
+
     app.post('/account-settings', function(req, res) {
         dbClient.collection('users').findOne({$or: [{name: req.body.name}, {email: req.body.email}]}, function(err, user) {
             if (err) {
@@ -128,10 +269,13 @@ module.exports = {
                         }
                         else {
                             res.status(409).json("Error: An account with that username already exists.");
+                            console.log(res.statusCode); //409
+                            return;
                         }
-                        return;
                     });
                 } 
+                // 200
+                //console.log(res.statusCode);
                 if((req.body.newEmail !== "") && (req.body.newEmail !== user.email)) {
                     dbClient.collection('users').findOne({email: req.body.newEmail}, function(err, userExist) {
                         if (err) {
@@ -144,9 +288,9 @@ module.exports = {
                             dbClient.collection('users').replaceOne({ email: req.body.email }, user);                 
                         }
                         else {
-                            res.status(409).json("Error: An account with that email already exists.");  
+                            res.status(409).json("Error: An account with that email already exists."); 
+                            return; 
                         }
-                        return;
                     });
                 }
                 // If either the username and/or email was changed, generate a new token for page reloads
@@ -167,10 +311,6 @@ module.exports = {
                             expiresIn: constants.USER_TIMEOUT
                         }
                     ); //expire in 30 mins
-                    res.status(200).json({
-                        auth_token: token,
-                        timeout: constants.USER_TIMEOUT
-                    });
                 }
                 // If the password is changed then the new password will need to be hashed
                 if(req.body.newPassword !== "") {
@@ -182,7 +322,14 @@ module.exports = {
                         dbClient.collection('users').replaceOne({ email: user.email }, user);
                     });
                 }
+                // if(res.statusMessage) {
+
+                // }
+                // If I get an error already and send back an err res,
+                // I can't then come here and modify it again,
+                // but I need this if I want to refresh the page
                 res.status(200).json("ok");
+                //console.log(res.statusMessage);
             }
         });
     });
