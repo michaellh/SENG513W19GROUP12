@@ -27,7 +27,7 @@ export default function SideControl(props) {
     }
     
     return (
-        <div className='row'>
+        <div className='d-none d-md-block'>
             {
                 props.mode=="friends"?
 

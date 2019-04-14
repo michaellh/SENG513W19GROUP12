@@ -155,13 +155,22 @@ export default class Container extends Component {
         return (
             <div className='container-fluid h-100'>
                 <div className='row h-100'>
-                    <SideArea className='col-2' id='side-area' updateUser={this.updateUser} user={this.state.user} socket={this.socket} modal={this.openModal} 
-                        chooseChat={this.chooseChat} chosenChat={[this.state.chat,this.state.chat2]} resetChat={this.resetChat} 
-                        toggleSplitScreen={this.toggleSplitScreen} toggleNotification={this.toggleNotification} 
-                        splitScreenState={this.state.splitScreen} notificationState={this.state.notification}/>
+                    <div className='col-md-3 col-lg-2' id='side-area' style={{padding:0,margin:0}}>
+                        <nav className='navbar navbar-expand-md'>
+                            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggler" aria-controls="navbarToggler" aria-expanded="false" aria-label="Toggle navigation">
+                                <i className='fas fa-bars'></i>
+                            </button>
+                            <div class="collapse navbar-collapse" id="navbarToggler">
+                            <SideArea className='' id='' updateUser={this.updateUser} user={this.state.user} socket={this.socket} modal={this.openModal} 
+                                chooseChat={this.chooseChat} chosenChat={[this.state.chat,this.state.chat2]} resetChat={this.resetChat} 
+                                toggleSplitScreen={this.toggleSplitScreen} toggleNotification={this.toggleNotification} 
+                                splitScreenState={this.state.splitScreen} notificationState={this.state.notification}/>
+                            </div>
+                        </nav>
+                    </div>
                     {this.state.splitScreen ? 
                         (
-                            <div className='col-10'>
+                            <div className='col-md-9 col-lg-10'>
                                 <div className='row  h-100'>
                                     {
                                         this.state.chat ? 
@@ -181,9 +190,9 @@ export default class Container extends Component {
                         :
                         (
                             this.state.chat ? 
-                            <ChatArea split={1} className='col-10' id='chat-area' chat={this.state.chat} socket={this.socket} user={this.state.user} modal={this.openModal} switchRoom={this.state.switchRoom} updateSwitchRoom={this.updateSwitchRoom} />
+                            <ChatArea split={1} className='col-md-9 col-lg-10' id='chat-area' chat={this.state.chat} socket={this.socket} user={this.state.user} modal={this.openModal} switchRoom={this.state.switchRoom} updateSwitchRoom={this.updateSwitchRoom} />
                             :
-                            <h1 className='col-10 text-center align-self-center'>Open a chat...</h1>
+                            <h1 className='col-md-9 col-lg-10 text-center align-self-center'>Open a chat...</h1>
                         )
                     
                     }
