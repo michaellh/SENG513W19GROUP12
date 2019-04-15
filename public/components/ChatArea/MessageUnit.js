@@ -5,13 +5,13 @@ import { UncontrolledPopover } from 'reactstrap';
 export default class MessageUnit extends Component {
     constructor(props) {
         super(props)
-        
+
         this.state = {
             message : props.message,
             popoverOpen : false,
             editMode : false,
             editMessage : props.message.message,
-	        file: null,
+	    file: null,
             leaveCount : props.leaveCount,
         }
 
@@ -34,8 +34,8 @@ export default class MessageUnit extends Component {
     fmtDate(date){
         const time = `${date.getHours() < 10 ? '0'+date.getHours() : date.getHours()}:${date.getMinutes() < 10 ? '0'+date.getMinutes() : date.getMinutes()}`;
         return `${date.toLocaleDateString()} ${time}`;
-    }        
-    
+    }
+
     componentWillReceiveProps({message, searchTerm, leaveCount}){
         const msg = {...message};
         // Highlighting Text
@@ -56,7 +56,7 @@ export default class MessageUnit extends Component {
         this.props.socket.emit('messageReact', {chatID : this.props.chatID, userID, date, reactions, incReaction:'like'});
         this.setState({popoverOpen:false});
     }
-    
+
     handleDislike(){
         const {date, userID, reactions} = this.state.message;
         this.props.socket.emit('messageReact', {chatID : this.props.chatID, userID, date, reactions, incReaction:'dislike'});
@@ -79,11 +79,11 @@ export default class MessageUnit extends Component {
     handleEditOnChange(e){
         this.setState({editMessage:e.target.value});
     }
-    
+
     togglePopover(){
         this.setState({popoverOpen: !this.state.popoverOpen});
     }
-    
+
     toggleEdit(){
         !this.state.editMode && this.setState({editMessage:this.props.message.message});
         this.setState({editMode: !this.state.editMode});
@@ -91,19 +91,14 @@ export default class MessageUnit extends Component {
 
     getDownload(message){
         const [name, type, url] = message.split(',');
+	console.log('Fetching file from: ', url);
         var xhr = new XMLHttpRequest();
         xhr.open('GET', 'https://cors-anywhere.herokuapp.com/' + url, true);
-
+	xhr.responseType = 'blob';
         xhr.onreadystatechange = () => {
             if(xhr.readyState == 4 && xhr.status == 200) {
-            let blob = new Blob([xhr.responseText], {type: type});
-            let reader = new FileReader;
-
-            reader.onload = () => {
-                this.setState({file: reader.result});
-            };
-
-            reader.readAsDataURL(blob);
+		var uri = (window.webkitURL || window.URL).createObjectURL(xhr.response);
+		this.setState({file: uri});
             }
         };
 
