@@ -24,6 +24,10 @@ export default class Settings extends Component {
         });
     }
 
+    componentWillReceiveProps(props){
+        this.setState({modeN: props.notificationState, modeS: props.splitScreenState});
+    }
+
     handleClickAccountSettings(e) {
         e.preventDefault();
 

@@ -44,8 +44,8 @@ export default class ChatArea extends Component {
         props.socket.on('message', ({chatID, message}) => {
             if (chatID == this.state.chat.id){
                 message.date = new Date(message.date);
-                this.messages.push(message);
                 this.setState({messages : [...this.state.messages, message]});
+                this.messages = this.state.messages;
                 this.scrollToBottom();
             }
         });
@@ -142,6 +142,9 @@ export default class ChatArea extends Component {
         let messages = this.messages;
         if(searchTerm != ''){
             messages = this.messages.filter(d => !d.type && d.message.includes(searchTerm))
+        }
+        else{
+            setTimeout(() => {this.scrollToBottom()}, 10); 
         }
         this.setState({messages});
     }

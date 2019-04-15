@@ -186,7 +186,7 @@ export default class Customize extends Component{
                         </div> 
                         <div className='col-2'></div>
                         <div className='col-5 form-group'>
-                            <label htmlFor='sel4'>Background Colour:</label>
+                            <label htmlFor='sel4'>Background:</label>
                             <select className='form-control' id='sel4' onChange={this.setBgColour}  value={this.state.chosenBgColour}>
                                 <option value='White'>White</option>
                                 <option value='Black'>Black</option>
