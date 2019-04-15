@@ -50,8 +50,8 @@ export default class Controls extends Component {
 		   <form onSubmit={this.handleSubmit}>
 		       <div className='input-group'>
 			   <div className='input-group-prepend'>
-			       <span id={`control_${this.props.chat.id}_emojiPicker`} className='btn btn-outline-primary d-none d-md-block' onClick={this.handleClick} style={{fontSize:23}}><i className='fas fa-smile'></i></span>
-			       <span id={`control_${this.props.chat.id}_GifPicker`} className='btn btn-outline-primary d-none d-md-block' onClick={this.handleClick}>GIF</span>
+			       <span id={`control_${this.props.chat.id}_emojiPicker`} className='btn btn-outline-primary' onClick={this.handleClick} style={{fontSize:23}}><i className='fas fa-smile'></i></span>
+			       <span id={`control_${this.props.chat.id}_GifPicker`} className='btn btn-outline-primary' onClick={this.handleClick}>GIF</span>
 			   </div>
 					<input ref={this.textInput} type="text" className='form-control' onChange={this.handleTextChange} value={this.state.text} placeholder={deadChat ? "Other user has left" : "Type a message..."} disabled={deadChat}/>
 					<div className='input-group-append'>
