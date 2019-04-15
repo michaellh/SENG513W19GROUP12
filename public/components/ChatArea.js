@@ -45,7 +45,7 @@ export default class ChatArea extends Component {
             if (chatID == this.state.chat.id){
                 message.date = new Date(message.date);
                 this.messages.push(message);
-                this.setState({messages : [...this.state.messages, message]});
+                this.setState({messages:this.messages});
                 this.scrollToBottom();
             }
         });
