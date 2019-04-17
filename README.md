@@ -1,25 +1,21 @@
-# Simple Chat App
+# NetChatter
 
 App Hosted at:
 https://radiant-waters-80256.herokuapp.com/
 
 Master Branch set to auto-deploy.
 
-Application has been tested in Edge, Chrome, and Firefox
+Application has been tested in Chrome and Firefox
 
 To Run locally:
 
-1. Clone Repo
+1. Clone repo
 
-2. Run "npm install" in public folder
-
-To Launch App:
-
-Run "npm start" in public folder
+2. Run "npm install" in the root and public folders
 
 To Build App:
 
-1. Run "npm build" in public folder
+1. Run "npm run build" or "npm run-script build" in public folder
 
 2. Run "node index.js" in root folder
 
